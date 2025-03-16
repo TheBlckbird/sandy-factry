@@ -12,9 +12,6 @@ enum DrawingMode {
     Erasing,
 }
 
-#[derive(Component)]
-struct WasJustPressed(bool);
-
 fn main() {
     App::new()
         .add_plugins((
@@ -50,15 +47,12 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
         for y in 0..map_size.y {
             let tile_pos = TilePos { x, y };
             let tile_entity = commands
-                .spawn((
-                    TileBundle {
-                        position: tile_pos,
-                        tilemap_id: TilemapId(tilemap_entity),
-                        visible: TileVisible(true), //(i % 2 == 0 || i % 7 == 0),
-                        ..Default::default()
-                    },
-                    WasJustPressed(false),
-                ))
+                .spawn(TileBundle {
+                    position: tile_pos,
+                    tilemap_id: TilemapId(tilemap_entity),
+                    visible: TileVisible(true), //(i % 2 == 0 || i % 7 == 0),
+                    ..Default::default()
+                })
                 .id();
             tile_storage.set(&tile_pos, tile_entity);
             // i += 1;
@@ -86,13 +80,7 @@ fn update(
     camera_query: Query<(&Camera, &GlobalTransform)>,
     window: Query<&Window, With<PrimaryWindow>>,
     buttons: Res<ButtonInput<MouseButton>>,
-    tilemap_q: Query<(
-        &TilemapSize,
-        &TilemapGridSize,
-        &TilemapType,
-        &TileStorage,
-        &Transform,
-    )>,
+    tilemap_q: Query<(&TilemapSize, &TilemapGridSize, &TilemapType, &Transform)>,
     tile_query: Query<(Entity, &TilePos, &TileVisible)>,
     mut drawing_mode: ResMut<DrawingMode>,
 ) {
@@ -112,7 +100,7 @@ fn update(
         None => return,
     };
 
-    for (map_size, grid_size, map_type, tile_storage, map_transform) in tilemap_q.iter() {
+    for (map_size, grid_size, map_type, map_transform) in tilemap_q.iter() {
         let cursor_in_map_position = {
             let cursor_position = Vec4::from((cursor_position, 0.0, 1.0));
             let cursor_in_map_position = map_transform.compute_matrix().inverse() * cursor_position;
@@ -128,7 +116,7 @@ fn update(
                 }
             };
 
-        for (entity, tile_pos, tile_visible) in tile_query.iter_mut() {
+        for (entity, tile_pos, tile_visible) in tile_query.iter() {
             if *tile_pos != clicked_tile_pos {
                 continue;
             }
