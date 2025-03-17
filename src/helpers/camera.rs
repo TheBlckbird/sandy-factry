@@ -1,47 +1,60 @@
-use bevy::{input::ButtonInput, math::Vec3, prelude::*, render::camera::Camera};
+use bevy::{
+    input::{
+        ButtonInput,
+        mouse::{MouseScrollUnit, MouseWheel},
+    },
+    prelude::*,
+};
 
-// A simple camera system for moving and zooming the camera.
-#[allow(dead_code)]
 pub fn movement(
+    mut camera: Query<(&mut OrthographicProjection, &mut Transform)>,
+    mut evr_scroll: EventReader<MouseWheel>,
+    keys: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
-    keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut query: Query<(&mut Transform, &mut OrthographicProjection), With<Camera>>,
 ) {
-    for (mut transform, mut ortho) in query.iter_mut() {
-        let mut direction = Vec3::ZERO;
+    let mut zoom_add = 0.0;
 
-        if keyboard_input.pressed(KeyCode::KeyA) || keyboard_input.pressed(KeyCode::ArrowLeft) {
-            direction -= Vec3::new(1.0, 0.0, 0.0);
+    for event in evr_scroll.read() {
+        match event.unit {
+            MouseScrollUnit::Pixel => {
+                if camera.single().0.scale >= 0.1 {
+                    zoom_add += event.y;
+                }
+            }
+            MouseScrollUnit::Line => {
+                if camera.single().0.scale >= 0.1 {
+                    zoom_add += event.y * 5.0;
+                }
+            }
         }
-
-        if keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight) {
-            direction += Vec3::new(1.0, 0.0, 0.0);
-        }
-
-        if keyboard_input.pressed(KeyCode::KeyW) || keyboard_input.pressed(KeyCode::ArrowUp) {
-            direction += Vec3::new(0.0, 1.0, 0.0);
-        }
-
-        if keyboard_input.pressed(KeyCode::KeyS) || keyboard_input.pressed(KeyCode::ArrowDown) {
-            direction -= Vec3::new(0.0, 1.0, 0.0);
-        }
-
-        if keyboard_input.pressed(KeyCode::KeyZ) {
-            ortho.scale += 0.1;
-        }
-
-        if keyboard_input.pressed(KeyCode::KeyX) {
-            ortho.scale -= 0.1;
-        }
-
-        if ortho.scale < 0.5 {
-            ortho.scale = 0.5;
-        }
-
-        let z = transform.translation.z;
-        transform.translation += time.delta_secs() * direction * 500.;
-        // Important! We need to restore the Z values when moving the camera around.
-        // Bevy has a specific camera setup and this can mess with how our layers are shown.
-        transform.translation.z = z;
     }
+
+    camera.single_mut().0.scale += zoom_add * time.delta_secs();
+
+    if camera.single().0.scale < 0.1 {
+        camera.single_mut().0.scale = 0.1;
+    }
+
+    let mut translation = Vec2::ZERO;
+
+    if keys.pressed(KeyCode::KeyW) {
+        translation.y += 1.0;
+    }
+
+    if keys.pressed(KeyCode::KeyD) {
+        translation.x += 1.0;
+    }
+
+    if keys.pressed(KeyCode::KeyS) {
+        translation.y -= 1.0;
+    }
+
+    if keys.pressed(KeyCode::KeyA) {
+        translation.x -= 1.0;
+    }
+
+    translation =
+        translation.normalize_or_zero() * 120.0 * camera.single().0.scale * time.delta_secs();
+
+    camera.single_mut().1.translation += translation.extend(0.0);
 }

@@ -4,13 +4,14 @@ use bevy_ecs_tilemap::prelude::*;
 
 mod helpers;
 
-#[derive(Resource, Default, PartialEq, Eq)]
-enum DrawingMode {
-    #[default]
-    Idling,
-    Drawing,
-    Erasing,
-}
+#[derive(Component)]
+struct Background;
+
+#[derive(Component)]
+struct Foreground;
+
+#[derive(Component)]
+struct Hover;
 
 fn main() {
     App::new()
@@ -18,7 +19,7 @@ fn main() {
             DefaultPlugins
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        title: String::from("Game of Life Example"),
+                        title: String::from("Bevy Grid World Example"),
                         ..Default::default()
                     }),
                     ..default()
@@ -26,7 +27,6 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
             TilemapPlugin,
         ))
-        .init_resource::<DrawingMode>()
         .add_systems(Startup, startup)
         .add_systems(Update, helpers::camera::movement)
         .add_systems(Update, update)
@@ -34,45 +34,66 @@ fn main() {
 }
 
 fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(Camera2d);
+    commands.spawn((Camera2d, Transform::from_scale(Vec3::new(0.2, 0.2, 1.0))));
 
-    let texture_handle: Handle<Image> = asset_server.load("tiles.png");
+    let foreground_texture_handle: Handle<Image> = asset_server.load("foreground_tiles.png");
+    let background_texture_handle: Handle<Image> = asset_server.load("background_tiles.png");
 
     let map_size = TilemapSize { x: 32, y: 32 };
-    let mut tile_storage = TileStorage::empty(map_size);
-    let tilemap_entity = commands.spawn_empty().id();
+    let mut background_tile_storage = TileStorage::empty(map_size);
+    let foreground_tile_storage = TileStorage::empty(map_size);
+    let background_tilemap_entity = commands.spawn_empty().id();
+    let foreground_tilemap_entity = commands.spawn_empty().id();
 
-    // let mut i = 0;
     for x in 0..map_size.x {
         for y in 0..map_size.y {
             let tile_pos = TilePos { x, y };
             let tile_entity = commands
-                .spawn(TileBundle {
-                    position: tile_pos,
-                    tilemap_id: TilemapId(tilemap_entity),
-                    visible: TileVisible(true), //(i % 2 == 0 || i % 7 == 0),
-                    ..Default::default()
-                })
+                .spawn((
+                    TileBundle {
+                        position: tile_pos,
+                        tilemap_id: TilemapId(background_tilemap_entity),
+                        texture_index: TileTextureIndex(0),
+                        ..Default::default()
+                    },
+                    Background,
+                ))
                 .id();
-            tile_storage.set(&tile_pos, tile_entity);
-            // i += 1;
+            background_tile_storage.set(&tile_pos, tile_entity);
         }
     }
 
-    let tile_size = TilemapTileSize { x: 16.0, y: 16.0 };
+    let tile_size = TilemapTileSize { x: 8.0, y: 8.0 };
     let grid_size = tile_size.into();
     let map_type = TilemapType::Square;
 
-    commands.entity(tilemap_entity).insert((TilemapBundle {
-        grid_size,
-        map_type,
-        size: map_size,
-        storage: tile_storage,
-        texture: TilemapTexture::Single(texture_handle),
-        tile_size,
-        transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 0.0),
-        ..Default::default()
-    },));
+    commands.entity(background_tilemap_entity).insert((
+        TilemapBundle {
+            grid_size,
+            map_type,
+            size: map_size,
+            storage: background_tile_storage,
+            texture: TilemapTexture::Single(background_texture_handle.clone()),
+            tile_size,
+            transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 0.0),
+            ..Default::default()
+        },
+        Background,
+    ));
+
+    commands.entity(foreground_tilemap_entity).insert((
+        TilemapBundle {
+            grid_size,
+            map_type,
+            size: map_size,
+            storage: foreground_tile_storage,
+            texture: TilemapTexture::Single(foreground_texture_handle),
+            tile_size,
+            transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 1.0),
+            ..Default::default()
+        },
+        Foreground,
+    ));
 }
 
 fn update(
@@ -80,15 +101,19 @@ fn update(
     camera_query: Query<(&Camera, &GlobalTransform)>,
     window: Query<&Window, With<PrimaryWindow>>,
     buttons: Res<ButtonInput<MouseButton>>,
-    tilemap_q: Query<(&TilemapSize, &TilemapGridSize, &TilemapType, &Transform)>,
-    tile_query: Query<(Entity, &TilePos, &TileVisible)>,
-    mut drawing_mode: ResMut<DrawingMode>,
+    mut tilemap_q: Query<
+        (
+            Entity,
+            &TilemapSize,
+            &TilemapGridSize,
+            &TilemapType,
+            &Transform,
+            &mut TileStorage,
+        ),
+        With<Foreground>,
+    >,
+    tile_query: Query<(Entity, &TilePos, Option<&Hover>), With<Foreground>>,
 ) {
-    if !buttons.pressed(MouseButton::Left) {
-        *drawing_mode = DrawingMode::Idling;
-        return;
-    }
-
     let (camera, camera_transform) = camera_query.single();
     let window = window.single();
 
@@ -100,44 +125,83 @@ fn update(
         None => return,
     };
 
-    for (map_size, grid_size, map_type, map_transform) in tilemap_q.iter() {
-        let cursor_in_map_position = {
-            let cursor_position = Vec4::from((cursor_position, 0.0, 1.0));
-            let cursor_in_map_position = map_transform.compute_matrix().inverse() * cursor_position;
-            cursor_in_map_position.xy()
+    let (tilemap_entity, map_size, grid_size, map_type, map_transform, mut tile_storage) =
+        tilemap_q.single_mut();
+
+    let cursor_in_map_position = {
+        let cursor_position = Vec4::from((cursor_position, 0.0, 1.0));
+        let cursor_in_map_position = map_transform.compute_matrix().inverse() * cursor_position;
+        cursor_in_map_position.xy()
+    };
+
+    let mouse_tile_pos =
+        match TilePos::from_world_pos(&cursor_in_map_position, map_size, grid_size, map_type) {
+            Some(position) => position,
+            None => return,
         };
 
-        let clicked_tile_pos =
-            match TilePos::from_world_pos(&cursor_in_map_position, map_size, grid_size, map_type) {
-                Some(position) => position,
-                None => {
-                    // println!("whoops");
-                    return;
-                }
-            };
+    if buttons.pressed(MouseButton::Left) {
+        // building mode
 
-        for (entity, tile_pos, tile_visible) in tile_query.iter() {
-            if *tile_pos != clicked_tile_pos {
-                continue;
+        for (tile_entity, tile_pos, hover) in tile_query.iter() {
+            if hover.is_some() {
+                commands.entity(tile_entity).despawn_recursive();
+                tile_storage.remove(&tile_pos);
             }
+        }
 
-            if *drawing_mode == DrawingMode::Idling {
-                if tile_visible.0 {
-                    *drawing_mode = DrawingMode::Erasing;
-                } else {
-                    *drawing_mode = DrawingMode::Drawing;
-                }
+        let new_tile_entity = commands
+            .spawn((
+                TileBundle {
+                    position: mouse_tile_pos,
+                    tilemap_id: TilemapId(tilemap_entity),
+                    texture_index: TileTextureIndex(8),
+                    ..Default::default()
+                },
+                Foreground,
+            ))
+            .id();
+
+        tile_storage.set(&mouse_tile_pos, new_tile_entity);
+    } else if buttons.pressed(MouseButton::Right) {
+        // erasing mode
+
+        for (tile_entity, tile_pos, hover) in tile_query.iter() {
+            if *tile_pos == mouse_tile_pos || hover.is_some() {
+                commands.entity(tile_entity).despawn_recursive();
+                tile_storage.remove(&mouse_tile_pos);
             }
+        }
+    } else {
+        // hover mode
 
-            let new_tile_visibility = match *drawing_mode {
-                DrawingMode::Drawing => true,
-                DrawingMode::Erasing => false,
-                _ => unreachable!(),
-            };
+        let mut is_tile_at_mouse = false;
 
-            commands
-                .entity(entity)
-                .insert(TileVisible(new_tile_visibility));
+        for (tile_entity, tile_pos, hover) in tile_query.iter() {
+            if *tile_pos == mouse_tile_pos {
+                is_tile_at_mouse = true;
+            } else if hover.is_some() {
+                commands.entity(tile_entity).despawn_recursive();
+                tile_storage.remove(&tile_pos);
+            }
+        }
+
+        if !is_tile_at_mouse {
+            let new_tile_entity = commands
+                .spawn((
+                    TileBundle {
+                        position: mouse_tile_pos,
+                        tilemap_id: TilemapId(tilemap_entity),
+                        texture_index: TileTextureIndex(8),
+                        color: TileColor(Color::srgba(1.0, 1.0, 1.0, 0.6)),
+                        ..Default::default()
+                    },
+                    Foreground,
+                    Hover,
+                ))
+                .id();
+
+            tile_storage.set(&mouse_tile_pos, new_tile_entity);
         }
     }
 }
