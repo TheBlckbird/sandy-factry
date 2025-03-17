@@ -4,6 +4,92 @@ use bevy_ecs_tilemap::prelude::*;
 
 mod helpers;
 
+#[derive(Resource, Default, Clone, Copy)]
+enum CurrentBuilding {
+    #[default]
+    BeltUp,
+    BeltDown,
+    BeltLeft,
+    BeltRight,
+    BeltDownRight,
+    BeltLeftDown,
+    BeltUpLeft,
+    BeltRightUp,
+    BeltRightDown,
+    BeltDownLeft,
+    BeltLeftUp,
+    BeltUpRight,
+    Crafter,
+    Miner,
+}
+
+impl CurrentBuilding {
+    pub fn select_next(&mut self) {
+        let next = match self {
+            CurrentBuilding::BeltUp => CurrentBuilding::BeltDown,
+            CurrentBuilding::BeltDown => CurrentBuilding::BeltLeft,
+            CurrentBuilding::BeltLeft => CurrentBuilding::BeltRight,
+            CurrentBuilding::BeltRight => CurrentBuilding::BeltDownRight,
+            CurrentBuilding::BeltDownRight => CurrentBuilding::BeltLeftDown,
+            CurrentBuilding::BeltLeftDown => CurrentBuilding::BeltUpLeft,
+            CurrentBuilding::BeltUpLeft => CurrentBuilding::BeltRightUp,
+            CurrentBuilding::BeltRightUp => CurrentBuilding::BeltRightDown,
+            CurrentBuilding::BeltRightDown => CurrentBuilding::BeltDownLeft,
+            CurrentBuilding::BeltDownLeft => CurrentBuilding::BeltLeftUp,
+            CurrentBuilding::BeltLeftUp => CurrentBuilding::BeltUpRight,
+            CurrentBuilding::BeltUpRight => CurrentBuilding::Crafter,
+            CurrentBuilding::Crafter => CurrentBuilding::Miner,
+            CurrentBuilding::Miner => CurrentBuilding::BeltUp,
+        };
+
+        *self = next;
+    }
+
+    pub fn select_previous(&mut self) {
+        let next = match self {
+            CurrentBuilding::BeltUp => CurrentBuilding::Miner,
+            CurrentBuilding::BeltDown => CurrentBuilding::BeltUp,
+            CurrentBuilding::BeltLeft => CurrentBuilding::BeltDown,
+            CurrentBuilding::BeltRight => CurrentBuilding::BeltLeft,
+            CurrentBuilding::BeltDownRight => CurrentBuilding::BeltRight,
+            CurrentBuilding::BeltLeftDown => CurrentBuilding::BeltDownRight,
+            CurrentBuilding::BeltUpLeft => CurrentBuilding::BeltLeftDown,
+            CurrentBuilding::BeltRightUp => CurrentBuilding::BeltUpLeft,
+            CurrentBuilding::BeltRightDown => CurrentBuilding::BeltRightUp,
+            CurrentBuilding::BeltDownLeft => CurrentBuilding::BeltRightDown,
+            CurrentBuilding::BeltLeftUp => CurrentBuilding::BeltDownLeft,
+            CurrentBuilding::BeltUpRight => CurrentBuilding::BeltLeftUp,
+            CurrentBuilding::Crafter => CurrentBuilding::BeltUpRight,
+            CurrentBuilding::Miner => CurrentBuilding::Crafter,
+        };
+
+        *self = next;
+    }
+}
+
+impl From<CurrentBuilding> for TileTextureIndex {
+    fn from(value: CurrentBuilding) -> Self {
+        let index = match value {
+            CurrentBuilding::BeltUp => 0,
+            CurrentBuilding::BeltDown => 1,
+            CurrentBuilding::BeltLeft => 2,
+            CurrentBuilding::BeltRight => 3,
+            CurrentBuilding::BeltDownRight => 4,
+            CurrentBuilding::BeltLeftDown => 5,
+            CurrentBuilding::BeltUpLeft => 6,
+            CurrentBuilding::BeltRightUp => 7,
+            CurrentBuilding::BeltRightDown => 8,
+            CurrentBuilding::BeltDownLeft => 9,
+            CurrentBuilding::BeltLeftUp => 10,
+            CurrentBuilding::BeltUpRight => 11,
+            CurrentBuilding::Crafter => 12,
+            CurrentBuilding::Miner => 13,
+        };
+
+        TileTextureIndex(index)
+    }
+}
+
 #[derive(Component)]
 struct Background;
 
@@ -27,9 +113,10 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
             TilemapPlugin,
         ))
+        .init_resource::<CurrentBuilding>()
         .add_systems(Startup, startup)
         .add_systems(Update, helpers::camera::movement)
-        .add_systems(Update, update)
+        .add_systems(Update, (place_buildings, select_building))
         .run();
 }
 
@@ -96,7 +183,15 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 }
 
-fn update(
+fn select_building(mut current_building: ResMut<CurrentBuilding>, keys: Res<ButtonInput<KeyCode>>) {
+    if keys.just_pressed(KeyCode::KeyC) {
+        current_building.select_next();
+    } else if keys.just_pressed(KeyCode::KeyX) {
+        current_building.select_previous();
+    }
+}
+
+fn place_buildings(
     mut commands: Commands,
     camera_query: Query<(&Camera, &GlobalTransform)>,
     window: Query<&Window, With<PrimaryWindow>>,
@@ -113,6 +208,7 @@ fn update(
         With<Foreground>,
     >,
     tile_query: Query<(Entity, &TilePos, Option<&Hover>), With<Foreground>>,
+    current_building: Res<CurrentBuilding>,
 ) {
     let (camera, camera_transform) = camera_query.single();
     let window = window.single();
@@ -155,7 +251,7 @@ fn update(
                 TileBundle {
                     position: mouse_tile_pos,
                     tilemap_id: TilemapId(tilemap_entity),
-                    texture_index: TileTextureIndex(8),
+                    texture_index: TileTextureIndex::from(*current_building),
                     ..Default::default()
                 },
                 Foreground,
@@ -178,7 +274,7 @@ fn update(
         let mut is_tile_at_mouse = false;
 
         for (tile_entity, tile_pos, hover) in tile_query.iter() {
-            if *tile_pos == mouse_tile_pos {
+            if *tile_pos == mouse_tile_pos && hover.is_none() {
                 is_tile_at_mouse = true;
             } else if hover.is_some() {
                 commands.entity(tile_entity).despawn_recursive();
@@ -192,7 +288,7 @@ fn update(
                     TileBundle {
                         position: mouse_tile_pos,
                         tilemap_id: TilemapId(tilemap_entity),
-                        texture_index: TileTextureIndex(8),
+                        texture_index: TileTextureIndex::from(*current_building),
                         color: TileColor(Color::srgba(1.0, 1.0, 1.0, 0.6)),
                         ..Default::default()
                     },
