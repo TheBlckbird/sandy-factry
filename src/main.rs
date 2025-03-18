@@ -105,7 +105,7 @@ fn main() {
             DefaultPlugins
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        title: String::from("Bevy Grid World Example"),
+                        title: String::from("The Oil Company"),
                         ..Default::default()
                     }),
                     ..default()
