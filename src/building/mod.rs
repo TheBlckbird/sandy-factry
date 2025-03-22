@@ -16,6 +16,14 @@ enum CurrentBuilding {
     BeltRight,
     BeltDown,
     BeltLeft,
+    BeltDownRight,
+    BeltLeftDown,
+    BeltUpLeft,
+    BeltRightUp,
+    BeltRightDown,
+    BeltDownLeft,
+    BeltLeftUp,
+    BeltUpRight,
 }
 
 impl CurrentBuilding {
@@ -27,19 +35,35 @@ impl CurrentBuilding {
             CurrentBuilding::BeltUp => CurrentBuilding::BeltRight,
             CurrentBuilding::BeltRight => CurrentBuilding::BeltDown,
             CurrentBuilding::BeltDown => CurrentBuilding::BeltLeft,
-            CurrentBuilding::BeltLeft => CurrentBuilding::Nothing,
+            CurrentBuilding::BeltLeft => CurrentBuilding::BeltDownRight,
+            CurrentBuilding::BeltDownRight => CurrentBuilding::BeltLeftDown,
+            CurrentBuilding::BeltLeftDown => CurrentBuilding::BeltUpLeft,
+            CurrentBuilding::BeltUpLeft => CurrentBuilding::BeltRightUp,
+            CurrentBuilding::BeltRightUp => CurrentBuilding::BeltRightDown,
+            CurrentBuilding::BeltRightDown => CurrentBuilding::BeltDownLeft,
+            CurrentBuilding::BeltDownLeft => CurrentBuilding::BeltLeftUp,
+            CurrentBuilding::BeltLeftUp => CurrentBuilding::BeltUpRight,
+            CurrentBuilding::BeltUpRight => CurrentBuilding::Nothing,
         };
     }
 
     pub fn select_previous(&mut self) {
         *self = match self {
-            CurrentBuilding::Nothing => CurrentBuilding::BeltLeft,
+            CurrentBuilding::Nothing => CurrentBuilding::BeltUpRight,
             CurrentBuilding::Miner => CurrentBuilding::Nothing,
             CurrentBuilding::Crafter => CurrentBuilding::Miner,
             CurrentBuilding::BeltUp => CurrentBuilding::Crafter,
             CurrentBuilding::BeltRight => CurrentBuilding::BeltUp,
             CurrentBuilding::BeltDown => CurrentBuilding::BeltRight,
             CurrentBuilding::BeltLeft => CurrentBuilding::BeltDown,
+            CurrentBuilding::BeltDownRight => CurrentBuilding::BeltLeft,
+            CurrentBuilding::BeltLeftDown => CurrentBuilding::BeltDownRight,
+            CurrentBuilding::BeltUpLeft => CurrentBuilding::BeltLeftDown,
+            CurrentBuilding::BeltRightUp => CurrentBuilding::BeltUpLeft,
+            CurrentBuilding::BeltRightDown => CurrentBuilding::BeltRightUp,
+            CurrentBuilding::BeltDownLeft => CurrentBuilding::BeltRightDown,
+            CurrentBuilding::BeltLeftUp => CurrentBuilding::BeltDownLeft,
+            CurrentBuilding::BeltUpRight => CurrentBuilding::BeltLeftUp,
         };
     }
 
@@ -52,6 +76,14 @@ impl CurrentBuilding {
             CurrentBuilding::BeltRight => ForegroundObject::BeltRight,
             CurrentBuilding::BeltDown => ForegroundObject::BeltDown,
             CurrentBuilding::BeltLeft => ForegroundObject::BeltLeft,
+            CurrentBuilding::BeltDownRight => ForegroundObject::BeltDownRight,
+            CurrentBuilding::BeltLeftDown => ForegroundObject::BeltLeftDown,
+            CurrentBuilding::BeltUpLeft => ForegroundObject::BeltUpLeft,
+            CurrentBuilding::BeltRightUp => ForegroundObject::BeltRightUp,
+            CurrentBuilding::BeltRightDown => ForegroundObject::BeltRightDown,
+            CurrentBuilding::BeltDownLeft => ForegroundObject::BeltDownLeft,
+            CurrentBuilding::BeltLeftUp => ForegroundObject::BeltLeftUp,
+            CurrentBuilding::BeltUpRight => ForegroundObject::BeltUpRight,
         }
     }
 }
@@ -205,21 +237,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         Building,
     ));
 }
-
-// fn update_current_foreground_object(
-//     mut foreground_object: ResMut<ForegroundObject>,
-//     current_building: Res<CurrentBuilding>,
-// ) {
-//     *foreground_object = match *current_building {
-//         CurrentBuilding::Nothing => ForegroundObject::Nothing,
-//         CurrentBuilding::Miner => ForegroundObject::Miner,
-//         CurrentBuilding::Crafter => ForegroundObject::Crafter,
-//         CurrentBuilding::BeltUp => ForegroundObject::BeltUp,
-//         CurrentBuilding::BeltRight => ForegroundObject::BeltRight,
-//         CurrentBuilding::BeltDown => ForegroundObject::BeltDown,
-//         CurrentBuilding::BeltLeft => ForegroundObject::BeltLeft,
-//     };
-// }
 
 fn select_building(mut current_building: ResMut<CurrentBuilding>, keys: Res<ButtonInput<KeyCode>>) {
     if keys.just_pressed(KeyCode::KeyX) {
