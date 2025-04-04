@@ -1,9 +1,10 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
-use building::BuildingPlugin;
+use plugins::building::BuildingPlugin;
 
-mod building;
+mod buildings;
 mod helpers;
+mod plugins;
 
 const MAP_SIZE: TilemapSize = TilemapSize { x: 32, y: 32 };
 const TILE_SIZE: TilemapTileSize = TilemapTileSize { x: 8.0, y: 8.0 };

@@ -347,7 +347,7 @@ dependencies = [
  "derive_more",
  "downcast-rs",
  "either",
- "petgraph",
+ "petgraph 0.6.5",
  "ron",
  "serde",
  "smallvec",
@@ -552,7 +552,7 @@ dependencies = [
  "disqualified",
  "fixedbitset 0.5.7",
  "nonmax",
- "petgraph",
+ "petgraph 0.6.5",
  "serde",
  "smallvec",
 ]
@@ -919,7 +919,7 @@ dependencies = [
  "downcast-rs",
  "erased-serde",
  "glam",
- "petgraph",
+ "petgraph 0.6.5",
  "serde",
  "smallvec",
  "smol_str",
@@ -3138,6 +3138,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "petgraph"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3672b37090dbd86368a4145bc067582552b29c27377cad4e0a306c97f9bd7772"
+dependencies = [
+ "fixedbitset 0.5.7",
+ "indexmap",
+]
+
+[[package]]
 name = "pin-project"
 version = "1.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3751,6 +3761,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_ecs_tilemap",
+ "petgraph 0.7.1",
 ]
 
 [[package]]
