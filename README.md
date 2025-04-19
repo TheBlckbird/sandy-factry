@@ -6,7 +6,7 @@ The Oil Company is a factory builder for school.
 
 Project managment and task tracking is done with Github Projects.
 
-Here's a graphic defining the relations of the different task types:
+Here's a graphic defining the relations of the different task types (© Microsoft):
 
 ![Agile Process](https://learn.microsoft.com/en-us/azure/devops/boards/work-items/guidance/media/alm_pt_scrum_wit_artifacts.png?view=azure-devops)
 
