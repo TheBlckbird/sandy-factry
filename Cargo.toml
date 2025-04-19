@@ -1,10 +1,18 @@
 [package]
 name = "the-oil-company"
 version = "0.1.0"
+authors = ["Louis Weigel"]
+license = "MIT OR Apache-2.0"
+description = "A game about building a factory (for oil processing?)"
+readme = "Readme.md"
+homepage = "https://github.com/TheBlckbird/factory-builder-pi"
+repository = "https://github.com/TheBlckbird/factory-builder-pi"
+keywords = ["gaming", "factory-builder"]
+categories = ["games"]
 edition = "2024"
 
 [dependencies]
-bevy = { version = "0.15", features = ["dynamic_linking"] }
+bevy = { version = "0.15" }
 bevy_ecs_tilemap = "0.15"
 image = "0.25"
 petgraph = "0.8"

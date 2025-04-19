@@ -84,7 +84,14 @@ fn main() {
             TilemapPlugin,
         ))
         .add_plugins((BuildingPlugin, SimulationPlugin))
-        .add_systems(Startup, (startup, set_window_icon))
+        .add_systems(
+            Startup,
+            (
+                startup,
+                #[cfg(any(target_os = "windows", all(target_os = "linux", feature = "x11")))]
+                set_window_icon,
+            ),
+        )
         .add_systems(Update, helpers::camera::movement)
         .run();
 }
@@ -103,7 +110,7 @@ fn set_window_icon(windows: NonSend<WinitWindows>) {
     // do it for all windows
     for window in windows.windows.values() {
         // this only sets it for Windows and X11
-        // The others are set at build time or via the desktop file
+        // The others are set at build time
         window.set_window_icon(Some(icon.clone()));
     }
 }
