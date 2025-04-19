@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-use bevy_ecs_tilemap::{helpers::square_grid::neighbors::Neighbors, prelude::*};
+use bevy_ecs_tilemap::prelude::*;
 
 use crate::{Direction, MAP_SIZE, MAP_TYPE, TILE_SIZE};
 
@@ -195,15 +195,31 @@ impl ForegroundObject {
     }
 }
 
-#[derive(Component)]
-struct Building;
+#[derive(Event)]
+pub enum BuildEvent {
+    Placed(TilePos, ForegroundObject),
+    Deleted(TilePos, ForegroundObject),
+}
 
 #[derive(Component)]
-struct Hover;
+pub struct BuildingComponent;
+
+#[derive(Component)]
+struct Foreground;
+
+#[derive(Component)]
+struct HoverBuilding;
+
+#[derive(Component)]
+pub struct BuildingInput(pub Option<Direction>);
+
+#[derive(Component)]
+pub struct BuildingOutput(pub Option<Direction>);
 
 impl Plugin for BuildingPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<CurrentBuilding>()
+        app.add_event::<BuildEvent>()
+            .init_resource::<CurrentBuilding>()
             .init_resource::<ForegroundObject>()
             .add_systems(Startup, setup)
             .add_systems(
@@ -234,7 +250,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             transform: get_tilemap_center_transform(&MAP_SIZE, &TILE_SIZE.into(), &MAP_TYPE, 1.0),
             ..Default::default()
         },
-        Building,
+        Foreground,
     ));
 }
 
@@ -262,10 +278,14 @@ fn place_buildings(
             &Transform,
             &mut TileStorage,
         ),
-        With<Building>,
+        With<Foreground>,
     >,
-    tile_query: Query<(Entity, &TilePos, Option<&Hover>, &TileTextureIndex), With<Building>>,
+    tile_query: Query<
+        (Entity, &TilePos, Option<&HoverBuilding>, &TileTextureIndex),
+        With<Foreground>,
+    >,
     current_building: Res<CurrentBuilding>,
+    mut event_writer: EventWriter<BuildEvent>,
 ) {
     let (camera, camera_transform) = camera_query.single();
     let window = window.single();
@@ -296,10 +316,15 @@ fn place_buildings(
     if buttons.pressed(MouseButton::Right) {
         // erasing mode
 
-        for (tile_entity, tile_pos, hover, _) in tile_query.iter() {
+        for (tile_entity, tile_pos, hover, texture_index) in tile_query.iter() {
             if *tile_pos == mouse_tile_pos || hover.is_some() {
                 commands.entity(tile_entity).despawn_recursive();
                 tile_storage.remove(&mouse_tile_pos);
+
+                event_writer.send(BuildEvent::Deleted(
+                    *tile_pos,
+                    ForegroundObject::from_tile_texture_index(texture_index),
+                ));
             }
         }
 
@@ -406,9 +431,17 @@ fn place_buildings(
                     texture_index: tile_texture_index,
                     ..Default::default()
                 },
-                Building,
+                Foreground,
+                BuildingComponent,
+                BuildingInput(foreground_object.get_input_side()),
+                BuildingOutput(foreground_object.get_output_side()),
             ))
             .id();
+
+        event_writer.send(BuildEvent::Placed(
+            mouse_tile_pos,
+            ForegroundObject::from_tile_texture_index(&tile_texture_index),
+        ));
 
         tile_storage.set(&mouse_tile_pos, new_tile_entity);
     } else {
@@ -435,8 +468,8 @@ fn place_buildings(
                         color: TileColor(Color::srgba(0.4, 0.7, 0.1, 0.8)),
                         ..Default::default()
                     },
-                    Building,
-                    Hover,
+                    Foreground,
+                    HoverBuilding,
                 ))
                 .id();
 

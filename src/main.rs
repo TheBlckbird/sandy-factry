@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
-use plugins::building::BuildingPlugin;
+use plugins::{building::BuildingPlugin, simulation::SimulationPlugin};
 
 mod buildings;
 mod helpers;
@@ -38,7 +38,7 @@ impl From<BackgroundObject> for TileTextureIndex {
 #[derive(Component)]
 struct BackgroundTile;
 
-#[derive(Component)]
+#[derive(Component, PartialEq)]
 enum Direction {
     North,
     East,
@@ -57,6 +57,15 @@ impl Direction {
             }
         }
     }
+
+    pub fn get_opposite(&self) -> Self {
+        match self {
+            Direction::North => Direction::South,
+            Direction::East => Direction::West,
+            Direction::South => Direction::North,
+            Direction::West => Direction::East,
+        }
+    }
 }
 
 fn main() {
@@ -73,7 +82,7 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
             TilemapPlugin,
         ))
-        .add_plugins(BuildingPlugin)
+        .add_plugins((BuildingPlugin, SimulationPlugin))
         .add_systems(Startup, startup)
         .add_systems(Update, helpers::camera::movement)
         .run();
