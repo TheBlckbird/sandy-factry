@@ -1,6 +1,7 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, winit::WinitWindows};
 use bevy_ecs_tilemap::prelude::*;
 use plugins::{building::BuildingPlugin, simulation::SimulationPlugin};
+use winit::window::Icon;
 
 mod buildings;
 mod helpers;
@@ -83,9 +84,28 @@ fn main() {
             TilemapPlugin,
         ))
         .add_plugins((BuildingPlugin, SimulationPlugin))
-        .add_systems(Startup, startup)
+        .add_systems(Startup, (startup, set_window_icon))
         .add_systems(Update, helpers::camera::movement)
         .run();
+}
+
+fn set_window_icon(windows: NonSend<WinitWindows>) {
+    let (icon_rgba, icon_width, icon_height) = {
+        let image = image::open("assets/app-icon.png")
+            .expect("Failed to open icon path")
+            .into_rgba8();
+        let (width, height) = image.dimensions();
+        let rgba = image.into_raw();
+        (rgba, width, height)
+    };
+    let icon = Icon::from_rgba(icon_rgba, icon_width, icon_height).unwrap();
+
+    // do it for all windows
+    for window in windows.windows.values() {
+        // this only sets it for Windows and X11
+        // The others are set at build time or via the desktop file
+        window.set_window_icon(Some(icon.clone()));
+    }
 }
 
 fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
