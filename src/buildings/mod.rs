@@ -5,13 +5,13 @@ use std::fmt::Debug;
 type Item = i32;
 
 #[derive(Debug)]
-pub struct TestBuilding {
+pub struct Building {
     pub building_type: Box<dyn BuildingType>,
     pub numbers: Vec<Item>,
     pub position: (u8, u8),
 }
 
-impl TestBuilding {
+impl Building {
     pub fn new(building_type: Box<dyn BuildingType>, position: (u8, u8)) -> Self {
         Self {
             building_type,
