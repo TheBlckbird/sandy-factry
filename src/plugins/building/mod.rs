@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_ecs_tilemap::prelude::*;
 
-use crate::{Direction, MAP_SIZE, MAP_TYPE, TILE_SIZE};
+use crate::{Direction, MAP_SIZE, MAP_TYPE, TILE_SIZE, buildings::Item};
 
 pub struct BuildingPlugin;
 
@@ -202,7 +202,7 @@ pub enum BuildEvent {
 }
 
 #[derive(Component)]
-pub struct BuildingComponent;
+pub struct BuildingComponent(Vec<Item>);
 
 #[derive(Component)]
 struct Foreground;
@@ -429,7 +429,7 @@ fn place_buildings(
                     ..Default::default()
                 },
                 Foreground,
-                BuildingComponent,
+                BuildingComponent(Vec::new()),
                 BuildingInput(foreground_object.get_input_side()),
                 BuildingOutput(foreground_object.get_output_side()),
             ))
