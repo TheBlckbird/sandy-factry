@@ -399,18 +399,15 @@ fn place_buildings(
 
     let foreground_object: ForegroundObject = current_building.into_foreground_object();
 
-    let tile_texture_index = foreground_object.into_tile_texture_index();
-    let tile_texture_index = if tile_texture_index.is_none() {
+    let Some(tile_texture_index) = foreground_object.into_tile_texture_index() else {
         for (tile_entity, tile_pos, hover, _) in tile_query.iter() {
             if hover.is_some() {
                 commands.entity(tile_entity).despawn_recursive();
-                tile_storage.remove(&tile_pos);
+                tile_storage.remove(tile_pos);
             }
         }
 
         return;
-    } else {
-        tile_texture_index.unwrap()
     };
 
     if buttons.pressed(MouseButton::Left) {
@@ -419,7 +416,7 @@ fn place_buildings(
         for (tile_entity, tile_pos, hover, _) in tile_query.iter() {
             if hover.is_some() {
                 commands.entity(tile_entity).despawn_recursive();
-                tile_storage.remove(&tile_pos);
+                tile_storage.remove(tile_pos);
             }
         }
 
@@ -454,7 +451,7 @@ fn place_buildings(
                 is_other_tile_at_mouse = true;
             } else if hover.is_some() {
                 commands.entity(tile_entity).despawn_recursive();
-                tile_storage.remove(&tile_pos);
+                tile_storage.remove(tile_pos);
             }
         }
 

@@ -88,7 +88,7 @@ fn main() {
             Startup,
             (
                 startup,
-                #[cfg(any(target_os = "windows", all(target_os = "linux", feature = "x11")))]
+                #[cfg(any(target_os = "windows", target_os = "linux"))]
                 set_window_icon,
             ),
         )

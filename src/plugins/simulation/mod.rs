@@ -57,7 +57,7 @@ fn build_graph(
         return;
     }
 
-    let first_tile = tile_query.iter().nth(0);
+    let first_tile = tile_query.iter().next();
 
     match first_tile {
         Some(first_tile) => next.push_back(*first_tile.1),
