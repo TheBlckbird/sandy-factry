@@ -1,5 +1,7 @@
 # Gamedesign
 
+Ein **Factory Builder**, gestrandet in der Wüste.
+
 Das Spiel wird ein Factory Builder vom Ding her inspiriert an Factorio und Shapez.  
 Im Gegenteil zu Factorio wird es, ähnlich zu Shapez, keine Grabber sondern direkte Belt Inputs in die Maschinen geben.
 
