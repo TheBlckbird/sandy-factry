@@ -131,7 +131,7 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     TileBundle {
                         position: tile_pos,
                         tilemap_id: TilemapId(background_tilemap_entity),
-                        texture_index: TileTextureIndex(1),
+                        texture_index: TileTextureIndex(2),
                         ..Default::default()
                     },
                     BackgroundTile,

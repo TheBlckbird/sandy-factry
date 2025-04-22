@@ -462,7 +462,7 @@ fn place_buildings(
                         position: mouse_tile_pos,
                         tilemap_id: TilemapId(tilemap_entity),
                         texture_index: tile_texture_index,
-                        color: TileColor(Color::srgba(0.4, 0.7, 0.1, 0.8)),
+                        color: TileColor(Color::srgba(1.0, 1.0, 1.0, 0.7)),
                         ..Default::default()
                     },
                     Foreground,
