@@ -18,7 +18,7 @@ pub fn movement(
         match event.unit {
             MouseScrollUnit::Pixel => {
                 if camera.single().0.scale >= 0.1 {
-                    zoom_add += event.y;
+                    zoom_add += event.y * 0.1;
                 }
             }
             MouseScrollUnit::Line => {
