@@ -1,11 +1,10 @@
 use super::{BuildingType, Item};
 
 #[derive(Debug, Clone, Copy)]
-pub struct Test;
-impl BuildingType for Test {
+pub struct Belt;
+impl BuildingType for Belt {
     fn perform_action(&self, contained_numbers: &[Item]) -> Result<Option<Item>, ()> {
-        println!("Reached an end: {}", contained_numbers.first().unwrap());
-        Ok(None)
+        todo!()
     }
 
     fn get_input_count(&self) -> usize {

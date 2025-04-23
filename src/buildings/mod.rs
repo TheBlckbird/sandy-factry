@@ -1,10 +1,8 @@
-use bevy::prelude::*;
 use std::fmt::Debug;
 
-pub mod belts;
+pub mod belt;
 pub mod crafter;
 pub mod miner;
-pub mod test;
 
 pub type Item = i32;
 

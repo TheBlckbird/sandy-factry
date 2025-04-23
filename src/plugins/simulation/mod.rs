@@ -8,10 +8,7 @@ use petgraph::{
     graph::NodeIndex,
 };
 
-use crate::{
-    Direction, MAP_SIZE,
-    buildings::{Building, BuildingType},
-};
+use crate::{Direction, MAP_SIZE, buildings::Building};
 
 use super::building::{BuildEvent, BuildingComponent, BuildingInput, BuildingOutput};
 

@@ -4,8 +4,7 @@ use super::{BuildingType, Item};
 pub struct Crafter;
 impl BuildingType for Crafter {
     fn perform_action(&self, contained_numbers: &[Item]) -> Result<Option<Item>, ()> {
-        println!("Reached an end: {}", contained_numbers.first().unwrap());
-        Ok(None)
+        todo!()
     }
 
     fn get_input_count(&self) -> usize {
