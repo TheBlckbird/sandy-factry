@@ -435,13 +435,6 @@ fn place_buildings(
     let foreground_object: ForegroundObject = current_building.into_foreground_object();
 
     let Some(tile_texture_index) = foreground_object.into_tile_texture_index() else {
-        for (tile_entity, tile_pos, hover, _) in tile_query.iter() {
-            if hover.is_some() {
-                commands.entity(tile_entity).despawn_recursive();
-                tile_storage.remove(tile_pos);
-            }
-        }
-
         return;
     };
 
@@ -462,13 +455,6 @@ fn place_buildings(
 
     if buttons.pressed(MouseButton::Left) {
         // building mode
-
-        for (tile_entity, tile_pos, hover, _) in tile_query.iter() {
-            if hover.is_some() {
-                commands.entity(tile_entity).despawn_recursive();
-                tile_storage.remove(tile_pos);
-            }
-        }
 
         let new_tile_entity = commands
             .spawn((
