@@ -2,7 +2,10 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_ecs_tilemap::prelude::*;
 
-use crate::{Direction, MAP_SIZE, MAP_TYPE, TILE_SIZE, buildings::Item};
+use crate::{
+    Direction, MAP_SIZE, MAP_TYPE, TILE_SIZE,
+    buildings::{BuildingType, Item, belt::Belt, crafter::Crafter, miner::Miner},
+};
 
 pub struct BuildingPlugin;
 
@@ -154,6 +157,26 @@ impl ForegroundObject {
         }
     }
 
+    pub fn into_building_type(&self) -> Option<Box<dyn BuildingType>> {
+        match self {
+            ForegroundObject::Nothing => None,
+            ForegroundObject::BeltUp
+            | ForegroundObject::BeltDown
+            | ForegroundObject::BeltLeft
+            | ForegroundObject::BeltRight
+            | ForegroundObject::BeltDownRight
+            | ForegroundObject::BeltLeftDown
+            | ForegroundObject::BeltUpLeft
+            | ForegroundObject::BeltRightUp
+            | ForegroundObject::BeltRightDown
+            | ForegroundObject::BeltDownLeft
+            | ForegroundObject::BeltLeftUp
+            | ForegroundObject::BeltUpRight => Some(Box::new(Belt)),
+            ForegroundObject::Crafter => Some(Box::new(Crafter)),
+            ForegroundObject::Miner => Some(Box::new(Miner)),
+        }
+    }
+
     pub fn get_input_side(&self) -> Option<Direction> {
         match self {
             ForegroundObject::Nothing => None,
@@ -202,7 +225,19 @@ pub enum BuildEvent {
 }
 
 #[derive(Component)]
-pub struct BuildingComponent(Vec<Item>);
+pub struct BuildingComponent {
+    pub items: Vec<Item>,
+    pub building_type: Box<dyn BuildingType>,
+}
+
+impl BuildingComponent {
+    pub fn new(items: Vec<Item>, building_type: Box<dyn BuildingType>) -> Self {
+        Self {
+            items,
+            building_type,
+        }
+    }
+}
 
 #[derive(Component)]
 struct Foreground;
@@ -429,7 +464,13 @@ fn place_buildings(
                     ..Default::default()
                 },
                 Foreground,
-                BuildingComponent(Vec::new()),
+                BuildingComponent::new(
+                    Vec::new(),
+                    match foreground_object.into_building_type() {
+                        Some(building_type) => building_type,
+                        None => return,
+                    },
+                ),
                 BuildingInput(foreground_object.get_input_side()),
                 BuildingOutput(foreground_object.get_output_side()),
             ))

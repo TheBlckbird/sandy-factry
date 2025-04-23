@@ -8,12 +8,12 @@ use petgraph::{
     graph::NodeIndex,
 };
 
-use crate::{Direction, MAP_SIZE};
+use crate::{Direction, MAP_SIZE, buildings::Building};
 
 use super::building::{BuildEvent, BuildingComponent, BuildingInput, BuildingOutput};
 
 #[derive(Resource, Default)]
-struct SimulationGraph(Graph<TilePos, ()>);
+struct SimulationGraph(Graph<(Building, TilePos), ()>);
 
 pub struct SimulationPlugin;
 
@@ -26,16 +26,14 @@ impl Plugin for SimulationPlugin {
 
 fn build_graph(
     mut build_events: EventReader<BuildEvent>,
-    tile_query: Query<
-        (
-            Entity,
-            &TilePos,
-            &TileTextureIndex,
-            &BuildingInput,
-            &BuildingOutput,
-        ),
-        With<BuildingComponent>,
-    >,
+    tile_query: Query<(
+        Entity,
+        &TilePos,
+        &TileTextureIndex,
+        &BuildingInput,
+        &BuildingOutput,
+        &BuildingComponent,
+    )>,
     mut simulation_graph: ResMut<SimulationGraph>,
 ) {
     if build_events.is_empty() {
@@ -44,13 +42,13 @@ fn build_graph(
 
     build_events.clear();
 
-    let mut factory_graph = Graph::<TilePos, ()>::new();
+    let mut factory_graph = Graph::new();
 
     let mut visited: VecDeque<TilePos> = VecDeque::new();
     let mut next: VecDeque<TilePos> = VecDeque::new();
     let mut remaining_tiles: VecDeque<TilePos> = tile_query
         .iter()
-        .map(|(_, &tile_pos, _, _, _)| tile_pos)
+        .map(|(_, &tile_pos, _, _, _, _)| tile_pos)
         .collect();
 
     if tile_query.is_empty() {
@@ -71,18 +69,20 @@ fn build_graph(
         let neighbors =
             Neighbors::get_square_neighboring_positions(&current_tile_pos, &MAP_SIZE, false);
 
-        let current_node_index = get_or_create_node(&mut factory_graph, &current_tile_pos);
-
         let tile = tile_query
             .iter()
-            .find(|&(_, &tile_pos, _, _, _)| tile_pos == current_tile_pos)
+            .find(|&(_, &tile_pos, _, _, _, _)| tile_pos == current_tile_pos)
             .unwrap();
+
+        let building = Building::new(tile.5.building_type.clone_box(), tile.5.items.clone());
+        let current_node_index =
+            get_or_create_node(&mut factory_graph, (building, &current_tile_pos));
 
         let add_neighbor = |neighbor: Option<TilePos>, next: &mut VecDeque<TilePos>| {
             if let Some(neighbor_pos) = neighbor {
                 if tile_query
                     .iter()
-                    .any(&|(_, &tile_pos, _, _, _)| tile_pos == neighbor_pos)
+                    .any(&|(_, &tile_pos, _, _, _, _)| tile_pos == neighbor_pos)
                     && !visited.contains(&neighbor_pos)
                 {
                     next.push_back(neighbor_pos);
@@ -106,12 +106,15 @@ fn build_graph(
             if let Some(neighbor_pos) = neighbor_pos {
                 if tile_query
                     .iter()
-                    .find(|&(_, &tile_pos, _, _, _)| tile_pos == neighbor_pos)
+                    .find(|&(_, &tile_pos, _, _, _, _)| tile_pos == neighbor_pos)
                     .and_then(|neighbor_tile| neighbor_tile.4.0.as_ref())
                     .filter(|neighbor_input| neighbor_input.get_opposite() == *input)
                     .is_some()
                 {
-                    let new_node_index = get_or_create_node(&mut factory_graph, &neighbor_pos);
+                    let building =
+                        Building::new(tile.5.building_type.clone_box(), tile.5.items.clone());
+                    let new_node_index =
+                        get_or_create_node(&mut factory_graph, (building, &neighbor_pos));
                     add_edge_if_not_exists(&mut factory_graph, new_node_index, current_node_index);
                 }
             }
@@ -128,12 +131,15 @@ fn build_graph(
             if let Some(neighbor_pos) = neighbor_pos {
                 if tile_query
                     .iter()
-                    .find(|&(_, &tile_pos, _, _, _)| tile_pos == neighbor_pos)
+                    .find(|&(_, &tile_pos, _, _, _, _)| tile_pos == neighbor_pos)
                     .and_then(|neighbor_tile| neighbor_tile.3.0.as_ref())
-                    .filter(|neighbor_input| neighbor_input.get_opposite() == *output)
+                    .filter(|neighbor_input| &neighbor_input.get_opposite() == output)
                     .is_some()
                 {
-                    let new_node_index = get_or_create_node(&mut factory_graph, &neighbor_pos);
+                    let building =
+                        Building::new(tile.5.building_type.clone_box(), tile.5.items.clone());
+                    let new_node_index =
+                        get_or_create_node(&mut factory_graph, (building, &neighbor_pos));
                     add_edge_if_not_exists(&mut factory_graph, current_node_index, new_node_index);
                 }
             }
@@ -148,14 +154,17 @@ fn build_graph(
     simulation_graph.0 = factory_graph;
 }
 
-fn get_or_create_node(graph: &mut Graph<TilePos, ()>, tile_pos: &TilePos) -> NodeIndex {
+fn get_or_create_node(
+    graph: &mut Graph<(Building, TilePos), ()>,
+    node: (Building, &TilePos),
+) -> NodeIndex {
     graph
         .node_indices()
-        .find(|&node_index| tile_pos == &graph[node_index])
-        .unwrap_or_else(|| graph.add_node(*tile_pos))
+        .find(|&node_index| node.1 == &graph[node_index].1)
+        .unwrap_or_else(|| graph.add_node((node.0, *node.1)))
 }
 
-fn add_edge_if_not_exists(graph: &mut Graph<TilePos, ()>, a: NodeIndex, b: NodeIndex) {
+fn add_edge_if_not_exists(graph: &mut Graph<(Building, TilePos), ()>, a: NodeIndex, b: NodeIndex) {
     if graph.find_edge(a, b).is_none() {
         graph.add_edge(a, b, ());
     }

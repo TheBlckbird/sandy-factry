@@ -1,5 +1,8 @@
-use bevy::prelude::*;
 use std::fmt::Debug;
+
+pub mod belt;
+pub mod crafter;
+pub mod miner;
 
 pub type Item = i32;
 
@@ -7,15 +10,13 @@ pub type Item = i32;
 pub struct Building {
     pub building_type: Box<dyn BuildingType>,
     pub items: Vec<Item>,
-    pub position: (u8, u8),
 }
 
 impl Building {
-    pub fn new(building_type: Box<dyn BuildingType>, position: (u8, u8)) -> Self {
+    pub fn new(building_type: Box<dyn BuildingType>, items: Vec<Item>) -> Self {
         Self {
             building_type,
-            items: Vec::new(),
-            position,
+            items,
         }
     }
 
@@ -33,4 +34,5 @@ impl Building {
 pub trait BuildingType: Debug + Send + Sync {
     fn perform_action(&self, contained_items: &[Item]) -> Result<Option<Item>, ()>;
     fn get_input_count(&self) -> usize;
+    fn clone_box(&self) -> Box<dyn BuildingType>;
 }
