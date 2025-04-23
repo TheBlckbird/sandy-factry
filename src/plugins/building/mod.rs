@@ -445,6 +445,21 @@ fn place_buildings(
         return;
     };
 
+    let mut is_other_tile_at_mouse = false;
+
+    for (tile_entity, tile_pos, hover, _) in tile_query.iter() {
+        if *tile_pos == mouse_tile_pos && hover.is_none() {
+            is_other_tile_at_mouse = true;
+        } else if hover.is_some() {
+            commands.entity(tile_entity).despawn_recursive();
+            tile_storage.remove(tile_pos);
+        }
+    }
+
+    if is_other_tile_at_mouse {
+        return;
+    }
+
     if buttons.pressed(MouseButton::Left) {
         // building mode
 
@@ -485,35 +500,22 @@ fn place_buildings(
     } else {
         // hover mode
 
-        let mut is_other_tile_at_mouse = false;
+        let new_tile_entity = commands
+            .spawn((
+                TileBundle {
+                    position: mouse_tile_pos,
+                    tilemap_id: TilemapId(tilemap_entity),
+                    texture_index: tile_texture_index,
+                    color: TileColor(Color::srgba(1.0, 1.0, 1.0, 0.7)),
+                    ..Default::default()
+                },
+                Foreground,
+                HoverBuilding,
+            ))
+            .id();
 
-        for (tile_entity, tile_pos, hover, _) in tile_query.iter() {
-            if *tile_pos == mouse_tile_pos && hover.is_none() {
-                is_other_tile_at_mouse = true;
-            } else if hover.is_some() {
-                commands.entity(tile_entity).despawn_recursive();
-                tile_storage.remove(tile_pos);
-            }
-        }
-
-        if !is_other_tile_at_mouse {
-            let new_tile_entity = commands
-                .spawn((
-                    TileBundle {
-                        position: mouse_tile_pos,
-                        tilemap_id: TilemapId(tilemap_entity),
-                        texture_index: tile_texture_index,
-                        color: TileColor(Color::srgba(1.0, 1.0, 1.0, 0.7)),
-                        ..Default::default()
-                    },
-                    Foreground,
-                    HoverBuilding,
-                ))
-                .id();
-
-            tile_storage.set(&mouse_tile_pos, new_tile_entity);
-        }
-    };
+        tile_storage.set(&mouse_tile_pos, new_tile_entity);
+    }
 }
 
 /*
