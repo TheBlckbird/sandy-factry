@@ -10,40 +10,43 @@ use crate::{
     helpers::graph::{add_edge_if_not_exists, get_or_create_node},
 };
 
-use crate::plugins::building::{BuildEvent, BuildingComponent, BuildingInput, BuildingOutput};
+use crate::plugins::building::{BuildEvent, BuildingInput, BuildingOutput};
 
 use super::SimulationGraph;
 
 pub fn build_graph(
-    mut build_events: EventReader<BuildEvent>,
+    mut _build_events: EventReader<BuildEvent>,
     tile_query: Query<(
         Entity,
         &TilePos,
         &TileTextureIndex,
         &BuildingInput,
         &BuildingOutput,
-        &BuildingComponent,
+        &Building,
     )>,
     mut simulation_graph: ResMut<SimulationGraph>,
 ) {
-    if build_events.is_empty() {
-        return;
-    }
+    // if build_events.is_empty() {
+    //     return;
+    // }
 
-    build_events.clear();
+    // build_events.clear();
+
+    // [FIXME] fix this in case the performance becomes a problem
 
     let mut factory_graph = Graph::new();
 
-    let mut visited: VecDeque<TilePos> = VecDeque::new();
-    let mut next: VecDeque<TilePos> = VecDeque::new();
+    if tile_query.is_empty() {
+        simulation_graph.0 = factory_graph;
+        return;
+    }
+
+    let mut visited = VecDeque::new();
+    let mut next = VecDeque::new();
     let mut remaining_tiles: VecDeque<TilePos> = tile_query
         .iter()
         .map(|(_, &tile_pos, _, _, _, _)| tile_pos)
         .collect();
-
-    if tile_query.is_empty() {
-        return;
-    }
 
     let first_tile = tile_query.iter().next();
 
@@ -64,7 +67,11 @@ pub fn build_graph(
             .find(|&(_, &tile_pos, _, _, _, _)| tile_pos == current_tile_pos)
             .unwrap();
 
-        let building = Building::new(tile.5.building_type.clone_box(), tile.5.items.clone());
+        let building = Building::new(
+            tile.5.building_type.clone_box(),
+            tile.5.input_items.clone(),
+            tile.5.output_items.clone(),
+        );
         let current_node_index =
             get_or_create_node(&mut factory_graph, (building, &current_tile_pos));
 
@@ -94,18 +101,30 @@ pub fn build_graph(
             };
 
             if let Some(neighbor_pos) = neighbor_pos {
-                if tile_query
+                if let Some(neighbor_tile) = tile_query
                     .iter()
                     .find(|&(_, &tile_pos, _, _, _, _)| tile_pos == neighbor_pos)
-                    .and_then(|neighbor_tile| neighbor_tile.4.0.as_ref())
-                    .filter(|neighbor_input| neighbor_input.get_opposite() == *input)
-                    .is_some()
                 {
-                    let building =
-                        Building::new(tile.5.building_type.clone_box(), tile.5.items.clone());
-                    let new_node_index =
-                        get_or_create_node(&mut factory_graph, (building, &neighbor_pos));
-                    add_edge_if_not_exists(&mut factory_graph, new_node_index, current_node_index);
+                    if neighbor_tile
+                        .4
+                        .0
+                        .as_ref()
+                        .filter(|neighbor_input| &neighbor_input.get_opposite() == input)
+                        .is_some()
+                    {
+                        let building = Building::new(
+                            neighbor_tile.5.building_type.clone_box(),
+                            neighbor_tile.5.input_items.clone(),
+                            neighbor_tile.5.output_items.clone(),
+                        );
+                        let new_node_index =
+                            get_or_create_node(&mut factory_graph, (building, &neighbor_pos));
+                        add_edge_if_not_exists(
+                            &mut factory_graph,
+                            new_node_index,
+                            current_node_index,
+                        );
+                    }
                 }
             }
         }
@@ -119,18 +138,32 @@ pub fn build_graph(
             };
 
             if let Some(neighbor_pos) = neighbor_pos {
-                if tile_query
+                if let Some(neighbor_tile) = tile_query
                     .iter()
                     .find(|&(_, &tile_pos, _, _, _, _)| tile_pos == neighbor_pos)
-                    .and_then(|neighbor_tile| neighbor_tile.3.0.as_ref())
-                    .filter(|neighbor_input| &neighbor_input.get_opposite() == output)
-                    .is_some()
+                // .and_then(|neighbor_tile| neighbor_tile.3.0.as_ref())
+                // .filter(|neighbor_input| &neighbor_input.get_opposite() == output)
                 {
-                    let building =
-                        Building::new(tile.5.building_type.clone_box(), tile.5.items.clone());
-                    let new_node_index =
-                        get_or_create_node(&mut factory_graph, (building, &neighbor_pos));
-                    add_edge_if_not_exists(&mut factory_graph, current_node_index, new_node_index);
+                    if neighbor_tile
+                        .3
+                        .0
+                        .as_ref()
+                        .filter(|neighbor_output| &neighbor_output.get_opposite() == output)
+                        .is_some()
+                    {
+                        let building = Building::new(
+                            neighbor_tile.5.building_type.clone_box(),
+                            neighbor_tile.5.input_items.clone(),
+                            neighbor_tile.5.output_items.clone(),
+                        );
+                        let new_node_index =
+                            get_or_create_node(&mut factory_graph, (building, &neighbor_pos));
+                        add_edge_if_not_exists(
+                            &mut factory_graph,
+                            current_node_index,
+                            new_node_index,
+                        );
+                    }
                 }
             }
         }

@@ -1,13 +1,13 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
-use crate::plugins::building::BuildingComponent;
+use crate::buildings::Building;
 
 use super::SimulationGraph;
 
 pub fn graph_to_world(
     simulation_graph: Res<SimulationGraph>,
-    mut tile_query: Query<(&TilePos, &mut BuildingComponent)>,
+    mut tile_query: Query<(&TilePos, &mut Building)>,
 ) {
     for (building, building_tile_pos) in simulation_graph
         .0
@@ -21,6 +21,7 @@ pub fn graph_to_world(
             return;
         };
 
-        building_component.items = building.items.clone();
+        building_component.input_items = building.input_items.clone();
+        building_component.output_items = building.output_items.clone();
     }
 }

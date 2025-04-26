@@ -1,9 +1,11 @@
+use std::collections::VecDeque;
+
 use super::{BuildingType, Item};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Crafter;
 impl BuildingType for Crafter {
-    fn perform_action(&self, contained_numbers: &[Item]) -> Result<Option<Item>, ()> {
+    fn perform_action(&self, input_items: &mut VecDeque<Item>, output_items: &mut VecDeque<Item>) {
         todo!()
     }
 

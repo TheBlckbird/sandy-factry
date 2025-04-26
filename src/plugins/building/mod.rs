@@ -93,7 +93,7 @@ impl CurrentBuilding {
     }
 }
 
-#[derive(Resource, Default, Clone, Copy)]
+#[derive(Resource, Default, Clone, Copy, PartialEq)]
 enum ForegroundObject {
     #[default]
     Nothing,
@@ -224,21 +224,6 @@ impl ForegroundObject {
 pub enum BuildEvent {
     Placed(TilePos, ForegroundObject),
     Deleted(TilePos, ForegroundObject),
-}
-
-#[derive(Component)]
-pub struct BuildingComponent {
-    pub items: Vec<Item>,
-    pub building_type: Box<dyn BuildingType>,
-}
-
-impl BuildingComponent {
-    pub fn new(items: Vec<Item>, building_type: Box<dyn BuildingType>) -> Self {
-        Self {
-            items,
-            building_type,
-        }
-    }
 }
 
 #[derive(Component)]

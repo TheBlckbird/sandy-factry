@@ -1,4 +1,6 @@
-use std::fmt::Debug;
+use bevy::prelude::*;
+
+use std::{collections::VecDeque, fmt::Debug};
 
 pub mod belt;
 pub mod crafter;
@@ -6,33 +8,38 @@ pub mod miner;
 
 pub type Item = i32;
 
-#[derive(Debug)]
+#[derive(Debug, Component)]
 pub struct Building {
     pub building_type: Box<dyn BuildingType>,
-    pub items: Vec<Item>,
+    pub input_items: VecDeque<Item>,
+    pub output_items: VecDeque<Item>,
 }
 
 impl Building {
-    pub fn new(building_type: Box<dyn BuildingType>, items: Vec<Item>) -> Self {
+    pub fn new(
+        building_type: Box<dyn BuildingType>,
+        input_items: VecDeque<Item>,
+        output_items: VecDeque<Item>,
+    ) -> Self {
         Self {
             building_type,
-            items,
+            input_items,
+            output_items,
         }
     }
 
-    pub fn perform_action(&mut self) -> Result<Option<Item>, ()> {
-        if self.items.len() != self.building_type.get_input_count() {
-            return Err(());
+    pub fn perform_action(&mut self) {
+        if self.input_items.len() != self.building_type.get_input_count() {
+            return;
         }
 
-        let output = self.building_type.perform_action(&self.items);
-        self.items = Vec::new();
-        output
+        self.building_type
+            .perform_action(&mut self.input_items, &mut self.output_items);
     }
 }
 
 pub trait BuildingType: Debug + Send + Sync {
-    fn perform_action(&self, contained_items: &[Item]) -> Result<Option<Item>, ()>;
+    fn perform_action(&self, input_items: &mut VecDeque<Item>, output_items: &mut VecDeque<Item>);
     fn get_input_count(&self) -> usize;
     fn clone_box(&self) -> Box<dyn BuildingType>;
 }

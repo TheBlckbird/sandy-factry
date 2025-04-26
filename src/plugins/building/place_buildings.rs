@@ -1,10 +1,14 @@
+use std::collections::VecDeque;
+
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_ecs_tilemap::prelude::*;
 
+use crate::buildings::Building;
+
 use super::{
-    BuildEvent, BuildingComponent, BuildingInput, BuildingOutput, CurrentBuilding, Foreground,
-    ForegroundObject, HoverBuilding,
+    BuildEvent, BuildingInput, BuildingOutput, CurrentBuilding, Foreground, ForegroundObject,
+    HoverBuilding,
 };
 
 pub fn place_buildings(
@@ -107,12 +111,17 @@ pub fn place_buildings(
                     ..Default::default()
                 },
                 Foreground,
-                BuildingComponent::new(
-                    Vec::new(),
+                Building::new(
                     match foreground_object.into_building_type() {
                         Some(building_type) => building_type,
                         None => return,
                     },
+                    if foreground_object == ForegroundObject::BeltDown {
+                        VecDeque::from([1])
+                    } else {
+                        VecDeque::new()
+                    },
+                    VecDeque::new(),
                 ),
                 BuildingInput(foreground_object.get_input_side()),
                 BuildingOutput(foreground_object.get_output_side()),
