@@ -1,13 +1,37 @@
 use bevy::prelude::*;
-use petgraph::prelude::*;
+use petgraph::{
+    algo::{connected_components, tarjan_scc},
+    prelude::*,
+};
 
 use super::SimulationGraph;
 
 pub fn simulate(mut simulation_graph: ResMut<SimulationGraph>) {
-    let leaf_nodes: Vec<NodeIndex> = simulation_graph
+    if simulation_graph.0.node_count() == 0 {
+        return;
+    }
+
+    let mut leaf_nodes: Vec<NodeIndex> = simulation_graph
         .0
         .externals(petgraph::Direction::Outgoing)
         .collect(); // [FIXME] This won't work anymore when the splitter is added
+
+    let sub_graphs_count = connected_components(&simulation_graph.0);
+
+    let mut additional_starting_nodes = Vec::with_capacity(sub_graphs_count - leaf_nodes.len());
+
+    if leaf_nodes.len() < sub_graphs_count {
+        tarjan_scc(&simulation_graph.0)
+            .iter()
+            .filter(|subgraph| {
+                !subgraph
+                    .iter()
+                    .any(|subgraph_node| leaf_nodes.contains(subgraph_node))
+            })
+            .for_each(|sub_graph| additional_starting_nodes.push(*sub_graph.first().unwrap()));
+    }
+
+    leaf_nodes.append(&mut additional_starting_nodes);
 
     for leaf_node in leaf_nodes {
         simulation_graph.0.reverse();
