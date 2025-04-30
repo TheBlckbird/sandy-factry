@@ -79,10 +79,7 @@ pub fn place_buildings(
                 commands.entity(tile_entity).despawn_recursive();
                 tile_storage.remove(&mouse_tile_pos);
 
-                event_writer.send(BuildEvent::Deleted(
-                    *tile_pos,
-                    ForegroundObject::from_tile_texture_index(texture_index),
-                ));
+                event_writer.send(BuildEvent::Deleted(*tile_pos, (*texture_index).into()));
             }
         }
 
@@ -91,7 +88,7 @@ pub fn place_buildings(
 
     let foreground_object: ForegroundObject = current_building.as_foreground_object();
 
-    let Some(tile_texture_index) = foreground_object.into_tile_texture_index() else {
+    let Ok(tile_texture_index) = foreground_object.try_into() else {
         return;
     };
 
@@ -130,7 +127,7 @@ pub fn place_buildings(
 
         event_writer.send(BuildEvent::Placed(
             mouse_tile_pos,
-            ForegroundObject::from_tile_texture_index(&tile_texture_index),
+            tile_texture_index.into(),
         ));
 
         tile_storage.set(&mouse_tile_pos, new_tile_entity);

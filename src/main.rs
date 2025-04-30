@@ -40,7 +40,7 @@ impl From<BackgroundObject> for TileTextureIndex {
 struct BackgroundTile;
 
 #[derive(Component, PartialEq)]
-enum Direction {
+pub enum Direction {
     North,
     East,
     South,
