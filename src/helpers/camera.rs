@@ -6,6 +6,8 @@ use bevy::{
     prelude::*,
 };
 
+use crate::plugins::world::MAP_SIZE;
+
 pub fn movement(
     mut camera: Query<(&mut OrthographicProjection, &mut Transform)>,
     mut evr_scroll: EventReader<MouseWheel>,
@@ -13,26 +15,27 @@ pub fn movement(
     time: Res<Time>,
 ) {
     let mut zoom_add = 0.0;
+    let (mut projection, mut camera) = camera.single_mut();
 
     for event in evr_scroll.read() {
         match event.unit {
             MouseScrollUnit::Pixel => {
-                if camera.single().0.scale >= 0.1 {
+                if projection.scale >= 0.1 {
                     zoom_add += event.y * 0.1;
                 }
             }
             MouseScrollUnit::Line => {
-                if camera.single().0.scale >= 0.1 {
+                if projection.scale >= 0.1 {
                     zoom_add += event.y * 5.0;
                 }
             }
         }
     }
 
-    camera.single_mut().0.scale += zoom_add * time.delta_secs();
+    projection.scale += zoom_add * time.delta_secs();
 
-    if camera.single().0.scale < 0.1 {
-        camera.single_mut().0.scale = 0.1;
+    if projection.scale < 0.1 {
+        projection.scale = 0.1;
     }
 
     let mut translation = Vec2::ZERO;
@@ -53,8 +56,19 @@ pub fn movement(
         translation.x -= 1.0;
     }
 
-    translation =
-        translation.normalize_or_zero() * 120.0 * camera.single().0.scale * time.delta_secs();
+    translation = translation.normalize_or_zero() * 120.0 * projection.scale * time.delta_secs();
 
-    camera.single_mut().1.translation += translation.extend(0.0);
+    camera.translation += translation.extend(0.0);
+
+    if camera.translation.x < 0.0 {
+        camera.translation.x = 0.0
+    } else if camera.translation.x > MAP_SIZE.x as f32 {
+        camera.translation.x = MAP_SIZE.x as f32;
+    }
+
+    if camera.translation.y < 0.0 {
+        camera.translation.y = 0.0
+    } else if camera.translation.y > MAP_SIZE.y as f32 {
+        camera.translation.y = MAP_SIZE.y as f32;
+    }
 }
