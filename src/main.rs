@@ -96,6 +96,7 @@ fn main() {
         .run();
 }
 
+#[allow(unused)]
 fn set_window_icon(windows: NonSend<WinitWindows>) {
     let (icon_rgba, icon_width, icon_height) = {
         let image = image::open("assets/app-icon.png")

@@ -4,7 +4,7 @@ use place_buildings::place_buildings;
 
 use crate::{
     Direction, MAP_SIZE, MAP_TYPE, TILE_SIZE,
-    buildings::{BuildingType, Item, belt::Belt, crafter::Crafter, miner::Miner},
+    buildings::{BuildingType, belt::Belt, crafter::Crafter, miner::Miner},
 };
 
 mod place_buildings;
@@ -72,7 +72,7 @@ impl CurrentBuilding {
         };
     }
 
-    pub fn into_foreground_object(&self) -> ForegroundObject {
+    pub fn as_foreground_object(&self) -> ForegroundObject {
         match self {
             CurrentBuilding::Nothing => ForegroundObject::Nothing,
             CurrentBuilding::Miner => ForegroundObject::Miner,
@@ -94,7 +94,7 @@ impl CurrentBuilding {
 }
 
 #[derive(Resource, Default, Clone, Copy, PartialEq)]
-enum ForegroundObject {
+pub enum ForegroundObject {
     #[default]
     Nothing,
     BeltUp,
@@ -114,7 +114,7 @@ enum ForegroundObject {
 }
 
 impl ForegroundObject {
-    pub fn into_tile_texture_index(&self) -> Option<TileTextureIndex> {
+    pub fn into_tile_texture_index(self) -> Option<TileTextureIndex> {
         let index = match self {
             ForegroundObject::BeltUp => 0,
             ForegroundObject::BeltDown => 1,
@@ -159,7 +159,7 @@ impl ForegroundObject {
         }
     }
 
-    pub fn into_building_type(&self) -> Option<Box<dyn BuildingType>> {
+    pub fn into_building_type(self) -> Option<Box<dyn BuildingType>> {
         match self {
             ForegroundObject::Nothing => None,
             ForegroundObject::BeltUp
@@ -220,6 +220,7 @@ impl ForegroundObject {
     }
 }
 
+#[allow(unused)]
 #[derive(Event)]
 pub enum BuildEvent {
     Placed(TilePos, ForegroundObject),

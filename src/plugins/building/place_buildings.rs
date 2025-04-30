@@ -89,7 +89,7 @@ pub fn place_buildings(
         return;
     }
 
-    let foreground_object: ForegroundObject = current_building.into_foreground_object();
+    let foreground_object: ForegroundObject = current_building.as_foreground_object();
 
     let Some(tile_texture_index) = foreground_object.into_tile_texture_index() else {
         return;
