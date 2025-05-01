@@ -1,15 +1,11 @@
 use bevy::{prelude::*, winit::WinitWindows};
 use bevy_ecs_tilemap::prelude::*;
-use plugins::{building::BuildingPlugin, simulation::SimulationPlugin};
+use plugins::{building::BuildingPlugin, simulation::SimulationPlugin, world::WorldPlugin};
 use winit::window::Icon;
 
 mod buildings;
 mod helpers;
 mod plugins;
-
-const MAP_SIZE: TilemapSize = TilemapSize { x: 32, y: 32 };
-const TILE_SIZE: TilemapTileSize = TilemapTileSize { x: 8.0, y: 8.0 };
-const MAP_TYPE: TilemapType = TilemapType::Square;
 
 #[derive(States, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 enum GameState {
@@ -17,27 +13,6 @@ enum GameState {
     Paused,
     Background,
 }
-
-#[derive(Resource, Default, Clone, Copy)]
-enum BackgroundObject {
-    Dirt,
-    #[default]
-    Water,
-}
-
-impl From<BackgroundObject> for TileTextureIndex {
-    fn from(value: BackgroundObject) -> Self {
-        let index = match value {
-            BackgroundObject::Dirt => 0,
-            BackgroundObject::Water => 1,
-        };
-
-        TileTextureIndex(index)
-    }
-}
-
-#[derive(Component)]
-struct BackgroundTile;
 
 #[derive(Component, PartialEq)]
 pub enum Direction {
@@ -83,7 +58,7 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
             TilemapPlugin,
         ))
-        .add_plugins((BuildingPlugin, SimulationPlugin))
+        .add_plugins((BuildingPlugin, SimulationPlugin, WorldPlugin))
         .add_systems(
             Startup,
             (
@@ -116,43 +91,6 @@ fn set_window_icon(windows: NonSend<WinitWindows>) {
     }
 }
 
-fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn startup(mut commands: Commands) {
     commands.spawn((Camera2d, Transform::from_scale(Vec3::new(0.2, 0.2, 1.0))));
-
-    let background_texture_handle: Handle<Image> = asset_server.load("background_tiles.png");
-
-    let mut background_tile_storage = TileStorage::empty(MAP_SIZE);
-    let background_tilemap_entity = commands.spawn_empty().id();
-
-    for x in 0..MAP_SIZE.x {
-        for y in 0..MAP_SIZE.y {
-            let tile_pos = TilePos { x, y };
-            let tile_entity = commands
-                .spawn((
-                    TileBundle {
-                        position: tile_pos,
-                        tilemap_id: TilemapId(background_tilemap_entity),
-                        texture_index: TileTextureIndex(2),
-                        ..Default::default()
-                    },
-                    BackgroundTile,
-                ))
-                .id();
-            background_tile_storage.set(&tile_pos, tile_entity);
-        }
-    }
-
-    commands.entity(background_tilemap_entity).insert((
-        TilemapBundle {
-            grid_size: TILE_SIZE.into(),
-            map_type: MAP_TYPE,
-            size: MAP_SIZE,
-            storage: background_tile_storage,
-            texture: TilemapTexture::Single(background_texture_handle.clone()),
-            tile_size: TILE_SIZE,
-            transform: get_tilemap_center_transform(&MAP_SIZE, &TILE_SIZE.into(), &MAP_TYPE, 0.0),
-            ..Default::default()
-        },
-        BackgroundTile,
-    ));
 }

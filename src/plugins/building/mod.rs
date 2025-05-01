@@ -3,9 +3,11 @@ use bevy_ecs_tilemap::prelude::*;
 use place_buildings::place_buildings;
 
 use crate::{
-    Direction, MAP_SIZE, MAP_TYPE, TILE_SIZE,
+    Direction,
     buildings::{BuildingType, belt::Belt, crafter::Crafter, miner::Miner},
 };
+
+use super::world::{MAP_SIZE, MAP_TYPE, TILE_SIZE};
 
 mod place_buildings;
 
