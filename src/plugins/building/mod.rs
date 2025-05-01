@@ -74,7 +74,7 @@ impl CurrentBuilding {
         };
     }
 
-    pub fn into_foreground_object(&self) -> ForegroundObject {
+    pub fn as_foreground_object(&self) -> ForegroundObject {
         match self {
             CurrentBuilding::Nothing => ForegroundObject::Nothing,
             CurrentBuilding::Miner => ForegroundObject::Miner,
@@ -96,7 +96,7 @@ impl CurrentBuilding {
 }
 
 #[derive(Resource, Default, Clone, Copy, PartialEq)]
-enum ForegroundObject {
+pub enum ForegroundObject {
     #[default]
     Nothing,
     BeltUp,
@@ -116,52 +116,7 @@ enum ForegroundObject {
 }
 
 impl ForegroundObject {
-    pub fn into_tile_texture_index(&self) -> Option<TileTextureIndex> {
-        let index = match self {
-            ForegroundObject::BeltUp => 0,
-            ForegroundObject::BeltDown => 1,
-            ForegroundObject::BeltRight => 2,
-            ForegroundObject::BeltLeft => 3,
-            ForegroundObject::BeltDownRight => 4,
-            ForegroundObject::BeltLeftDown => 5,
-            ForegroundObject::BeltUpLeft => 6,
-            ForegroundObject::BeltRightUp => 7,
-            ForegroundObject::BeltRightDown => 8,
-            ForegroundObject::BeltDownLeft => 9,
-            ForegroundObject::BeltLeftUp => 10,
-            ForegroundObject::BeltUpRight => 11,
-            ForegroundObject::Crafter => 12,
-            ForegroundObject::Miner => 13,
-            ForegroundObject::Nothing => return None,
-        };
-
-        Some(TileTextureIndex(index))
-    }
-
-    pub fn from_tile_texture_index(tile_texture_index: &TileTextureIndex) -> Self {
-        match tile_texture_index.0 {
-            0 => ForegroundObject::BeltUp,
-            1 => ForegroundObject::BeltDown,
-            2 => ForegroundObject::BeltRight,
-            3 => ForegroundObject::BeltLeft,
-            4 => ForegroundObject::BeltDownRight,
-            5 => ForegroundObject::BeltLeftDown,
-            6 => ForegroundObject::BeltUpLeft,
-            7 => ForegroundObject::BeltRightUp,
-            8 => ForegroundObject::BeltRightDown,
-            9 => ForegroundObject::BeltDownLeft,
-            10 => ForegroundObject::BeltLeftUp,
-            11 => ForegroundObject::BeltUpRight,
-            12 => ForegroundObject::Crafter,
-            13 => ForegroundObject::Miner,
-            _ => panic!(
-                "Can't convert {:?} to a ForegroundObject!",
-                tile_texture_index
-            ),
-        }
-    }
-
-    pub fn into_building_type(&self) -> Option<Box<dyn BuildingType>> {
+    pub fn into_building_type(self) -> Option<Box<dyn BuildingType>> {
         match self {
             ForegroundObject::Nothing => None,
             ForegroundObject::BeltUp
@@ -222,6 +177,55 @@ impl ForegroundObject {
     }
 }
 
+impl From<TileTextureIndex> for ForegroundObject {
+    fn from(value: TileTextureIndex) -> Self {
+        match value.0 {
+            0 => ForegroundObject::BeltUp,
+            1 => ForegroundObject::BeltDown,
+            2 => ForegroundObject::BeltRight,
+            3 => ForegroundObject::BeltLeft,
+            4 => ForegroundObject::BeltDownRight,
+            5 => ForegroundObject::BeltLeftDown,
+            6 => ForegroundObject::BeltUpLeft,
+            7 => ForegroundObject::BeltRightUp,
+            8 => ForegroundObject::BeltRightDown,
+            9 => ForegroundObject::BeltDownLeft,
+            10 => ForegroundObject::BeltLeftUp,
+            11 => ForegroundObject::BeltUpRight,
+            12 => ForegroundObject::Crafter,
+            13 => ForegroundObject::Miner,
+            _ => panic!("Can't convert {:?} to a ForegroundObject!", value.0),
+        }
+    }
+}
+
+impl TryFrom<ForegroundObject> for TileTextureIndex {
+    type Error = &'static str;
+
+    fn try_from(value: ForegroundObject) -> Result<Self, Self::Error> {
+        Ok(TileTextureIndex(match value {
+            ForegroundObject::BeltUp => 0,
+            ForegroundObject::BeltDown => 1,
+            ForegroundObject::BeltRight => 2,
+            ForegroundObject::BeltLeft => 3,
+            ForegroundObject::BeltDownRight => 4,
+            ForegroundObject::BeltLeftDown => 5,
+            ForegroundObject::BeltUpLeft => 6,
+            ForegroundObject::BeltRightUp => 7,
+            ForegroundObject::BeltRightDown => 8,
+            ForegroundObject::BeltDownLeft => 9,
+            ForegroundObject::BeltLeftUp => 10,
+            ForegroundObject::BeltUpRight => 11,
+            ForegroundObject::Crafter => 12,
+            ForegroundObject::Miner => 13,
+            ForegroundObject::Nothing => {
+                return Err("Building `Nothing` can't be converted to `ForegroundObject`");
+            }
+        }))
+    }
+}
+
+#[allow(unused)]
 #[derive(Event)]
 pub enum BuildEvent {
     Placed(TilePos, ForegroundObject),
