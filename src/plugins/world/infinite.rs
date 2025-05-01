@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
 use super::{
-    Background, BackgroundObject, CHUNK_SIZE, Chunk, ChunkManager, RENDER_CHUNK_SIZE, TILE_SIZE,
+    Background, BackgroundObject, CHUNK_SIZE, Chunk, ChunkManager, Middleground,
+    MiddlegroundObject, RENDER_CHUNK_SIZE, TILE_SIZE,
 };
 
 pub fn spawn_chunks_around_camera(
@@ -51,10 +52,15 @@ pub fn despawn_outofrange_chunks(
 }
 
 fn spawn_chunk(commands: &mut Commands, asset_server: &AssetServer, chunk_pos: IVec2) {
-    let tilemap_entity = commands.spawn_empty().id();
-    let mut tile_storage = TileStorage::empty(CHUNK_SIZE.into());
+    let translation = Vec2::new(
+        chunk_pos.x as f32 * CHUNK_SIZE.x as f32 * TILE_SIZE.x,
+        chunk_pos.y as f32 * CHUNK_SIZE.y as f32 * TILE_SIZE.y,
+    );
 
-    // Spawn the elements of the tilemap.
+    let background_tilemap_entity = commands.spawn_empty().id();
+    let mut background_tile_storage = TileStorage::empty(CHUNK_SIZE.into());
+
+    // Spawn the tiles for the background tilemap
     for x in 0..CHUNK_SIZE.x {
         for y in 0..CHUNK_SIZE.y {
             let tile_pos = TilePos { x, y };
@@ -62,42 +68,90 @@ fn spawn_chunk(commands: &mut Commands, asset_server: &AssetServer, chunk_pos: I
                 .spawn((
                     TileBundle {
                         position: tile_pos,
-                        tilemap_id: TilemapId(tilemap_entity),
+                        tilemap_id: TilemapId(background_tilemap_entity),
                         texture_index: BackgroundObject::DefaultTile.into(),
                         ..Default::default()
                     },
                     Background,
                 ))
                 .id();
-            commands.entity(tilemap_entity).add_child(tile_entity);
-            tile_storage.set(&tile_pos, tile_entity);
+            commands
+                .entity(background_tilemap_entity)
+                .add_child(tile_entity);
+            background_tile_storage.set(&tile_pos, tile_entity);
         }
     }
 
-    let transform = Transform::from_translation(Vec3::new(
-        chunk_pos.x as f32 * CHUNK_SIZE.x as f32 * TILE_SIZE.x,
-        chunk_pos.y as f32 * CHUNK_SIZE.y as f32 * TILE_SIZE.y,
-        0.0,
-    ));
-    let texture_handle: Handle<Image> = asset_server.load("background_tiles.png");
+    let background_texture_handle: Handle<Image> = asset_server.load("background_tiles.png");
 
-    commands.entity(tilemap_entity).insert((
-        TilemapBundle {
-            grid_size: TILE_SIZE.into(),
-            size: CHUNK_SIZE.into(),
-            storage: tile_storage,
-            texture: TilemapTexture::Single(texture_handle),
-            tile_size: TILE_SIZE,
-            transform,
-            render_settings: TilemapRenderSettings {
-                render_chunk_size: RENDER_CHUNK_SIZE,
-                ..Default::default()
-            },
-            ..Default::default()
-        },
+    // Spawn the background tilemap
+    commands.entity(background_tilemap_entity).insert((
+        make_tilemap_bundle(
+            Transform::from_translation(translation.extend(0.0)),
+            background_texture_handle,
+            background_tile_storage,
+        ),
         Background,
         Chunk,
     ));
+
+    let middleground_tilemap_entity = commands.spawn_empty().id();
+    let mut middleground_tile_storage = TileStorage::empty(CHUNK_SIZE.into());
+
+    // Spawn the tiles for the middleground tilemap
+    for x in 0..CHUNK_SIZE.x {
+        for y in 0..CHUNK_SIZE.y {
+            let tile_pos = TilePos { x, y };
+            let tile_entity = commands
+                .spawn((
+                    TileBundle {
+                        position: tile_pos,
+                        tilemap_id: TilemapId(middleground_tilemap_entity),
+                        texture_index: MiddlegroundObject::Copper.into(),
+                        ..Default::default()
+                    },
+                    Middleground,
+                ))
+                .id();
+            commands
+                .entity(middleground_tilemap_entity)
+                .add_child(tile_entity);
+            middleground_tile_storage.set(&tile_pos, tile_entity);
+        }
+    }
+
+    let middleground_texture_handle = asset_server.load("middleground_tiles.png");
+
+    // Spawn the middleground tilemap
+    commands.entity(middleground_tilemap_entity).insert((
+        make_tilemap_bundle(
+            Transform::from_translation(translation.extend(1.0)),
+            middleground_texture_handle,
+            middleground_tile_storage,
+        ),
+        Middleground,
+        Chunk,
+    ));
+}
+
+fn make_tilemap_bundle(
+    transform: Transform,
+    texture_handle: Handle<Image>,
+    tile_storage: TileStorage,
+) -> TilemapBundle {
+    TilemapBundle {
+        grid_size: TILE_SIZE.into(),
+        size: CHUNK_SIZE.into(),
+        storage: tile_storage,
+        texture: TilemapTexture::Single(texture_handle),
+        tile_size: TILE_SIZE,
+        transform,
+        render_settings: TilemapRenderSettings {
+            render_chunk_size: RENDER_CHUNK_SIZE,
+            ..Default::default()
+        },
+        ..Default::default()
+    }
 }
 
 fn camera_pos_to_chunk_pos(camera_pos: &Vec2) -> IVec2 {

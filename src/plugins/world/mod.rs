@@ -17,19 +17,17 @@ pub const RENDER_CHUNK_SIZE: UVec2 = UVec2 {
 pub struct Background;
 
 #[derive(Component)]
+pub struct Middleground;
+
+#[derive(Component)]
 pub struct Chunk;
 
-#[derive(Resource, Default, Clone, Copy)]
+#[derive(Default, Clone, Copy)]
 enum BackgroundObject {
     Dirt,
     Water,
     #[default]
     DefaultTile,
-}
-
-#[derive(Default, Debug, Resource)]
-struct ChunkManager {
-    pub spawned_chunks: HashSet<IVec2>,
 }
 
 impl From<BackgroundObject> for TileTextureIndex {
@@ -42,6 +40,30 @@ impl From<BackgroundObject> for TileTextureIndex {
 
         TileTextureIndex(index)
     }
+}
+
+#[derive(Clone, Copy)]
+enum MiddlegroundObject {
+    Coal,
+    Copper,
+    Iron,
+}
+
+impl From<MiddlegroundObject> for TileTextureIndex {
+    fn from(value: MiddlegroundObject) -> Self {
+        let index = match value {
+            MiddlegroundObject::Coal => 0,
+            MiddlegroundObject::Copper => 1,
+            MiddlegroundObject::Iron => 2,
+        };
+
+        TileTextureIndex(index)
+    }
+}
+
+#[derive(Default, Debug, Resource)]
+struct ChunkManager {
+    pub spawned_chunks: HashSet<IVec2>,
 }
 
 pub struct WorldPlugin;

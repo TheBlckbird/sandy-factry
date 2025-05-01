@@ -275,7 +275,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             storage: foreground_tile_storage,
             texture: TilemapTexture::Single(foreground_texture_handle),
             tile_size: TILE_SIZE,
-            transform: get_tilemap_center_transform(&MAP_SIZE, &TILE_SIZE.into(), &MAP_TYPE, 1.0),
+            transform: get_tilemap_center_transform(&MAP_SIZE, &TILE_SIZE.into(), &MAP_TYPE, 2.0),
             ..Default::default()
         },
         Foreground,
