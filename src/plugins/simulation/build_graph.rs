@@ -6,8 +6,8 @@ use petgraph::Graph;
 
 use crate::{
     Direction,
-    buildings::Building,
     helpers::graph::{add_edge_if_not_exists, get_or_create_node},
+    machines::Machine,
     plugins::world::MAP_SIZE,
 };
 
@@ -23,7 +23,7 @@ pub fn build_graph(
         &TileTextureIndex,
         &BuildingInput,
         &BuildingOutput,
-        &Building,
+        &Machine,
     )>,
     mut simulation_graph: ResMut<SimulationGraph>,
 ) {
@@ -68,8 +68,8 @@ pub fn build_graph(
             .find(|&(_, &tile_pos, _, _, _, _)| tile_pos == current_tile_pos)
             .unwrap();
 
-        let building = Building::new(
-            tile.5.building_type.clone_box(),
+        let building = Machine::new(
+            tile.5.machine_type.clone_box(),
             tile.5.input_items.clone(),
             tile.5.output_items.clone(),
         );
@@ -113,8 +113,8 @@ pub fn build_graph(
                         .filter(|neighbor_input| &neighbor_input.get_opposite() == input)
                         .is_some()
                     {
-                        let building = Building::new(
-                            neighbor_tile.5.building_type.clone_box(),
+                        let building = Machine::new(
+                            neighbor_tile.5.machine_type.clone_box(),
                             neighbor_tile.5.input_items.clone(),
                             neighbor_tile.5.output_items.clone(),
                         );
@@ -152,8 +152,8 @@ pub fn build_graph(
                         .filter(|neighbor_output| &neighbor_output.get_opposite() == output)
                         .is_some()
                     {
-                        let building = Building::new(
-                            neighbor_tile.5.building_type.clone_box(),
+                        let building = Machine::new(
+                            neighbor_tile.5.machine_type.clone_box(),
                             neighbor_tile.5.input_items.clone(),
                             neighbor_tile.5.output_items.clone(),
                         );

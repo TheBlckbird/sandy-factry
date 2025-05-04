@@ -108,16 +108,12 @@ pub fn place_buildings(
                     ..Default::default()
                 },
                 Foreground,
-                Building::new(
+                Machine::new(
                     match foreground_object.into_building_type() {
                         Some(building_type) => building_type,
                         None => return,
                     },
-                    if foreground_object == ForegroundObject::BeltDown {
-                        VecDeque::from([1])
-                    } else {
-                        VecDeque::new()
-                    },
+                    VecDeque::new(),
                     VecDeque::new(),
                 ),
                 BuildingInput(foreground_object.get_input_side()),

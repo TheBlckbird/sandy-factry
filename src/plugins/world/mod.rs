@@ -53,7 +53,7 @@ impl From<BackgroundObject> for TileTextureIndex {
 }
 
 #[derive(Clone, Copy)]
-enum MiddlegroundObject {
+pub enum MiddlegroundObject {
     Coal,
     Copper,
     Iron,
@@ -68,6 +68,19 @@ impl From<MiddlegroundObject> for TileTextureIndex {
         };
 
         TileTextureIndex(index)
+    }
+}
+
+impl TryFrom<TileTextureIndex> for MiddlegroundObject {
+    type Error = ();
+
+    fn try_from(value: TileTextureIndex) -> Result<Self, Self::Error> {
+        match value.0 {
+            0 => Ok(MiddlegroundObject::Coal),
+            1 => Ok(MiddlegroundObject::Copper),
+            2 => Ok(MiddlegroundObject::Iron),
+            _ => Err(()),
+        }
     }
 }
 

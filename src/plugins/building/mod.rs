@@ -4,7 +4,7 @@ use place_buildings::place_buildings;
 
 use crate::{
     Direction,
-    buildings::{BuildingType, belt::Belt, crafter::Crafter, miner::Miner},
+    machines::{MachineType, belt::Belt, crafter::Crafter, miner::Miner},
 };
 
 use super::world::{MAP_SIZE, MAP_TYPE, TILE_SIZE};
@@ -116,7 +116,7 @@ pub enum ForegroundObject {
 }
 
 impl ForegroundObject {
-    pub fn into_building_type(self) -> Option<Box<dyn BuildingType>> {
+    pub fn into_building_type(self) -> Option<Box<dyn MachineType>> {
         match self {
             ForegroundObject::Nothing => None,
             ForegroundObject::BeltUp
@@ -132,7 +132,7 @@ impl ForegroundObject {
             | ForegroundObject::BeltLeftUp
             | ForegroundObject::BeltUpRight => Some(Box::new(Belt)),
             ForegroundObject::Crafter => Some(Box::new(Crafter)),
-            ForegroundObject::Miner => Some(Box::new(Miner)),
+            ForegroundObject::Miner => Some(Box::new(Miner::new(0))),
         }
     }
 
@@ -152,7 +152,7 @@ impl ForegroundObject {
             ForegroundObject::BeltLeftUp => Some(Direction::West),
             ForegroundObject::BeltUpRight => Some(Direction::North),
             ForegroundObject::Crafter => None,
-            ForegroundObject::Miner => None,
+            ForegroundObject::Miner => Some(Direction::North),
         }
     }
 
@@ -172,7 +172,7 @@ impl ForegroundObject {
             ForegroundObject::BeltLeftUp => Some(Direction::North),
             ForegroundObject::BeltUpRight => Some(Direction::East),
             ForegroundObject::Crafter => None,
-            ForegroundObject::Miner => None,
+            ForegroundObject::Miner => Some(Direction::South),
         }
     }
 }

@@ -1,13 +1,13 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
-use crate::buildings::Building;
+use crate::machines::Machine;
 
 use super::SimulationGraph;
 
 pub fn graph_to_world(
     simulation_graph: Res<SimulationGraph>,
-    mut tile_query: Query<(&TilePos, &mut Building)>,
+    mut tile_query: Query<(&TilePos, &mut Machine)>,
 ) {
     for (building, building_tile_pos) in simulation_graph
         .0

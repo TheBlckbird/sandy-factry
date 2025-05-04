@@ -1,10 +1,12 @@
+#![feature(let_chains)]
+
 use bevy::{prelude::*, winit::WinitWindows};
 use bevy_ecs_tilemap::prelude::*;
 use plugins::{building::BuildingPlugin, simulation::SimulationPlugin, world::WorldPlugin};
 use winit::window::Icon;
 
-mod buildings;
 mod helpers;
+mod machines;
 mod plugins;
 
 #[derive(States, Debug, Clone, Copy, PartialEq, Eq, Hash)]
