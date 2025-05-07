@@ -4,7 +4,10 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_ecs_tilemap::prelude::*;
 
-use crate::buildings::Building;
+use crate::{
+    helpers::tilemap::get_mouse_tilepos,
+    machines::{Item, Machine},
+};
 
 use super::{
     BuildEvent, BuildingInput, BuildingOutput, CurrentBuilding, Foreground, ForegroundObject,
@@ -13,8 +16,8 @@ use super::{
 
 pub fn place_buildings(
     mut commands: Commands,
-    camera_query: Query<(&Camera, &GlobalTransform)>,
-    window: Query<&Window, With<PrimaryWindow>>,
+    camera_q: Query<(&Camera, &GlobalTransform)>,
+    window_q: Query<&Window, With<PrimaryWindow>>,
     buttons: Res<ButtonInput<MouseButton>>,
     mut tilemap_q: Query<
         (
@@ -34,30 +37,22 @@ pub fn place_buildings(
     current_building: Res<CurrentBuilding>,
     mut event_writer: EventWriter<BuildEvent>,
 ) {
-    let (camera, camera_transform) = camera_query.single();
-    let window = window.single();
-
-    let cursor_position = match window
-        .cursor_position()
-        .and_then(|cursor| camera.viewport_to_world_2d(camera_transform, cursor).ok())
-    {
-        Some(position) => position,
-        None => return,
-    };
+    let (camera, camera_transform) = camera_q.single();
+    let window = window_q.single();
 
     let (tilemap_entity, map_size, grid_size, map_type, map_transform, mut tile_storage) =
         tilemap_q.single_mut();
 
-    let cursor_in_map_position = {
-        let cursor_position = Vec4::from((cursor_position, 0.0, 1.0));
-        let cursor_in_map_position = map_transform.compute_matrix().inverse() * cursor_position;
-        cursor_in_map_position.xy()
-    };
-
-    let mouse_tile_pos =
-        match TilePos::from_world_pos(&cursor_in_map_position, map_size, grid_size, map_type) {
-            Some(position) => position,
-            None => return,
+    let Some(mouse_tile_pos) = get_mouse_tilepos(
+        camera,
+        window,
+        camera_transform,
+        map_transform,
+        map_size,
+        grid_size,
+        map_type,
+    ) else {
+        return;
         };
 
     let mut is_other_tile_at_mouse = false;
@@ -108,16 +103,12 @@ pub fn place_buildings(
                     ..Default::default()
                 },
                 Foreground,
-                Building::new(
+                Machine::new(
                     match foreground_object.into_building_type() {
                         Some(building_type) => building_type,
                         None => return,
                     },
-                    if foreground_object == ForegroundObject::BeltDown {
-                        VecDeque::from([1])
-                    } else {
-                        VecDeque::new()
-                    },
+                    VecDeque::new(),
                     VecDeque::new(),
                 ),
                 BuildingInput(foreground_object.get_input_side()),

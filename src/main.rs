@@ -1,11 +1,25 @@
-use bevy::{prelude::*, winit::WinitWindows};
+#![feature(let_chains)]
+
+use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
 use bevy_ecs_tilemap::prelude::*;
-use plugins::{building::BuildingPlugin, simulation::SimulationPlugin, world::WorldPlugin};
+use helpers::tilemap::get_mouse_tilepos;
+use plugins::{
+    building::{BuildingPlugin, Foreground},
+    hud::HudPlugin,
+    simulation::SimulationPlugin,
+    world::WorldPlugin,
+};
 use winit::window::Icon;
 
-mod buildings;
 mod helpers;
+mod machines;
 mod plugins;
+
+#[derive(Resource, Default)]
+pub struct MouseCoordinates {
+    pub x: u32,
+    pub y: u32,
+}
 
 #[derive(States, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 enum GameState {
@@ -58,7 +72,8 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
             TilemapPlugin,
         ))
-        .add_plugins((BuildingPlugin, SimulationPlugin, WorldPlugin))
+        .add_plugins((BuildingPlugin, SimulationPlugin, WorldPlugin, HudPlugin))
+        .init_resource::<MouseCoordinates>()
         .add_systems(
             Startup,
             (
@@ -67,7 +82,7 @@ fn main() {
                 set_window_icon,
             ),
         )
-        .add_systems(Update, helpers::camera::movement)
+        .add_systems(Update, (helpers::camera::movement, update_mouse_coords))
         .run();
 }
 
@@ -93,4 +108,33 @@ fn set_window_icon(windows: NonSend<WinitWindows>) {
 
 fn startup(mut commands: Commands) {
     commands.spawn((Camera2d, Transform::from_scale(Vec3::new(0.2, 0.2, 1.0))));
+}
+
+fn update_mouse_coords(
+    mut mouse_coordinates: ResMut<MouseCoordinates>,
+    camera_q: Query<(&Camera, &GlobalTransform)>,
+    window_q: Query<&Window, With<PrimaryWindow>>,
+    map_transform_q: Query<
+        (&Transform, &TilemapSize, &TilemapGridSize, &TilemapType),
+        With<Foreground>,
+    >,
+) {
+    let (camera, camera_transform) = camera_q.single();
+    let window = window_q.single();
+    let (map_transform, map_size, grid_size, map_type) = map_transform_q.single();
+
+    let Some(new_mouse_coords) = get_mouse_tilepos(
+        camera,
+        window,
+        camera_transform,
+        map_transform,
+        map_size,
+        grid_size,
+        map_type,
+    ) else {
+        return;
+    };
+
+    mouse_coordinates.x = new_mouse_coords.x;
+    mouse_coordinates.y = new_mouse_coords.y;
 }

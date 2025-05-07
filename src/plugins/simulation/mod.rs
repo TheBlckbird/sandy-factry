@@ -5,14 +5,14 @@ use graph_to_world::graph_to_world;
 use petgraph::prelude::*;
 use simulate::simulate;
 
-use crate::buildings::Building;
+use crate::machines::Machine;
 
 mod build_graph;
 mod graph_to_world;
 mod simulate;
 
 #[derive(Resource, Default)]
-struct SimulationGraph(Graph<(Building, TilePos), ()>);
+struct SimulationGraph(Graph<(Machine, TilePos), ()>);
 
 pub struct SimulationPlugin;
 
