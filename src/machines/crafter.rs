@@ -2,10 +2,12 @@ use std::collections::VecDeque;
 
 use crate::plugins::world::MiddlegroundObject;
 
-use super::{MachineType, Item};
+use super::{Item, MachineType};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Crafter;
+
+#[allow(unused)] // [TODO] remove this once the crafter is implemented
 impl MachineType for Crafter {
     fn perform_action(
         &mut self,
@@ -15,10 +17,6 @@ impl MachineType for Crafter {
     ) {
         todo!()
     }
-
-    // fn get_input_count(&self) -> usize {
-    //     1
-    // }
 
     fn clone_box(&self) -> Box<(dyn MachineType + 'static)> {
         Box::new(*self)

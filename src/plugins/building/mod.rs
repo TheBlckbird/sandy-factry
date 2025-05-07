@@ -132,7 +132,7 @@ impl ForegroundObject {
             | ForegroundObject::BeltLeftUp
             | ForegroundObject::BeltUpRight => Some(Box::new(Belt)),
             ForegroundObject::Crafter => Some(Box::new(Crafter)),
-            ForegroundObject::Miner => Some(Box::new(Miner::new(0))),
+            ForegroundObject::Miner => Some(Box::new(Miner)),
         }
     }
 
@@ -233,7 +233,7 @@ pub enum BuildEvent {
 }
 
 #[derive(Component)]
-struct Foreground;
+pub struct Foreground;
 
 #[derive(Component)]
 struct HoverBuilding;

@@ -135,6 +135,6 @@ fn update_mouse_coords(
         return;
     };
 
-    mouse_coordinates.x = new_mouse_coords.x as u32;
-    mouse_coordinates.y = new_mouse_coords.y as u32;
+    mouse_coordinates.x = new_mouse_coords.x;
+    mouse_coordinates.y = new_mouse_coords.y;
 }

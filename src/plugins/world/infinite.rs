@@ -3,8 +3,8 @@ use bevy_ecs_tilemap::prelude::*;
 use rand::{Rng, rngs::StdRng};
 
 use super::{
-    Background, BackgroundObject, CHUNK_SIZE, Chunk, ChunkManager, GlobalRng, Middleground,
-    MiddlegroundObject, RENDER_CHUNK_SIZE, TILE_SIZE,
+    Background, BackgroundObject, CHUNK_SIZE, Chunk, ChunkManager, ChunkPos, GlobalRng,
+    Middleground, MiddlegroundObject, RENDER_CHUNK_SIZE, TILE_SIZE,
 };
 
 pub fn spawn_chunks_around_camera(
@@ -60,8 +60,8 @@ fn spawn_chunk(
     rng: &mut StdRng,
 ) {
     let translation = Vec2::new(
-        chunk_pos.x as f32 * CHUNK_SIZE.x as f32 * TILE_SIZE.x,
-        chunk_pos.y as f32 * CHUNK_SIZE.y as f32 * TILE_SIZE.y,
+        chunk_pos.x as f32 * CHUNK_SIZE.x as f32 * TILE_SIZE.x + TILE_SIZE.x / 2.0,
+        chunk_pos.y as f32 * CHUNK_SIZE.y as f32 * TILE_SIZE.y - TILE_SIZE.y / 2.0,
     );
 
     let background_tilemap_entity = commands.spawn_empty().id();
@@ -80,6 +80,10 @@ fn spawn_chunk(
                         ..Default::default()
                     },
                     Background,
+                    ChunkPos(IVec2 {
+                        x: x as i32,
+                        y: y as i32,
+                    }),
                 ))
                 .id();
             commands
@@ -126,6 +130,10 @@ fn spawn_chunk(
                             ..Default::default()
                         },
                         Middleground,
+                        ChunkPos(IVec2 {
+                            x: x as i32,
+                            y: y as i32,
+                        }),
                     ))
                     .id();
                 commands

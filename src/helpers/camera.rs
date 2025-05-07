@@ -6,8 +6,6 @@ use bevy::{
     prelude::*,
 };
 
-use crate::plugins::world::MAP_SIZE;
-
 pub fn movement(
     mut camera: Query<(&mut OrthographicProjection, &mut Transform)>,
     mut evr_scroll: EventReader<MouseWheel>,
@@ -59,16 +57,4 @@ pub fn movement(
     translation = translation.normalize_or_zero() * 120.0 * projection.scale * time.delta_secs();
 
     camera.translation += translation.extend(0.0);
-
-    if camera.translation.x < 0.0 {
-        camera.translation.x = 0.0
-    } else if camera.translation.x > MAP_SIZE.x as f32 {
-        camera.translation.x = MAP_SIZE.x as f32;
-    }
-
-    if camera.translation.y < 0.0 {
-        camera.translation.y = 0.0
-    } else if camera.translation.y > MAP_SIZE.y as f32 {
-        camera.translation.y = MAP_SIZE.y as f32;
-    }
 }

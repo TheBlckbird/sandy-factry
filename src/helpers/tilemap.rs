@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
+use crate::plugins::world::{MAP_SIZE, MAP_TYPE, TILE_SIZE};
+
 pub fn get_mouse_tilepos(
     camera: &Camera,
     window: &Window,
@@ -20,13 +22,20 @@ pub fn get_mouse_tilepos(
     TilePos::from_world_pos(&cursor_in_map_position.xy(), map_size, grid_size, map_type)
 }
 
-pub fn chunk_pos_to_world_pos(
-    position_in_chunk: &TilePos,
-    chunk_position: &IVec2,
-    chunk_size: UVec2,
-) -> TilePos {
-    TilePos::new(
-        chunk_position.x as u32 * chunk_size.x + position_in_chunk.x,
-        chunk_position.y as u32 * chunk_size.y + position_in_chunk.y,
-    )
+/// Creates a new tilemap bundle with sensible defaults
+pub fn make_tilemap_bundle(
+    transform: Transform,
+    texture_handle: Handle<Image>,
+    tile_storage: TileStorage,
+) -> TilemapBundle {
+    TilemapBundle {
+        grid_size: TILE_SIZE.into(),
+        map_type: MAP_TYPE,
+        size: MAP_SIZE,
+        storage: tile_storage,
+        texture: TilemapTexture::Single(texture_handle),
+        tile_size: TILE_SIZE,
+        transform,
+        ..Default::default()
+    }
 }

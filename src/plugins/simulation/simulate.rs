@@ -6,26 +6,14 @@ use petgraph::{
     prelude::*,
 };
 
-use crate::plugins::world::{Middleground, MiddlegroundObject};
+use crate::plugins::world::Middleground;
 
 use super::SimulationGraph;
-
-#[derive(Debug, Resource, Default)]
-pub struct TicksPassed(pub u32);
 
 pub fn simulate(
     mut simulation_graph: ResMut<SimulationGraph>,
     tile_query: Query<(&TilePos, &TileTextureIndex), With<Middleground>>,
-    mut ticks_passed: ResMut<TicksPassed>,
 ) {
-    // [TODO] remove debug
-    if ticks_passed.0 <= 120 {
-        ticks_passed.0 += 1;
-        return;
-    }
-
-    ticks_passed.0 = 0;
-
     if simulation_graph.0.node_count() == 0 {
         return;
     }
@@ -70,12 +58,10 @@ pub fn simulate(
                 .map(|next_building_edge| next_building_edge.source());
 
             let get_middleground_object = |searched_tile_pos| {
-                // tile_query
-                //     .iter()
-                //     .find(|(tile_pos, _)| &searched_tile_pos == tile_pos)
-                //     .and_then(|(_, tile_texture_index)| (*tile_texture_index).try_into().ok())
-
-                Some(MiddlegroundObject::Coal) // [TODO] Get real tile, but chunking
+                tile_query
+                    .iter()
+                    .find(|(tile_pos, _)| tile_pos == &searched_tile_pos)
+                    .and_then(|(_, tile_texture_index)| (*tile_texture_index).try_into().ok())
             };
 
             match maybe_next_building_index {
@@ -85,10 +71,6 @@ pub fn simulate(
                         .index_twice_mut(node_index, next_building_index);
 
                     building.perform_action(get_middleground_object(building_tile_pos));
-
-                    // let next_building_input_capacity =
-                    //     next_building.building_type.get_input_count()
-                    // - (next_building.input_items.len() + next_building.output_items.len());
 
                     let Some(item) = building.output_items.front() else {
                         continue;

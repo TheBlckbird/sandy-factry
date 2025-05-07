@@ -5,9 +5,6 @@ mod debug;
 #[derive(Component)]
 struct CoordinatesText;
 
-#[derive(Component)]
-struct HudCamera;
-
 pub struct HudPlugin;
 impl Plugin for HudPlugin {
     fn build(&self, app: &mut App) {
