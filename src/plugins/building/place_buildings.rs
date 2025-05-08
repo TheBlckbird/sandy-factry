@@ -53,7 +53,7 @@ pub fn place_buildings(
         map_type,
     ) else {
         return;
-        };
+    };
 
     let mut is_other_tile_at_mouse = false;
 
