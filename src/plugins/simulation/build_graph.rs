@@ -3,13 +3,9 @@ use std::collections::VecDeque;
 use bevy::prelude::*;
 use bevy_ecs_tilemap::{helpers::square_grid::neighbors::Neighbors, prelude::*};
 use petgraph::Graph;
+use sandy_factry_helpers::graph::{add_edge_if_not_exists, get_or_create_node};
 
-use crate::{
-    Direction,
-    helpers::graph::{add_edge_if_not_exists, get_or_create_node},
-    machines::Machine,
-    plugins::world::MAP_SIZE,
-};
+use crate::{Direction, machines::Machine, plugins::world::MAP_SIZE};
 
 use crate::plugins::building::{BuildEvent, BuildingInput, BuildingOutput};
 

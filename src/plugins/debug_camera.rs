@@ -6,7 +6,14 @@ use bevy::{
     prelude::*,
 };
 
-pub fn movement(
+pub struct DebugCameraPlugin;
+impl Plugin for DebugCameraPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Update, movement);
+    }
+}
+
+fn movement(
     camera: Single<(&mut Projection, &mut Transform)>,
     mut evr_scroll: EventReader<MouseWheel>,
     keys: Res<ButtonInput<KeyCode>>,

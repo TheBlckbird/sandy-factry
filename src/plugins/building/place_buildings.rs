@@ -3,11 +3,9 @@ use std::collections::VecDeque;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_ecs_tilemap::prelude::*;
+use sandy_factry_helpers::tilemap::{TilemapSettingsBorrowed, get_mouse_tilepos};
 
-use crate::{
-    helpers::tilemap::get_mouse_tilepos,
-    machines::{Item, Machine},
-};
+use crate::machines::{Item, Machine};
 
 use super::{
     BuildEvent, BuildingInput, BuildingOutput, CurrentBuilding, Foreground, ForegroundObject,
@@ -58,10 +56,7 @@ pub fn place_buildings(
         window,
         camera_transform,
         map_transform,
-        map_size,
-        grid_size,
-        tile_size,
-        map_type,
+        TilemapSettingsBorrowed::new(map_size, tile_size, map_type, grid_size),
         anchor,
     ) else {
         return;
