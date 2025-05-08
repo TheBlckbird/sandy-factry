@@ -112,16 +112,24 @@ fn startup(mut commands: Commands) {
 
 fn update_mouse_coords(
     mut mouse_coordinates: ResMut<MouseCoordinates>,
-    camera_q: Query<(&Camera, &GlobalTransform)>,
-    window_q: Query<&Window, With<PrimaryWindow>>,
-    map_transform_q: Query<
-        (&Transform, &TilemapSize, &TilemapGridSize, &TilemapType),
+    camera_q: Single<(&Camera, &GlobalTransform)>,
+    window_q: Single<&Window, With<PrimaryWindow>>,
+    map_transform_q: Single<
+        (
+            &Transform,
+            &TilemapSize,
+            &TilemapGridSize,
+            &TilemapType,
+            &TilemapTileSize,
+            &TilemapAnchor,
+        ),
         With<Foreground>,
     >,
 ) {
-    let (camera, camera_transform) = camera_q.single();
-    let window = window_q.single();
-    let (map_transform, map_size, grid_size, map_type) = map_transform_q.single();
+    let (camera, camera_transform) = camera_q.into_inner();
+    let window = window_q.into_inner();
+    let (map_transform, map_size, grid_size, map_type, tile_size, anchor) =
+        map_transform_q.into_inner();
 
     let Some(new_mouse_coords) = get_mouse_tilepos(
         camera,
@@ -130,7 +138,9 @@ fn update_mouse_coords(
         map_transform,
         map_size,
         grid_size,
+        tile_size,
         map_type,
+        anchor,
     ) else {
         return;
     };

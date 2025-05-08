@@ -7,13 +7,16 @@ use bevy::{
 };
 
 pub fn movement(
-    mut camera: Query<(&mut OrthographicProjection, &mut Transform)>,
+    camera: Single<(&mut Projection, &mut Transform)>,
     mut evr_scroll: EventReader<MouseWheel>,
     keys: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
 ) {
     let mut zoom_add = 0.0;
-    let (mut projection, mut camera) = camera.single_mut();
+    let (mut projection, mut camera) = camera.into_inner();
+    let Projection::Orthographic(projection) = &mut *projection else {
+        return;
+    };
 
     for event in evr_scroll.read() {
         match event.unit {

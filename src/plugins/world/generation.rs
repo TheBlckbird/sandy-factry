@@ -107,11 +107,7 @@ fn generate_tilemap_layer<F, C>(
 
     // Spawn the tilemap itself
     commands.entity(tilemap_entity).insert((
-        make_tilemap_bundle(
-            get_tilemap_center_transform(&MAP_SIZE, &TILE_SIZE.into(), &MAP_TYPE, z),
-            tiles_texture,
-            tile_storage,
-        ),
+        make_tilemap_bundle(TilemapAnchor::Center, tiles_texture, tile_storage, z),
         make_marker_component,
     ));
 }

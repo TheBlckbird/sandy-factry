@@ -16,10 +16,10 @@ use super::{
 
 pub fn place_buildings(
     mut commands: Commands,
-    camera_q: Query<(&Camera, &GlobalTransform)>,
-    window_q: Query<&Window, With<PrimaryWindow>>,
+    camera_q: Single<(&Camera, &GlobalTransform)>,
+    window_q: Single<&Window, With<PrimaryWindow>>,
     buttons: Res<ButtonInput<MouseButton>>,
-    mut tilemap_q: Query<
+    tilemap_q: Single<
         (
             Entity,
             &TilemapSize,
@@ -27,6 +27,8 @@ pub fn place_buildings(
             &TilemapType,
             &Transform,
             &mut TileStorage,
+            &TilemapAnchor,
+            &TilemapTileSize,
         ),
         With<Foreground>,
     >,
@@ -37,11 +39,19 @@ pub fn place_buildings(
     current_building: Res<CurrentBuilding>,
     mut event_writer: EventWriter<BuildEvent>,
 ) {
-    let (camera, camera_transform) = camera_q.single();
-    let window = window_q.single();
+    let (camera, camera_transform) = camera_q.into_inner();
+    let window = window_q.into_inner();
 
-    let (tilemap_entity, map_size, grid_size, map_type, map_transform, mut tile_storage) =
-        tilemap_q.single_mut();
+    let (
+        tilemap_entity,
+        map_size,
+        grid_size,
+        map_type,
+        map_transform,
+        mut tile_storage,
+        anchor,
+        tile_size,
+    ) = tilemap_q.into_inner();
 
     let Some(mouse_tile_pos) = get_mouse_tilepos(
         camera,
@@ -50,7 +60,9 @@ pub fn place_buildings(
         map_transform,
         map_size,
         grid_size,
+        tile_size,
         map_type,
+        anchor,
     ) else {
         return;
     };
@@ -61,7 +73,7 @@ pub fn place_buildings(
         if *tile_pos == mouse_tile_pos && hover.is_none() {
             is_other_tile_at_mouse = true;
         } else if hover.is_some() {
-            commands.entity(tile_entity).despawn_recursive();
+            commands.entity(tile_entity).despawn();
             tile_storage.remove(tile_pos);
         }
     }
@@ -71,10 +83,10 @@ pub fn place_buildings(
 
         for (tile_entity, tile_pos, hover, texture_index) in tile_query.iter() {
             if *tile_pos == mouse_tile_pos || hover.is_some() {
-                commands.entity(tile_entity).despawn_recursive();
+                commands.entity(tile_entity).despawn();
                 tile_storage.remove(&mouse_tile_pos);
 
-                event_writer.send(BuildEvent::Deleted(*tile_pos, (*texture_index).into()));
+                event_writer.write(BuildEvent::Deleted(*tile_pos, (*texture_index).into()));
             }
         }
 
@@ -116,7 +128,7 @@ pub fn place_buildings(
             ))
             .id();
 
-        event_writer.send(BuildEvent::Placed(
+        event_writer.write(BuildEvent::Placed(
             mouse_tile_pos,
             tile_texture_index.into(),
         ));
