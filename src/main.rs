@@ -2,16 +2,17 @@
 
 use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
 use bevy_ecs_tilemap::prelude::*;
-use helpers::tilemap::get_mouse_tilepos;
 use plugins::{
     building::{BuildingPlugin, Foreground},
+    debug_camera::DebugCameraPlugin,
     hud::HudPlugin,
+    rendering::RenderingPlugin,
     simulation::SimulationPlugin,
     world::WorldPlugin,
 };
+use sandy_factry_helpers::tilemap::{TilemapSettingsBorrowed, get_mouse_tilepos};
 use winit::window::Icon;
 
-mod helpers;
 mod machines;
 mod plugins;
 
@@ -72,7 +73,13 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
             TilemapPlugin,
         ))
-        .add_plugins((BuildingPlugin, SimulationPlugin, WorldPlugin, HudPlugin))
+        .add_plugins((
+            BuildingPlugin,
+            SimulationPlugin,
+            WorldPlugin,
+            HudPlugin,
+            DebugCameraPlugin,
+        ))
         .init_resource::<MouseCoordinates>()
         .add_systems(
             Startup,
@@ -82,7 +89,7 @@ fn main() {
                 set_window_icon,
             ),
         )
-        .add_systems(Update, (helpers::camera::movement, update_mouse_coords))
+        .add_systems(Update, update_mouse_coords)
         .run();
 }
 
@@ -136,10 +143,7 @@ fn update_mouse_coords(
         window,
         camera_transform,
         map_transform,
-        map_size,
-        grid_size,
-        tile_size,
-        map_type,
+        TilemapSettingsBorrowed::new(map_size, tile_size, map_type, grid_size),
         anchor,
     ) else {
         return;

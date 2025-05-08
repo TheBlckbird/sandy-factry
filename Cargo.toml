@@ -12,13 +12,27 @@ categories = ["games"]
 edition = "2024"
 
 [dependencies]
-bevy = { version = "0.15" }
-bevy_ecs_tilemap = "0.15"
+bevy.workspace = true
+bevy_ecs_tilemap.workspace = true
+petgraph.workspace = true
 image = "0.25"
 noise = "0.9"
-petgraph = "0.8"
 rand = "0.9"
 winit = "0.30"
+sandy_factry_helpers = { path = "./sandy_factry_helpers" }
+
+
+[workspace]
+members = ["sandy_factry_helpers", "."]
+
+[workspace.dependencies]
+bevy = "0.16"
+bevy_ecs_tilemap = "0.16"
+petgraph = "0.8"
+
+[workspace.lints.clippy]
+too_many_arguments = "allow"
+type_complexity = "allow"
 
 
 # Enable a small amount of optimization in the dev profile.
@@ -28,8 +42,3 @@ opt-level = 1
 # Enable a large amount of optimization in the dev profile for dependencies.
 [profile.dev.package."*"]
 opt-level = 3
-
-
-[lints.clippy]
-too_many_arguments = "allow"
-type_complexity = "allow"

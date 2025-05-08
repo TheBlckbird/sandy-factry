@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use noise::{NoiseFn, Simplex};
-
-use crate::helpers::tilemap::make_tilemap_bundle;
+use sandy_factry_helpers::tilemap::{TilemapSettings, generate_tilemap_layer};
 
 use super::{
     Background, BackgroundObject, MAP_SIZE, MAP_TYPE, Middleground, MiddlegroundObject, Seed,
@@ -17,14 +16,17 @@ pub fn generation(mut commands: Commands, asset_server: Res<AssetServer>, seed: 
     generate_tilemap_layer(
         &mut commands,
         background_texture_handle,
+        0.0,
+        TilemapSettings::new(MAP_SIZE, TILE_SIZE, MAP_TYPE, TILE_SIZE.into()),
         Background,
         |_| Some(BackgroundObject::DefaultTile.into()),
-        0.0,
     );
 
     generate_tilemap_layer(
         &mut commands,
         middleground_texture_handle,
+        1.0,
+        TilemapSettings::new(MAP_SIZE, TILE_SIZE, MAP_TYPE, TILE_SIZE.into()),
         Middleground,
         |tile_pos| {
             // The following method isn't exactly the best, but it's enough for this demo.
@@ -57,57 +59,5 @@ pub fn generation(mut commands: Commands, asset_server: Res<AssetServer>, seed: 
                 None // No resource in this tile
             }
         },
-        1.0,
     );
-}
-
-/// Generic function for generating a tilemap
-/// Accepts a marker component and a closure to generate the tile for a specific tile position
-fn generate_tilemap_layer<F, C>(
-    commands: &mut Commands,
-    tiles_texture: Handle<Image>,
-    make_marker_component: C,
-    mut gen_texture_index: F,
-    z: f32,
-) where
-    F: FnMut(TilePos) -> Option<TileTextureIndex>,
-    C: Component + Clone + Copy,
-{
-    let mut tile_storage = TileStorage::empty(MAP_SIZE);
-    let tilemap_entity = commands.spawn_empty().id();
-
-    // Loop through the map size to generate each tile
-    for x in 0..MAP_SIZE.x {
-        for y in 0..MAP_SIZE.y {
-            let tile_pos = TilePos { x, y };
-
-            // Try to fenerate the tile
-            let maybe_texture_index = gen_texture_index(tile_pos);
-
-            // Check if a tile was generated
-            if let Some(texture_index) = maybe_texture_index {
-                // Spawn the generated tile and add it to the tile storage and tilemap
-                let tile_entity = commands
-                    .spawn((
-                        TileBundle {
-                            position: tile_pos,
-                            tilemap_id: TilemapId(tilemap_entity),
-                            texture_index,
-                            ..default()
-                        },
-                        make_marker_component,
-                    ))
-                    .id();
-
-                commands.entity(tilemap_entity).add_child(tile_entity);
-                tile_storage.set(&tile_pos, tile_entity);
-            }
-        }
-    }
-
-    // Spawn the tilemap itself
-    commands.entity(tilemap_entity).insert((
-        make_tilemap_bundle(TilemapAnchor::Center, tiles_texture, tile_storage, z),
-        make_marker_component,
-    ));
 }
