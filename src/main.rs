@@ -22,13 +22,6 @@ pub struct MouseCoordinates {
     pub y: u32,
 }
 
-#[derive(States, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-enum GameState {
-    Running,
-    Paused,
-    Background,
-}
-
 #[derive(Component, PartialEq)]
 pub enum Direction {
     North,
