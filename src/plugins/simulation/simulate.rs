@@ -7,12 +7,20 @@ use petgraph::{
 
 use crate::plugins::world::Middleground;
 
-use super::SimulationGraph;
+use super::{SimulationGraph, SimulationTimer};
 
 pub fn simulate(
     mut simulation_graph: ResMut<SimulationGraph>,
     tile_query: Query<(&TilePos, &TileTextureIndex), With<Middleground>>,
+    mut simulation_timer: ResMut<SimulationTimer>,
+    time: Res<Time>,
 ) {
+    // Check if this tick is a simulation tick
+    if !simulation_timer.0.tick(time.delta()).just_finished() {
+        return;
+    }
+
+    // Return if the simulation graph is empty aka there are no machines in the world
     if simulation_graph.0.node_count() == 0 {
         return;
     }
