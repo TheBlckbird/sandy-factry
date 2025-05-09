@@ -4,6 +4,7 @@ use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
 use bevy_ecs_tilemap::prelude::*;
 use plugins::{
     building::{BuildingPlugin, Foreground},
+    crafting::CraftingPlugin,
     debug_camera::DebugCameraPlugin,
     hud::HudPlugin,
     rendering::RenderingPlugin,
@@ -73,6 +74,7 @@ fn main() {
             HudPlugin,
             RenderingPlugin,
             DebugCameraPlugin,
+            CraftingPlugin,
         ))
         .init_resource::<MouseCoordinates>()
         .add_systems(
