@@ -2,7 +2,6 @@ use bevy::prelude::*;
 use bevy_ecs_tilemap::tiles::{TilePos, TileTextureIndex};
 use petgraph::{
     algo::{connected_components, tarjan_scc},
-    dot::{Config, Dot},
     prelude::*,
 };
 
