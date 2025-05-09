@@ -18,11 +18,6 @@ pub fn simulate(
         return;
     }
 
-    println!(
-        "{:?}",
-        Dot::with_config(&simulation_graph.0, &[Config::EdgeNoLabel])
-    );
-
     let mut leaf_nodes: Vec<NodeIndex> = simulation_graph
         .0
         .externals(petgraph::Direction::Outgoing)
