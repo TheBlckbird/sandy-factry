@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy_ecs_tilemap::prelude::*;
 use noise::{NoiseFn, Simplex};
 use sandy_factry_helpers::tilemap::{TilemapSettings, generate_tilemap_layer};
 

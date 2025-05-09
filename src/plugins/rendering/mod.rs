@@ -1,6 +1,5 @@
 use belt::{setup_item_tilemap, update_item_tilemap};
 use bevy::prelude::*;
-use bevy_ecs_tilemap::prelude::*;
 
 mod belt;
 

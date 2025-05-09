@@ -1,4 +1,4 @@
-use bevy::{ecs::entity::unique_slice::IterMut, prelude::*};
+use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use sandy_factry_helpers::tilemap::{
     TilemapQueryData, TilemapSettings, generate_tilemap_layer, remove_tile,
