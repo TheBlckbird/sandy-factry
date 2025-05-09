@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_ecs_tilemap::prelude::*;
-use sandy_factry_helpers::tilemap::{TilemapQueryData, TilemapSettingsBorrowed, get_mouse_tilepos};
+use sandy_factry_helpers::tilemap::{TilemapSettingsBorrowed, get_mouse_tilepos};
 
 use crate::machines::{Item, Machine};
 
@@ -17,7 +17,19 @@ pub fn place_buildings(
     camera_q: Single<(&Camera, &GlobalTransform)>,
     window_q: Single<&Window, With<PrimaryWindow>>,
     buttons: Res<ButtonInput<MouseButton>>,
-    tilemap_q: Single<TilemapQueryData, With<Foreground>>,
+    tilemap_q: Single<
+        (
+            Entity,
+            &TilemapSize,
+            &TilemapGridSize,
+            &TilemapType,
+            &Transform,
+            &mut TileStorage,
+            &TilemapAnchor,
+            &TilemapTileSize,
+        ),
+        With<Foreground>,
+    >,
     tile_query: Query<
         (Entity, &TilePos, Option<&HoverBuilding>, &TileTextureIndex),
         With<Foreground>,

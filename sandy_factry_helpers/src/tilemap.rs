@@ -47,17 +47,6 @@ impl<'a> TilemapSettingsBorrowed<'a> {
     }
 }
 
-pub type TilemapQueryData<'a> = (
-    Entity,
-    &'a TilemapSize,
-    &'a TilemapGridSize,
-    &'a TilemapType,
-    &'a Transform,
-    &'a mut TileStorage,
-    &'a TilemapAnchor,
-    &'a TilemapTileSize,
-);
-
 pub fn get_mouse_tilepos(
     camera: &Camera,
     window: &Window,
