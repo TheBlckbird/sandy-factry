@@ -95,7 +95,7 @@ impl CurrentBuilding {
     }
 }
 
-#[derive(Resource, Default, Clone, Copy, PartialEq)]
+#[derive(Debug, Resource, Default, Clone, Copy, PartialEq)]
 pub enum ForegroundObject {
     #[default]
     Nothing,
@@ -173,6 +173,26 @@ impl ForegroundObject {
             ForegroundObject::BeltUpRight => Some(Direction::East),
             ForegroundObject::Crafter => None,
             ForegroundObject::Miner => Some(Direction::South),
+        }
+    }
+
+    pub fn should_render_item(&self) -> bool {
+        match self {
+            ForegroundObject::Nothing | ForegroundObject::Crafter | ForegroundObject::Miner => {
+                false
+            }
+            ForegroundObject::BeltUp
+            | ForegroundObject::BeltDown
+            | ForegroundObject::BeltLeft
+            | ForegroundObject::BeltRight
+            | ForegroundObject::BeltDownRight
+            | ForegroundObject::BeltLeftDown
+            | ForegroundObject::BeltUpLeft
+            | ForegroundObject::BeltRightUp
+            | ForegroundObject::BeltRightDown
+            | ForegroundObject::BeltDownLeft
+            | ForegroundObject::BeltLeftUp
+            | ForegroundObject::BeltUpRight => true,
         }
     }
 }
@@ -275,7 +295,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             storage: foreground_tile_storage,
             texture: TilemapTexture::Single(foreground_texture_handle),
             tile_size: TILE_SIZE,
-            transform: get_tilemap_center_transform(&MAP_SIZE, &TILE_SIZE.into(), &MAP_TYPE, 2.0),
+            transform: Transform::from_xyz(0.0, 0.0, 2.0),
+            anchor: TilemapAnchor::Center,
             ..Default::default()
         },
         Foreground,

@@ -78,6 +78,7 @@ fn main() {
             SimulationPlugin,
             WorldPlugin,
             HudPlugin,
+            RenderingPlugin,
             DebugCameraPlugin,
         ))
         .init_resource::<MouseCoordinates>()

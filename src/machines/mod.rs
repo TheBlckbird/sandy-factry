@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_ecs_tilemap::tiles::TileTextureIndex;
 
 use std::{collections::VecDeque, fmt::Debug};
 
@@ -8,11 +9,25 @@ pub mod belt;
 pub mod crafter;
 pub mod miner;
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Component, Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Item {
     Coal,
-    Copper,
-    Iron,
+    RawCopper,
+    RawIron,
+    CopperIngot,
+    IronIngot,
+}
+
+impl From<Item> for TileTextureIndex {
+    fn from(value: Item) -> Self {
+        TileTextureIndex(match value {
+            Item::Coal => 0,
+            Item::RawCopper => 1,
+            Item::RawIron => 2,
+            Item::CopperIngot => 3,
+            Item::IronIngot => 4,
+        })
+    }
 }
 
 #[derive(Debug, Component)]

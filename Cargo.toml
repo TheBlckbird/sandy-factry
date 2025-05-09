@@ -35,6 +35,10 @@ too_many_arguments = "allow"
 type_complexity = "allow"
 
 
+[lints]
+workspace = true
+
+
 # Enable a small amount of optimization in the dev profile.
 [profile.dev]
 opt-level = 1

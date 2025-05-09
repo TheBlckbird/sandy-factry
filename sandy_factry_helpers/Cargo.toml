@@ -7,3 +7,6 @@ edition = "2024"
 bevy.workspace = true
 bevy_ecs_tilemap.workspace = true
 petgraph.workspace = true
+
+[lints]
+workspace = true

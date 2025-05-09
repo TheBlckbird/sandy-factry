@@ -74,16 +74,17 @@ pub fn get_mouse_tilepos(
 
 /// Generic function for generating a tilemap
 /// Accepts a marker component and a closure to generate the tile for a specific tile position
-pub fn generate_tilemap_layer<F, C>(
+pub fn generate_tilemap_layer<F, C, D>(
     commands: &mut Commands,
     texture_handle: Handle<Image>,
     z: f32,
     map_settings: TilemapSettings,
-    marker_component: C,
-    mut gen_texture_index: F,
+    map_marker_component: C,
+    mut gen_tile: F,
 ) where
-    F: FnMut(TilePos) -> Option<TileTextureIndex>,
-    C: Component + Clone + Copy,
+    F: FnMut(TilePos) -> Option<(TileTextureIndex, D)>,
+    C: Component,
+    D: Component,
 {
     let mut tile_storage = TileStorage::empty(map_settings.map_size);
     let tilemap_entity = commands.spawn_empty().id();
@@ -94,10 +95,10 @@ pub fn generate_tilemap_layer<F, C>(
             let tile_pos = TilePos { x, y };
 
             // Try to fenerate the tile
-            let maybe_texture_index = gen_texture_index(tile_pos);
+            let maybe_texture_index = gen_tile(tile_pos);
 
             // Check if a tile was generated
-            if let Some(texture_index) = maybe_texture_index {
+            if let Some((texture_index, tile_component)) = maybe_texture_index {
                 // Spawn the generated tile and add it to the tile storage and tilemap
                 let tile_entity = commands
                     .spawn((
@@ -107,7 +108,7 @@ pub fn generate_tilemap_layer<F, C>(
                             texture_index,
                             ..default()
                         },
-                        marker_component,
+                        tile_component,
                     ))
                     .id();
 
@@ -126,7 +127,7 @@ pub fn generate_tilemap_layer<F, C>(
             z,
             map_settings,
         ),
-        marker_component,
+        map_marker_component,
     ));
 }
 
@@ -149,4 +150,14 @@ pub fn make_tilemap_bundle(
         transform: Transform::from_xyz(0.0, 0.0, z),
         ..Default::default()
     }
+}
+
+pub fn remove_tile(
+    commands: &mut Commands,
+    tile_storage: &mut TileStorage,
+    tile_entity: Entity,
+    tile_pos: &TilePos,
+) {
+    commands.entity(tile_entity).despawn();
+    tile_storage.remove(tile_pos);
 }
