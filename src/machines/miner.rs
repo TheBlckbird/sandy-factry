@@ -20,8 +20,8 @@ impl MachineType for Miner {
         {
             let item = match middleground_object {
                 MiddlegroundObject::Coal => Item::Coal,
-                MiddlegroundObject::Copper => Item::Copper,
-                MiddlegroundObject::Iron => Item::Iron,
+                MiddlegroundObject::Copper => Item::RawCopper,
+                MiddlegroundObject::Iron => Item::RawIron,
             };
 
             // Remove one coal, if mining was successful
