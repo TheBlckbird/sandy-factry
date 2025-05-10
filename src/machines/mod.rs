@@ -9,7 +9,7 @@ pub mod belt;
 pub mod crafter;
 pub mod miner;
 
-#[derive(Component, Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash)]
 pub enum Item {
     Coal,
     RawCopper,

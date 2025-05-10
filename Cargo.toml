@@ -26,7 +26,7 @@ sandy_factry_helpers = { path = "./sandy_factry_helpers" }
 members = ["sandy_factry_helpers", "."]
 
 [workspace.dependencies]
-bevy = "0.16"
+bevy = { version = "0.16", features = ["file_watcher"] }
 bevy_ecs_tilemap = "0.16"
 petgraph = "0.8"
 

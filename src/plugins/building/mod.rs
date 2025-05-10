@@ -131,7 +131,7 @@ impl ForegroundObject {
             | ForegroundObject::BeltDownLeft
             | ForegroundObject::BeltLeftUp
             | ForegroundObject::BeltUpRight => Some(Box::new(Belt)),
-            ForegroundObject::Crafter => Some(Box::new(Crafter)),
+            ForegroundObject::Crafter => Some(Box::new(Crafter::default())),
             ForegroundObject::Miner => Some(Box::new(Miner)),
         }
     }
@@ -151,7 +151,7 @@ impl ForegroundObject {
             ForegroundObject::BeltDownLeft => Some(Direction::South),
             ForegroundObject::BeltLeftUp => Some(Direction::West),
             ForegroundObject::BeltUpRight => Some(Direction::North),
-            ForegroundObject::Crafter => None,
+            ForegroundObject::Crafter => Some(Direction::North), // [TODO] make two inputs possible
             ForegroundObject::Miner => Some(Direction::North),
         }
     }
@@ -171,7 +171,7 @@ impl ForegroundObject {
             ForegroundObject::BeltDownLeft => Some(Direction::West),
             ForegroundObject::BeltLeftUp => Some(Direction::North),
             ForegroundObject::BeltUpRight => Some(Direction::East),
-            ForegroundObject::Crafter => None,
+            ForegroundObject::Crafter => Some(Direction::South),
             ForegroundObject::Miner => Some(Direction::South),
         }
     }
