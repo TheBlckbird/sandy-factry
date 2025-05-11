@@ -16,7 +16,6 @@ impl MachineType for Crafter {
         output_items: &mut VecDeque<Item>,
         _middleground_object: Option<MiddlegroundObject>,
     ) {
-        // Check if there's currently a recipe set
         let current_recipe = match &self.current_recipe {
             Some(current_recipe) => current_recipe,
             None => return,
@@ -39,9 +38,9 @@ impl MachineType for Crafter {
             None => return,
         };
 
-        // Transfer the `rest_items` back into `input_items`
         input_items.clear();
 
+        // Transfer the `rest_items` back into `input_items`
         for (item, count) in rest_items.into_iter() {
             for _ in 0..count {
                 input_items.push_back(item);
