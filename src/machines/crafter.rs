@@ -1,19 +1,27 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::HashMap;
 
 use crate::plugins::{crafting::recipe_types::CrafterRecipe, world::MiddlegroundObject};
 
-use super::{Item, MachineType};
+use super::{InputItems, InputSide, Item, MachineType, OutputItems};
 
 #[derive(Debug, Clone, Default)]
 pub struct Crafter {
     current_recipe: Option<CrafterRecipe>,
 }
 
+impl Crafter {
+    pub fn new(current_recipe: CrafterRecipe) -> Self {
+        Self {
+            current_recipe: Some(current_recipe),
+        }
+    }
+}
+
 impl MachineType for Crafter {
     fn perform_action(
         &mut self,
-        input_items: &mut VecDeque<Item>,
-        output_items: &mut VecDeque<Item>,
+        input_items: &mut InputItems,
+        output_items: &mut OutputItems,
         _middleground_object: Option<MiddlegroundObject>,
     ) {
         let current_recipe = match &self.current_recipe {
@@ -22,9 +30,13 @@ impl MachineType for Crafter {
         };
 
         let mut items = HashMap::new();
+        let items_input = input_items
+            .north
+            .as_mut()
+            .expect("A Crafter should have a north input");
 
         // Convert the queue into a HashMap of all the items and their count
-        for item in input_items.iter() {
+        for item in items_input.iter() {
             items
                 .entry(*item)
                 .and_modify(|count| *count += 1)
@@ -38,12 +50,12 @@ impl MachineType for Crafter {
             None => return,
         };
 
-        input_items.clear();
+        items_input.clear();
 
-        // Transfer the `rest_items` back into `input_items`
+        // Transfer the `rest_items` back into `items_input`
         for (item, count) in rest_items.into_iter() {
             for _ in 0..count {
-                input_items.push_back(item);
+                items_input.push_back(item);
             }
         }
 
@@ -60,8 +72,9 @@ impl MachineType for Crafter {
     fn can_accept(
         &self,
         _item: &Item,
-        _input_items: &VecDeque<Item>,
-        _output_items: &VecDeque<Item>,
+        _input_items: &InputItems,
+        _output_items: &OutputItems,
+        _input_side: &InputSide,
     ) -> bool {
         true
     }

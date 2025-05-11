@@ -1,20 +1,18 @@
-use std::collections::VecDeque;
-
 use crate::plugins::world::MiddlegroundObject;
 
-use super::{Item, MachineType};
+use super::{InputItems, InputSide, Item, MachineType, OutputItems};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Belt;
 impl MachineType for Belt {
     fn perform_action(
         &mut self,
-        input_items: &mut VecDeque<Item>,
-        output_items: &mut VecDeque<Item>,
+        input_items: &mut InputItems,
+        output_items: &mut OutputItems,
         _middleground_object: Option<MiddlegroundObject>,
     ) {
         if output_items.is_empty()
-            && let Some(input_item) = input_items.pop_front()
+            && let Some(input_item) = input_items.exactly_one_mut().pop_front()
         {
             output_items.push_back(input_item);
         }
@@ -27,9 +25,10 @@ impl MachineType for Belt {
     fn can_accept(
         &self,
         _item: &Item,
-        input_items: &VecDeque<Item>,
-        output_items: &VecDeque<Item>,
+        input_items: &InputItems,
+        output_items: &OutputItems,
+        _input_side: &InputSide,
     ) -> bool {
-        (input_items.len() + output_items.len()) == 0
+        (input_items.exactly_one().len() + output_items.len()) == 0
     }
 }

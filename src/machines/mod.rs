@@ -1,9 +1,10 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::tiles::TileTextureIndex;
+use itertools::Itertools;
 
 use std::{collections::VecDeque, fmt::Debug};
 
-use crate::plugins::world::MiddlegroundObject;
+use crate::{Direction, plugins::world::MiddlegroundObject};
 
 pub mod belt;
 pub mod crafter;
@@ -30,18 +31,113 @@ impl From<Item> for TileTextureIndex {
     }
 }
 
+type InputItemsPart = Option<VecDeque<Item>>;
+
+#[derive(Debug, Default, Clone)]
+pub struct InputItems {
+    pub north: InputItemsPart,
+    pub east: InputItemsPart,
+    pub south: InputItemsPart,
+    pub west: InputItemsPart,
+}
+
+impl InputItems {
+    pub fn new(
+        north: InputItemsPart,
+        east: InputItemsPart,
+        south: InputItemsPart,
+        west: InputItemsPart,
+    ) -> Self {
+        Self {
+            north,
+            east,
+            south,
+            west,
+        }
+    }
+
+    /// Gets exactly one input side
+    /// Panics if zero or more than one sides are set
+    pub fn exactly_one(&self) -> &VecDeque<Item> {
+        let directions = [&self.north, &self.east, &self.south, &self.west];
+
+        directions
+            .into_iter()
+            .filter_map(|direction| direction.as_ref())
+            .exactly_one()
+            .expect("There should be exactly one valid input")
+    }
+
+    /// Gets exactly one mutable reference to an input side
+    /// Panics if zero or more than one sides are set
+    pub fn exactly_one_mut(&mut self) -> &mut VecDeque<Item> {
+        let directions = [
+            &mut self.north,
+            &mut self.east,
+            &mut self.south,
+            &mut self.west,
+        ];
+
+        directions
+            .into_iter()
+            .filter_map(|direction| direction.as_mut())
+            .exactly_one()
+            .expect("There should be exactly one valid input")
+    }
+
+    /// Gets a specific input side
+    pub fn get_side(&self, side: &InputSide) -> &InputItemsPart {
+        match side {
+            Direction::North => &self.north,
+            Direction::East => &self.east,
+            Direction::South => &self.south,
+            Direction::West => &self.west,
+        }
+    }
+
+    /// Gets a mutable reference to a specific input side
+    pub fn get_side_mut(&mut self, side: &InputSide) -> &mut InputItemsPart {
+        match side {
+            Direction::North => &mut self.north,
+            Direction::East => &mut self.east,
+            Direction::South => &mut self.south,
+            Direction::West => &mut self.west,
+        }
+    }
+}
+
+impl From<Option<Vec<Direction>>> for InputItems {
+    fn from(value: Option<Vec<Direction>>) -> Self {
+        let mut output = Self::default();
+
+        for direction in value.iter().flatten() {
+            match direction {
+                Direction::North => output.north = Some(VecDeque::new()),
+                Direction::East => output.east = Some(VecDeque::new()),
+                Direction::South => output.south = Some(VecDeque::new()),
+                Direction::West => output.west = Some(VecDeque::new()),
+            }
+        }
+
+        output
+    }
+}
+
+type OutputItems = VecDeque<Item>;
+pub type InputSide = Direction;
+
 #[derive(Debug, Component)]
 pub struct Machine {
     pub machine_type: Box<dyn MachineType>,
-    pub input_items: VecDeque<Item>,
-    pub output_items: VecDeque<Item>,
+    pub input_items: InputItems,
+    pub output_items: OutputItems,
 }
 
 impl Machine {
     pub fn new(
         machine_type: Box<dyn MachineType>,
-        input_items: VecDeque<Item>,
-        output_items: VecDeque<Item>,
+        input_items: InputItems,
+        output_items: OutputItems,
     ) -> Self {
         Self {
             machine_type,
@@ -51,10 +147,6 @@ impl Machine {
     }
 
     pub fn perform_action(&mut self, middleground_object: Option<MiddlegroundObject>) {
-        // if self.input_items.len() != self.building_type.get_input_count() {
-        //     return;
-        // }
-
         self.machine_type.perform_action(
             &mut self.input_items,
             &mut self.output_items,
@@ -66,16 +158,16 @@ impl Machine {
 pub trait MachineType: Debug + Send + Sync {
     fn perform_action(
         &mut self,
-        input_items: &mut VecDeque<Item>,
-        output_items: &mut VecDeque<Item>,
+        input_items: &mut InputItems,
+        output_items: &mut OutputItems,
         middleground_object: Option<MiddlegroundObject>,
     );
-    // fn get_input_count(&self) -> usize;
     fn clone_box(&self) -> Box<dyn MachineType>;
     fn can_accept(
         &self,
         item: &Item,
-        input_items: &VecDeque<Item>,
-        output_items: &VecDeque<Item>,
+        input_items: &InputItems,
+        output_items: &OutputItems,
+        input_side: &InputSide,
     ) -> bool;
 }

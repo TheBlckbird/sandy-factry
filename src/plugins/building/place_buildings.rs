@@ -5,7 +5,7 @@ use bevy::window::PrimaryWindow;
 use bevy_ecs_tilemap::prelude::*;
 use sandy_factry_helpers::tilemap::{TilemapSettingsBorrowed, get_mouse_tilepos};
 
-use crate::machines::{Item, Machine};
+use crate::machines::{InputItems, Item, Machine};
 
 use super::{
     BuildEvent, BuildingInput, BuildingOutput, CurrentBuilding, Foreground, ForegroundObject,
@@ -118,7 +118,7 @@ pub fn place_buildings(
                     VecDeque::new(),
                     VecDeque::new(),
                 ),
-                BuildingInput(foreground_object.get_input_side()),
+                BuildingInput(foreground_object.get_input_sides()),
                 BuildingOutput(foreground_object.get_output_side()),
             ))
             .id();

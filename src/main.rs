@@ -23,7 +23,7 @@ pub struct MouseCoordinates {
     pub y: u32,
 }
 
-#[derive(Component, PartialEq)]
+#[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash)]
 pub enum Direction {
     North,
     East,
@@ -99,7 +99,8 @@ fn set_window_icon(windows: NonSend<WinitWindows>) {
         let rgba = image.into_raw();
         (rgba, width, height)
     };
-    let icon = Icon::from_rgba(icon_rgba, icon_width, icon_height).unwrap();
+    let icon = Icon::from_rgba(icon_rgba, icon_width, icon_height)
+        .expect("The icon should adhere to the following rules: The length of `rgba` must be divisible by 4, and `width * height` must equal `rgba.len() / 4`.");
 
     // do it for all windows
     for window in windows.windows.values() {
