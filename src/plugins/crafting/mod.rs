@@ -1,9 +1,11 @@
+use std::collections::HashMap;
+
 use bevy::prelude::*;
 use recipe_types::{CrafterRecipe, FurnaceRecipe};
 
 use crate::machines::Item;
 
-mod recipe_types;
+pub mod recipe_types;
 
 #[derive(Debug, Resource)]
 pub struct CrafterRecipes(Vec<CrafterRecipe>);
@@ -17,7 +19,12 @@ impl Plugin for CraftingPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(CrafterRecipes(vec![
             // [TODO] Remove test recipe
-            CrafterRecipe::new(Box::new([Item::RawCopper, Item::RawIron]), Item::Coal, 1, 1),
+            CrafterRecipe::new(
+                HashMap::from([(Item::Coal, 1), (Item::RawCopper, 2)]),
+                Item::CopperIngot,
+                1,
+                1,
+            ),
         ]))
         .insert_resource(FurnaceRecipes(vec![]))
         .add_systems(Startup, list_all_recipes);

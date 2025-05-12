@@ -20,23 +20,26 @@ noise = "0.9"
 rand = "0.9"
 winit = "0.30"
 sandy_factry_helpers = { path = "./sandy_factry_helpers" }
+itertools.workspace = true
+
+
+[lints]
+workspace = true
 
 
 [workspace]
 members = ["sandy_factry_helpers", "."]
 
 [workspace.dependencies]
-bevy = "0.16"
+bevy = { version = "0.16", features = ["file_watcher"] }
 bevy_ecs_tilemap = "0.16"
 petgraph = "0.8"
+itertools = "0.14"
 
 [workspace.lints.clippy]
 too_many_arguments = "allow"
 type_complexity = "allow"
-
-
-[lints]
-workspace = true
+unwrap_used = "warn"
 
 
 # Enable a small amount of optimization in the dev profile.

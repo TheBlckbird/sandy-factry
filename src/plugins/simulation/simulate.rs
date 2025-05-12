@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy_ecs_tilemap::tiles::{TilePos, TileTextureIndex};
 use petgraph::{
     algo::{connected_components, tarjan_scc},
+    dot::Dot,
     prelude::*,
 };
 
@@ -25,6 +26,8 @@ pub fn simulate(
         return;
     }
 
+    println!("{:?}", Dot::new(&simulation_graph.0));
+
     let mut leaf_nodes: Vec<NodeIndex> = simulation_graph
         .0
         .externals(petgraph::Direction::Outgoing)
@@ -42,7 +45,13 @@ pub fn simulate(
                     .iter()
                     .any(|subgraph_node| leaf_nodes.contains(subgraph_node))
             })
-            .for_each(|sub_graph| additional_starting_nodes.push(*sub_graph.first().unwrap()));
+            .for_each(|subgraph| {
+                additional_starting_nodes.push(
+                    *subgraph
+                        .first()
+                        .expect("There should be at least one subgraph"),
+                )
+            });
     }
 
     leaf_nodes.append(&mut additional_starting_nodes);
@@ -68,6 +77,12 @@ pub fn simulate(
 
             match maybe_next_building_index {
                 Some(next_building_index) => {
+                    let input_side = *simulation_graph.0.edge_weight(
+                            simulation_graph
+                                .0
+                                .find_edge(next_building_index, node_index).expect("There should be an edge between the next building and the current building")
+                        ).expect("This edge should exist");
+
                     let ((building, building_tile_pos), (next_building, _)) = simulation_graph
                         .0
                         .index_twice_mut(node_index, next_building_index);
@@ -82,12 +97,18 @@ pub fn simulate(
                         item,
                         &next_building.input_items,
                         &next_building.output_items,
+                        &input_side,
                     ) {
                         let Some(item) = building.output_items.pop_front() else {
                             continue; // this is technically redundant, but I don't want the game to crash, sooo...
                         };
 
-                        next_building.input_items.push_back(item);
+                        next_building
+                            .input_items
+                            .get_side_mut(&input_side)
+                            .as_mut()
+                            .expect("The input side should be set; it's connected in the graph")
+                            .push_back(item);
                     }
                 }
                 None => {

@@ -1,13 +1,18 @@
+use std::collections::HashMap;
+
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use place_buildings::place_buildings;
 
 use crate::{
     Direction,
-    machines::{MachineType, belt::Belt, crafter::Crafter, miner::Miner},
+    machines::{Item, MachineType, belt::Belt, crafter::Crafter, miner::Miner},
 };
 
-use super::world::{MAP_SIZE, MAP_TYPE, TILE_SIZE};
+use super::{
+    crafting::recipe_types::CrafterRecipe,
+    world::{MAP_SIZE, MAP_TYPE, TILE_SIZE},
+};
 
 mod place_buildings;
 
@@ -131,28 +136,33 @@ impl ForegroundObject {
             | ForegroundObject::BeltDownLeft
             | ForegroundObject::BeltLeftUp
             | ForegroundObject::BeltUpRight => Some(Box::new(Belt)),
-            ForegroundObject::Crafter => Some(Box::new(Crafter)),
+            ForegroundObject::Crafter => Some(Box::new(Crafter::new(CrafterRecipe::new(
+                HashMap::from([(Item::Coal, 1), (Item::RawCopper, 2)]),
+                Item::CopperIngot,
+                1,
+                1,
+            )))),
             ForegroundObject::Miner => Some(Box::new(Miner)),
         }
     }
 
-    pub fn get_input_side(&self) -> Option<Direction> {
+    pub fn get_input_sides(&self) -> Option<Vec<Direction>> {
         match self {
             ForegroundObject::Nothing => None,
-            ForegroundObject::BeltUp => Some(Direction::South),
-            ForegroundObject::BeltDown => Some(Direction::North),
-            ForegroundObject::BeltLeft => Some(Direction::East),
-            ForegroundObject::BeltRight => Some(Direction::West),
-            ForegroundObject::BeltDownRight => Some(Direction::South),
-            ForegroundObject::BeltLeftDown => Some(Direction::West),
-            ForegroundObject::BeltUpLeft => Some(Direction::North),
-            ForegroundObject::BeltRightUp => Some(Direction::East),
-            ForegroundObject::BeltRightDown => Some(Direction::East),
-            ForegroundObject::BeltDownLeft => Some(Direction::South),
-            ForegroundObject::BeltLeftUp => Some(Direction::West),
-            ForegroundObject::BeltUpRight => Some(Direction::North),
-            ForegroundObject::Crafter => None,
-            ForegroundObject::Miner => Some(Direction::North),
+            ForegroundObject::BeltUp => Some(vec![Direction::South]),
+            ForegroundObject::BeltDown => Some(vec![Direction::North]),
+            ForegroundObject::BeltLeft => Some(vec![Direction::East]),
+            ForegroundObject::BeltRight => Some(vec![Direction::West]),
+            ForegroundObject::BeltDownRight => Some(vec![Direction::South]),
+            ForegroundObject::BeltLeftDown => Some(vec![Direction::West]),
+            ForegroundObject::BeltUpLeft => Some(vec![Direction::North]),
+            ForegroundObject::BeltRightUp => Some(vec![Direction::East]),
+            ForegroundObject::BeltRightDown => Some(vec![Direction::East]),
+            ForegroundObject::BeltDownLeft => Some(vec![Direction::South]),
+            ForegroundObject::BeltLeftUp => Some(vec![Direction::West]),
+            ForegroundObject::BeltUpRight => Some(vec![Direction::North]),
+            ForegroundObject::Crafter => Some(vec![Direction::North, Direction::West]), // [TODO] make two inputs possible
+            ForegroundObject::Miner => Some(vec![Direction::North]),
         }
     }
 
@@ -171,7 +181,7 @@ impl ForegroundObject {
             ForegroundObject::BeltDownLeft => Some(Direction::West),
             ForegroundObject::BeltLeftUp => Some(Direction::North),
             ForegroundObject::BeltUpRight => Some(Direction::East),
-            ForegroundObject::Crafter => None,
+            ForegroundObject::Crafter => Some(Direction::South),
             ForegroundObject::Miner => Some(Direction::South),
         }
     }
@@ -259,7 +269,7 @@ pub struct Foreground;
 struct HoverBuilding;
 
 #[derive(Component)]
-pub struct BuildingInput(pub Option<Direction>);
+pub struct BuildingInput(pub Option<Vec<Direction>>);
 
 #[derive(Component)]
 pub struct BuildingOutput(pub Option<Direction>);

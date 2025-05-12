@@ -57,6 +57,7 @@ pub fn update_item_tilemap(
             // We first check if input_items has one item, if that's not the case take the item from output items
             if let Some(item) = machine
                 .input_items
+                .exactly_one()
                 .front()
                 .or_else(|| machine.output_items.front())
             {
