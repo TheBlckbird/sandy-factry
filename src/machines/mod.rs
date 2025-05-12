@@ -10,6 +10,55 @@ pub mod belt;
 pub mod crafter;
 pub mod miner;
 
+#[derive(Debug, Component)]
+pub struct Machine {
+    pub machine_type: Box<dyn MachineType>,
+    pub input_items: InputItems,
+    pub output_items: OutputItems,
+}
+
+impl Machine {
+    pub fn new(
+        machine_type: Box<dyn MachineType>,
+        input_items: InputItems,
+        output_items: OutputItems,
+    ) -> Self {
+        Self {
+            machine_type,
+            input_items,
+            output_items,
+        }
+    }
+
+    pub fn perform_action(&mut self, middleground_object: Option<MiddlegroundObject>) {
+        self.machine_type.perform_action(
+            &mut self.input_items,
+            &mut self.output_items,
+            middleground_object,
+        );
+    }
+}
+
+pub trait MachineType: Debug + Send + Sync {
+    fn perform_action(
+        &mut self,
+        input_items: &mut InputItems,
+        output_items: &mut OutputItems,
+        middleground_object: Option<MiddlegroundObject>,
+    );
+    fn clone_box(&self) -> Box<dyn MachineType>;
+    fn can_accept(
+        &self,
+        item: &Item,
+        input_items: &InputItems,
+        output_items: &OutputItems,
+        input_side: &InputSide,
+    ) -> bool;
+}
+
+type OutputItems = VecDeque<Item>;
+pub type InputSide = Direction;
+
 #[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash)]
 pub enum Item {
     Coal,
@@ -121,53 +170,4 @@ impl From<Option<Vec<Direction>>> for InputItems {
 
         output
     }
-}
-
-type OutputItems = VecDeque<Item>;
-pub type InputSide = Direction;
-
-#[derive(Debug, Component)]
-pub struct Machine {
-    pub machine_type: Box<dyn MachineType>,
-    pub input_items: InputItems,
-    pub output_items: OutputItems,
-}
-
-impl Machine {
-    pub fn new(
-        machine_type: Box<dyn MachineType>,
-        input_items: InputItems,
-        output_items: OutputItems,
-    ) -> Self {
-        Self {
-            machine_type,
-            input_items,
-            output_items,
-        }
-    }
-
-    pub fn perform_action(&mut self, middleground_object: Option<MiddlegroundObject>) {
-        self.machine_type.perform_action(
-            &mut self.input_items,
-            &mut self.output_items,
-            middleground_object,
-        );
-    }
-}
-
-pub trait MachineType: Debug + Send + Sync {
-    fn perform_action(
-        &mut self,
-        input_items: &mut InputItems,
-        output_items: &mut OutputItems,
-        middleground_object: Option<MiddlegroundObject>,
-    );
-    fn clone_box(&self) -> Box<dyn MachineType>;
-    fn can_accept(
-        &self,
-        item: &Item,
-        input_items: &InputItems,
-        output_items: &OutputItems,
-        input_side: &InputSide,
-    ) -> bool;
 }
