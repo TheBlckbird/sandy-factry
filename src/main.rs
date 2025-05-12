@@ -1,5 +1,3 @@
-#![feature(let_chains)]
-
 use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
 use bevy_ecs_tilemap::prelude::*;
 use plugins::{
