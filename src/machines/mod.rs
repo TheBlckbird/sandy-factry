@@ -109,9 +109,9 @@ impl InputItems {
     /// Gets exactly one input side
     /// Panics if zero or more than one sides are set
     pub fn exactly_one(&self) -> &VecDeque<Item> {
-        let directions = [&self.north, &self.east, &self.south, &self.west];
+        let sides = [&self.north, &self.east, &self.south, &self.west];
 
-        directions
+        sides
             .into_iter()
             .filter_map(|direction| direction.as_ref())
             .exactly_one()
@@ -121,14 +121,14 @@ impl InputItems {
     /// Gets exactly one mutable reference to an input side
     /// Panics if zero or more than one sides are set
     pub fn exactly_one_mut(&mut self) -> &mut VecDeque<Item> {
-        let directions = [
+        let sides = [
             &mut self.north,
             &mut self.east,
             &mut self.south,
             &mut self.west,
         ];
 
-        directions
+        sides
             .into_iter()
             .filter_map(|direction| direction.as_mut())
             .exactly_one()
@@ -165,6 +165,17 @@ impl InputItems {
         }
 
         count
+    }
+
+    /// Gets all items
+    /// Returns a Queue with north being at the beginning, then east, south and west
+    pub fn all(&self) -> VecDeque<&Item> {
+        let sides = [&self.north, &self.east, &self.south, &self.west];
+
+        sides
+            .iter()
+            .flat_map(|side| side.iter().flat_map(|items| items.iter()))
+            .collect()
     }
 }
 

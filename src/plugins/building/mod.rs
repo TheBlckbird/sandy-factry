@@ -168,15 +168,15 @@ impl ForegroundObject {
             | ForegroundObject::BeltRightDown
             | ForegroundObject::BeltDownLeft
             | ForegroundObject::BeltLeftUp
-            | ForegroundObject::BeltUpRight => true,
-            ForegroundObject::CombinerUpLeft
+            | ForegroundObject::BeltUpRight
+            | ForegroundObject::CombinerUpLeft
             | ForegroundObject::CombinerLeftDown
             | ForegroundObject::CombinerDownRight
             | ForegroundObject::CombinerRightUp
             | ForegroundObject::CombinerDownLeft
             | ForegroundObject::CombinerLeftUp
             | ForegroundObject::CombinerUpRight
-            | ForegroundObject::CombinerRightDown => false, // [TODO] Set this to true
+            | ForegroundObject::CombinerRightDown => true,
         }
     }
 
