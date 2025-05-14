@@ -7,6 +7,7 @@ use std::{collections::VecDeque, fmt::Debug};
 use crate::{Direction, plugins::world::MiddlegroundObject};
 
 pub mod belt;
+pub mod combiner;
 pub mod crafter;
 pub mod miner;
 
@@ -80,7 +81,7 @@ impl From<Item> for TileTextureIndex {
     }
 }
 
-type InputItemsPart = Option<VecDeque<Item>>;
+pub type InputItemsPart = Option<VecDeque<Item>>;
 
 #[derive(Debug, Default, Clone)]
 pub struct InputItems {
@@ -152,6 +153,18 @@ impl InputItems {
             Direction::South => &mut self.south,
             Direction::West => &mut self.west,
         }
+    }
+
+    /// Returns the count of all items in all fields together
+    pub fn count(&self) -> usize {
+        let directions = [&self.north, &self.east, &self.south, &self.west];
+        let mut count = 0;
+
+        for direction in directions.iter().flat_map(|&direction| direction) {
+            count += direction.len();
+        }
+
+        count
     }
 }
 
