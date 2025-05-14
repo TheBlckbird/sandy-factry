@@ -5,14 +5,14 @@ use graph_to_world::graph_to_world;
 use petgraph::prelude::*;
 use simulate::simulate;
 
-use crate::machines::{InputSide, Machine};
+use crate::machines::{Side, Machine};
 
 mod build_graph;
 mod graph_to_world;
 mod simulate;
 
 #[derive(Resource, Default)]
-struct SimulationGraph(Graph<(Machine, TilePos), InputSide>);
+struct SimulationGraph(Graph<(Machine, TilePos), Side>);
 
 #[derive(Resource)]
 struct SimulationTimer(Timer);

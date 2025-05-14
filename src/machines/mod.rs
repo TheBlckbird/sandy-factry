@@ -52,12 +52,12 @@ pub trait MachineType: Debug + Send + Sync {
         item: &Item,
         input_items: &InputItems,
         output_items: &OutputItems,
-        input_side: &InputSide,
+        input_side: &Side,
     ) -> bool;
 }
 
 type OutputItems = VecDeque<Item>;
-pub type InputSide = Direction;
+pub type Side = Direction;
 
 #[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash)]
 pub enum Item {
@@ -135,7 +135,7 @@ impl InputItems {
     }
 
     /// Gets a specific input side
-    pub fn get_side(&self, side: &InputSide) -> &InputItemsPart {
+    pub fn get_side(&self, side: &Side) -> &InputItemsPart {
         match side {
             Direction::North => &self.north,
             Direction::East => &self.east,
@@ -145,7 +145,7 @@ impl InputItems {
     }
 
     /// Gets a mutable reference to a specific input side
-    pub fn get_side_mut(&mut self, side: &InputSide) -> &mut InputItemsPart {
+    pub fn get_side_mut(&mut self, side: &Side) -> &mut InputItemsPart {
         match side {
             Direction::North => &mut self.north,
             Direction::East => &mut self.east,

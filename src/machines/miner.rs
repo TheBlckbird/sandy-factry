@@ -1,6 +1,6 @@
 use crate::plugins::world::MiddlegroundObject;
 
-use super::{InputItems, InputSide, Item, MachineType, OutputItems};
+use super::{InputItems, Side, Item, MachineType, OutputItems};
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Miner;
@@ -38,7 +38,7 @@ impl MachineType for Miner {
         item: &Item,
         _input_items: &InputItems,
         _output_items: &OutputItems,
-        _input_side: &InputSide,
+        _input_side: &Side,
     ) -> bool {
         item == &Item::Coal
     }
