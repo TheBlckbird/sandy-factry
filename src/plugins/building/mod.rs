@@ -6,7 +6,9 @@ use place_buildings::place_buildings;
 
 use crate::{
     Direction,
-    machines::{Item, MachineType, belt::Belt, crafter::Crafter, miner::Miner},
+    machines::{
+        Item, MachineType, Side, belt::Belt, combiner::Combiner, crafter::Crafter, miner::Miner,
+    },
 };
 
 use super::{
@@ -15,90 +17,6 @@ use super::{
 };
 
 mod place_buildings;
-
-pub struct BuildingPlugin;
-
-#[derive(Resource, Default, Clone, Copy, PartialEq, PartialOrd)]
-enum CurrentBuilding {
-    #[default]
-    Nothing,
-    Miner,
-    Crafter,
-    BeltUp,
-    BeltRight,
-    BeltDown,
-    BeltLeft,
-    BeltDownRight,
-    BeltLeftDown,
-    BeltUpLeft,
-    BeltRightUp,
-    BeltRightDown,
-    BeltDownLeft,
-    BeltLeftUp,
-    BeltUpRight,
-}
-
-impl CurrentBuilding {
-    pub fn select_next(&mut self) {
-        *self = match self {
-            CurrentBuilding::Nothing => CurrentBuilding::Miner,
-            CurrentBuilding::Miner => CurrentBuilding::Crafter,
-            CurrentBuilding::Crafter => CurrentBuilding::BeltUp,
-            CurrentBuilding::BeltUp => CurrentBuilding::BeltRight,
-            CurrentBuilding::BeltRight => CurrentBuilding::BeltDown,
-            CurrentBuilding::BeltDown => CurrentBuilding::BeltLeft,
-            CurrentBuilding::BeltLeft => CurrentBuilding::BeltDownRight,
-            CurrentBuilding::BeltDownRight => CurrentBuilding::BeltLeftDown,
-            CurrentBuilding::BeltLeftDown => CurrentBuilding::BeltUpLeft,
-            CurrentBuilding::BeltUpLeft => CurrentBuilding::BeltRightUp,
-            CurrentBuilding::BeltRightUp => CurrentBuilding::BeltRightDown,
-            CurrentBuilding::BeltRightDown => CurrentBuilding::BeltDownLeft,
-            CurrentBuilding::BeltDownLeft => CurrentBuilding::BeltLeftUp,
-            CurrentBuilding::BeltLeftUp => CurrentBuilding::BeltUpRight,
-            CurrentBuilding::BeltUpRight => CurrentBuilding::Nothing,
-        };
-    }
-
-    pub fn select_previous(&mut self) {
-        *self = match self {
-            CurrentBuilding::Nothing => CurrentBuilding::BeltUpRight,
-            CurrentBuilding::Miner => CurrentBuilding::Nothing,
-            CurrentBuilding::Crafter => CurrentBuilding::Miner,
-            CurrentBuilding::BeltUp => CurrentBuilding::Crafter,
-            CurrentBuilding::BeltRight => CurrentBuilding::BeltUp,
-            CurrentBuilding::BeltDown => CurrentBuilding::BeltRight,
-            CurrentBuilding::BeltLeft => CurrentBuilding::BeltDown,
-            CurrentBuilding::BeltDownRight => CurrentBuilding::BeltLeft,
-            CurrentBuilding::BeltLeftDown => CurrentBuilding::BeltDownRight,
-            CurrentBuilding::BeltUpLeft => CurrentBuilding::BeltLeftDown,
-            CurrentBuilding::BeltRightUp => CurrentBuilding::BeltUpLeft,
-            CurrentBuilding::BeltRightDown => CurrentBuilding::BeltRightUp,
-            CurrentBuilding::BeltDownLeft => CurrentBuilding::BeltRightDown,
-            CurrentBuilding::BeltLeftUp => CurrentBuilding::BeltDownLeft,
-            CurrentBuilding::BeltUpRight => CurrentBuilding::BeltLeftUp,
-        };
-    }
-
-    pub fn as_foreground_object(&self) -> ForegroundObject {
-        match self {
-            CurrentBuilding::Nothing => ForegroundObject::Nothing,
-            CurrentBuilding::Miner => ForegroundObject::Miner,
-            CurrentBuilding::Crafter => ForegroundObject::Crafter,
-            CurrentBuilding::BeltUp => ForegroundObject::BeltUp,
-            CurrentBuilding::BeltRight => ForegroundObject::BeltRight,
-            CurrentBuilding::BeltDown => ForegroundObject::BeltDown,
-            CurrentBuilding::BeltLeft => ForegroundObject::BeltLeft,
-            CurrentBuilding::BeltDownRight => ForegroundObject::BeltDownRight,
-            CurrentBuilding::BeltLeftDown => ForegroundObject::BeltLeftDown,
-            CurrentBuilding::BeltUpLeft => ForegroundObject::BeltUpLeft,
-            CurrentBuilding::BeltRightUp => ForegroundObject::BeltRightUp,
-            CurrentBuilding::BeltRightDown => ForegroundObject::BeltRightDown,
-            CurrentBuilding::BeltDownLeft => ForegroundObject::BeltDownLeft,
-            CurrentBuilding::BeltLeftUp => ForegroundObject::BeltLeftUp,
-            CurrentBuilding::BeltUpRight => ForegroundObject::BeltUpRight,
-        }
-    }
-}
 
 #[derive(Debug, Resource, Default, Clone, Copy, PartialEq)]
 pub enum ForegroundObject {
@@ -118,6 +36,14 @@ pub enum ForegroundObject {
     BeltUpRight,
     Crafter,
     Miner,
+    CombinerUpLeft,
+    CombinerLeftDown,
+    CombinerDownRight,
+    CombinerRightUp,
+    CombinerDownLeft,
+    CombinerLeftUp,
+    CombinerUpRight,
+    CombinerRightDown,
 }
 
 impl ForegroundObject {
@@ -143,46 +69,86 @@ impl ForegroundObject {
                 1,
             )))),
             ForegroundObject::Miner => Some(Box::new(Miner)),
+            ForegroundObject::CombinerUpLeft => {
+                Some(Box::new(Combiner::new([Side::North, Side::West])))
+            }
+            ForegroundObject::CombinerLeftDown => {
+                Some(Box::new(Combiner::new([Side::West, Side::South])))
+            }
+            ForegroundObject::CombinerDownRight => {
+                Some(Box::new(Combiner::new([Side::South, Side::East])))
+            }
+            ForegroundObject::CombinerRightUp => {
+                Some(Box::new(Combiner::new([Side::East, Side::North])))
+            }
+            ForegroundObject::CombinerDownLeft => {
+                Some(Box::new(Combiner::new([Side::South, Side::West])))
+            }
+            ForegroundObject::CombinerLeftUp => {
+                Some(Box::new(Combiner::new([Side::West, Side::North])))
+            }
+            ForegroundObject::CombinerUpRight => {
+                Some(Box::new(Combiner::new([Side::North, Side::East])))
+            }
+            ForegroundObject::CombinerRightDown => {
+                Some(Box::new(Combiner::new([Side::East, Side::South])))
+            }
         }
     }
 
-    pub fn get_input_sides(&self) -> Option<Vec<Direction>> {
+    pub fn get_input_sides(&self) -> Option<Vec<Side>> {
         match self {
             ForegroundObject::Nothing => None,
-            ForegroundObject::BeltUp => Some(vec![Direction::South]),
-            ForegroundObject::BeltDown => Some(vec![Direction::North]),
-            ForegroundObject::BeltLeft => Some(vec![Direction::East]),
-            ForegroundObject::BeltRight => Some(vec![Direction::West]),
-            ForegroundObject::BeltDownRight => Some(vec![Direction::South]),
-            ForegroundObject::BeltLeftDown => Some(vec![Direction::West]),
-            ForegroundObject::BeltUpLeft => Some(vec![Direction::North]),
-            ForegroundObject::BeltRightUp => Some(vec![Direction::East]),
-            ForegroundObject::BeltRightDown => Some(vec![Direction::East]),
-            ForegroundObject::BeltDownLeft => Some(vec![Direction::South]),
-            ForegroundObject::BeltLeftUp => Some(vec![Direction::West]),
-            ForegroundObject::BeltUpRight => Some(vec![Direction::North]),
-            ForegroundObject::Crafter => Some(vec![Direction::North, Direction::West]), // [TODO] make two inputs possible
-            ForegroundObject::Miner => Some(vec![Direction::North]),
+            ForegroundObject::BeltUp => Some(vec![Side::South]),
+            ForegroundObject::BeltDown => Some(vec![Side::North]),
+            ForegroundObject::BeltLeft => Some(vec![Side::East]),
+            ForegroundObject::BeltRight => Some(vec![Side::West]),
+            ForegroundObject::BeltDownRight => Some(vec![Side::South]),
+            ForegroundObject::BeltLeftDown => Some(vec![Side::West]),
+            ForegroundObject::BeltUpLeft => Some(vec![Side::North]),
+            ForegroundObject::BeltRightUp => Some(vec![Side::East]),
+            ForegroundObject::BeltRightDown => Some(vec![Side::East]),
+            ForegroundObject::BeltDownLeft => Some(vec![Side::South]),
+            ForegroundObject::BeltLeftUp => Some(vec![Side::West]),
+            ForegroundObject::BeltUpRight => Some(vec![Side::North]),
+            ForegroundObject::Crafter => Some(vec![Side::North, Side::West]),
+            ForegroundObject::Miner => Some(vec![Side::North]),
+            ForegroundObject::CombinerUpLeft => Some(vec![Side::North, Side::West]),
+            ForegroundObject::CombinerLeftDown => Some(vec![Side::West, Side::South]),
+            ForegroundObject::CombinerDownRight => Some(vec![Side::South, Side::East]),
+            ForegroundObject::CombinerRightUp => Some(vec![Side::East, Side::North]),
+            ForegroundObject::CombinerDownLeft => Some(vec![Side::South, Side::West]),
+            ForegroundObject::CombinerLeftUp => Some(vec![Side::West, Side::North]),
+            ForegroundObject::CombinerUpRight => Some(vec![Side::North, Side::East]),
+            ForegroundObject::CombinerRightDown => Some(vec![Side::East, Side::South]),
         }
     }
 
-    pub fn get_output_side(&self) -> Option<Direction> {
+    pub fn get_output_side(&self) -> Option<Side> {
         match self {
             ForegroundObject::Nothing => None,
-            ForegroundObject::BeltUp => Some(Direction::North),
-            ForegroundObject::BeltDown => Some(Direction::South),
-            ForegroundObject::BeltLeft => Some(Direction::West),
-            ForegroundObject::BeltRight => Some(Direction::East),
-            ForegroundObject::BeltDownRight => Some(Direction::East),
-            ForegroundObject::BeltLeftDown => Some(Direction::South),
-            ForegroundObject::BeltUpLeft => Some(Direction::West),
-            ForegroundObject::BeltRightUp => Some(Direction::North),
-            ForegroundObject::BeltRightDown => Some(Direction::South),
-            ForegroundObject::BeltDownLeft => Some(Direction::West),
-            ForegroundObject::BeltLeftUp => Some(Direction::North),
-            ForegroundObject::BeltUpRight => Some(Direction::East),
-            ForegroundObject::Crafter => Some(Direction::South),
-            ForegroundObject::Miner => Some(Direction::South),
+            ForegroundObject::BeltUp => Some(Side::North),
+            ForegroundObject::BeltDown => Some(Side::South),
+            ForegroundObject::BeltLeft => Some(Side::West),
+            ForegroundObject::BeltRight => Some(Side::East),
+            ForegroundObject::BeltDownRight => Some(Side::East),
+            ForegroundObject::BeltLeftDown => Some(Side::South),
+            ForegroundObject::BeltUpLeft => Some(Side::West),
+            ForegroundObject::BeltRightUp => Some(Side::North),
+            ForegroundObject::BeltRightDown => Some(Side::South),
+            ForegroundObject::BeltDownLeft => Some(Side::West),
+            ForegroundObject::BeltLeftUp => Some(Side::North),
+            ForegroundObject::BeltUpRight => Some(Side::East),
+            ForegroundObject::Crafter => Some(Side::South),
+            ForegroundObject::Miner => Some(Side::South),
+            ForegroundObject::CombinerUpLeft => Some(Side::South),
+            ForegroundObject::CombinerLeftDown => Some(Side::East),
+            ForegroundObject::CombinerDownRight => Some(Side::North),
+            ForegroundObject::CombinerRightUp => Some(Side::West),
+            ForegroundObject::CombinerDownLeft => Some(Side::North),
+            ForegroundObject::CombinerLeftUp => Some(Side::East),
+            ForegroundObject::CombinerUpRight => Some(Side::South),
+            ForegroundObject::CombinerRightDown => Some(Side::West),
         }
     }
 
@@ -202,7 +168,71 @@ impl ForegroundObject {
             | ForegroundObject::BeltRightDown
             | ForegroundObject::BeltDownLeft
             | ForegroundObject::BeltLeftUp
-            | ForegroundObject::BeltUpRight => true,
+            | ForegroundObject::BeltUpRight
+            | ForegroundObject::CombinerUpLeft
+            | ForegroundObject::CombinerLeftDown
+            | ForegroundObject::CombinerDownRight
+            | ForegroundObject::CombinerRightUp
+            | ForegroundObject::CombinerDownLeft
+            | ForegroundObject::CombinerLeftUp
+            | ForegroundObject::CombinerUpRight
+            | ForegroundObject::CombinerRightDown => true,
+        }
+    }
+
+    pub fn select_previous(&mut self) {
+        *self = match self {
+            ForegroundObject::Nothing => ForegroundObject::CombinerUpRight,
+            ForegroundObject::BeltUp => ForegroundObject::Nothing,
+            ForegroundObject::BeltDown => ForegroundObject::BeltUp,
+            ForegroundObject::BeltLeft => ForegroundObject::BeltDown,
+            ForegroundObject::BeltRight => ForegroundObject::BeltLeft,
+            ForegroundObject::BeltDownRight => ForegroundObject::BeltRight,
+            ForegroundObject::BeltLeftDown => ForegroundObject::BeltDownRight,
+            ForegroundObject::BeltUpLeft => ForegroundObject::BeltLeftDown,
+            ForegroundObject::BeltRightUp => ForegroundObject::BeltUpLeft,
+            ForegroundObject::BeltRightDown => ForegroundObject::BeltRightUp,
+            ForegroundObject::BeltDownLeft => ForegroundObject::BeltRightDown,
+            ForegroundObject::BeltLeftUp => ForegroundObject::BeltDownLeft,
+            ForegroundObject::BeltUpRight => ForegroundObject::BeltLeftUp,
+            ForegroundObject::Crafter => ForegroundObject::BeltUpRight,
+            ForegroundObject::Miner => ForegroundObject::Crafter,
+            ForegroundObject::CombinerUpLeft => ForegroundObject::Miner,
+            ForegroundObject::CombinerLeftDown => ForegroundObject::CombinerUpLeft,
+            ForegroundObject::CombinerDownRight => ForegroundObject::CombinerLeftDown,
+            ForegroundObject::CombinerRightUp => ForegroundObject::CombinerDownRight,
+            ForegroundObject::CombinerDownLeft => ForegroundObject::CombinerRightUp,
+            ForegroundObject::CombinerLeftUp => ForegroundObject::CombinerDownLeft,
+            ForegroundObject::CombinerUpRight => ForegroundObject::CombinerLeftUp,
+            ForegroundObject::CombinerRightDown => ForegroundObject::CombinerUpRight,
+        };
+    }
+
+    pub fn select_next(&mut self) {
+        *self = match self {
+            ForegroundObject::Nothing => ForegroundObject::BeltUp,
+            ForegroundObject::BeltUp => ForegroundObject::BeltDown,
+            ForegroundObject::BeltDown => ForegroundObject::BeltLeft,
+            ForegroundObject::BeltLeft => ForegroundObject::BeltRight,
+            ForegroundObject::BeltRight => ForegroundObject::BeltDownRight,
+            ForegroundObject::BeltDownRight => ForegroundObject::BeltLeftDown,
+            ForegroundObject::BeltLeftDown => ForegroundObject::BeltUpLeft,
+            ForegroundObject::BeltUpLeft => ForegroundObject::BeltRightUp,
+            ForegroundObject::BeltRightUp => ForegroundObject::BeltRightDown,
+            ForegroundObject::BeltRightDown => ForegroundObject::BeltDownLeft,
+            ForegroundObject::BeltDownLeft => ForegroundObject::BeltLeftUp,
+            ForegroundObject::BeltLeftUp => ForegroundObject::BeltUpRight,
+            ForegroundObject::BeltUpRight => ForegroundObject::Crafter,
+            ForegroundObject::Crafter => ForegroundObject::Miner,
+            ForegroundObject::Miner => ForegroundObject::CombinerUpLeft,
+            ForegroundObject::CombinerUpLeft => ForegroundObject::CombinerLeftDown,
+            ForegroundObject::CombinerLeftDown => ForegroundObject::CombinerDownRight,
+            ForegroundObject::CombinerDownRight => ForegroundObject::CombinerRightUp,
+            ForegroundObject::CombinerRightUp => ForegroundObject::CombinerDownLeft,
+            ForegroundObject::CombinerDownLeft => ForegroundObject::CombinerLeftUp,
+            ForegroundObject::CombinerLeftUp => ForegroundObject::CombinerUpRight,
+            ForegroundObject::CombinerUpRight => ForegroundObject::CombinerRightDown,
+            ForegroundObject::CombinerRightDown => ForegroundObject::Nothing,
         }
     }
 }
@@ -224,6 +254,14 @@ impl From<TileTextureIndex> for ForegroundObject {
             11 => ForegroundObject::BeltUpRight,
             12 => ForegroundObject::Crafter,
             13 => ForegroundObject::Miner,
+            14 => ForegroundObject::CombinerUpLeft,
+            15 => ForegroundObject::CombinerLeftDown,
+            16 => ForegroundObject::CombinerDownRight,
+            17 => ForegroundObject::CombinerRightUp,
+            18 => ForegroundObject::CombinerDownLeft,
+            19 => ForegroundObject::CombinerLeftUp,
+            20 => ForegroundObject::CombinerUpRight,
+            21 => ForegroundObject::CombinerRightDown,
             _ => panic!("Can't convert {:?} to a ForegroundObject!", value.0),
         }
     }
@@ -248,6 +286,14 @@ impl TryFrom<ForegroundObject> for TileTextureIndex {
             ForegroundObject::BeltUpRight => 11,
             ForegroundObject::Crafter => 12,
             ForegroundObject::Miner => 13,
+            ForegroundObject::CombinerUpLeft => 14,
+            ForegroundObject::CombinerLeftDown => 15,
+            ForegroundObject::CombinerDownRight => 16,
+            ForegroundObject::CombinerRightUp => 17,
+            ForegroundObject::CombinerDownLeft => 18,
+            ForegroundObject::CombinerLeftUp => 19,
+            ForegroundObject::CombinerUpRight => 20,
+            ForegroundObject::CombinerRightDown => 21,
             ForegroundObject::Nothing => {
                 return Err("Building `Nothing` can't be converted to `ForegroundObject`");
             }
@@ -274,10 +320,11 @@ pub struct BuildingInput(pub Option<Vec<Direction>>);
 #[derive(Component)]
 pub struct BuildingOutput(pub Option<Direction>);
 
+pub struct BuildingPlugin;
+
 impl Plugin for BuildingPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<BuildEvent>()
-            .init_resource::<CurrentBuilding>()
             .init_resource::<ForegroundObject>()
             .add_systems(Startup, setup)
             .add_systems(
@@ -313,13 +360,16 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 }
 
-fn select_building(mut current_building: ResMut<CurrentBuilding>, keys: Res<ButtonInput<KeyCode>>) {
+fn select_building(
+    mut current_building: ResMut<ForegroundObject>,
+    keys: Res<ButtonInput<KeyCode>>,
+) {
     if keys.just_pressed(KeyCode::KeyX) {
         current_building.select_next();
     } else if keys.just_pressed(KeyCode::KeyZ) {
         current_building.select_previous();
     } else if keys.just_pressed(KeyCode::KeyQ) {
-        *current_building = CurrentBuilding::Nothing;
+        *current_building = ForegroundObject::Nothing;
     }
 }
 

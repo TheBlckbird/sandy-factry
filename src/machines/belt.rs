@@ -1,6 +1,6 @@
 use crate::plugins::world::MiddlegroundObject;
 
-use super::{InputItems, InputSide, Item, MachineType, OutputItems};
+use super::{InputItems, Item, MachineType, OutputItems, Side};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Belt;
@@ -27,7 +27,7 @@ impl MachineType for Belt {
         _item: &Item,
         input_items: &InputItems,
         output_items: &OutputItems,
-        _input_side: &InputSide,
+        _input_side: &Side,
     ) -> bool {
         (input_items.exactly_one().len() + output_items.len()) == 0
     }

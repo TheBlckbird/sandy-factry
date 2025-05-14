@@ -8,8 +8,7 @@ use sandy_factry_helpers::tilemap::{TilemapSettingsBorrowed, get_mouse_tilepos};
 use crate::machines::{InputItems, Item, Machine};
 
 use super::{
-    BuildEvent, BuildingInput, BuildingOutput, CurrentBuilding, Foreground, ForegroundObject,
-    HoverBuilding,
+    BuildEvent, BuildingInput, BuildingOutput, Foreground, ForegroundObject, HoverBuilding,
 };
 
 pub fn place_buildings(
@@ -34,7 +33,7 @@ pub fn place_buildings(
         (Entity, &TilePos, Option<&HoverBuilding>, &TileTextureIndex),
         With<Foreground>,
     >,
-    current_building: Res<CurrentBuilding>,
+    current_building: Res<ForegroundObject>,
     mut event_writer: EventWriter<BuildEvent>,
 ) {
     let (camera, camera_transform) = camera_q.into_inner();
@@ -88,7 +87,7 @@ pub fn place_buildings(
         return;
     }
 
-    let foreground_object: ForegroundObject = current_building.as_foreground_object();
+    let foreground_object: ForegroundObject = *current_building;
 
     let Ok(tile_texture_index) = foreground_object.try_into() else {
         return;

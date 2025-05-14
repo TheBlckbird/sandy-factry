@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::plugins::{crafting::recipe_types::CrafterRecipe, world::MiddlegroundObject};
 
-use super::{InputItems, InputSide, Item, MachineType, OutputItems};
+use super::{InputItems, Side, Item, MachineType, OutputItems};
 
 #[derive(Debug, Clone, Default)]
 pub struct Crafter {
@@ -128,7 +128,7 @@ impl MachineType for Crafter {
         item: &Item,
         _input_items: &InputItems,
         _output_items: &OutputItems,
-        input_side: &InputSide,
+        input_side: &Side,
     ) -> bool {
         match input_side {
             crate::Direction::North => true,

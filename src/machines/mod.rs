@@ -7,6 +7,7 @@ use std::{collections::VecDeque, fmt::Debug};
 use crate::{Direction, plugins::world::MiddlegroundObject};
 
 pub mod belt;
+pub mod combiner;
 pub mod crafter;
 pub mod miner;
 
@@ -52,12 +53,12 @@ pub trait MachineType: Debug + Send + Sync {
         item: &Item,
         input_items: &InputItems,
         output_items: &OutputItems,
-        input_side: &InputSide,
+        input_side: &Side,
     ) -> bool;
 }
 
 type OutputItems = VecDeque<Item>;
-pub type InputSide = Direction;
+pub type Side = Direction;
 
 #[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash)]
 pub enum Item {
@@ -80,7 +81,7 @@ impl From<Item> for TileTextureIndex {
     }
 }
 
-type InputItemsPart = Option<VecDeque<Item>>;
+pub type InputItemsPart = Option<VecDeque<Item>>;
 
 #[derive(Debug, Default, Clone)]
 pub struct InputItems {
@@ -108,9 +109,9 @@ impl InputItems {
     /// Gets exactly one input side
     /// Panics if zero or more than one sides are set
     pub fn exactly_one(&self) -> &VecDeque<Item> {
-        let directions = [&self.north, &self.east, &self.south, &self.west];
+        let sides = [&self.north, &self.east, &self.south, &self.west];
 
-        directions
+        sides
             .into_iter()
             .filter_map(|direction| direction.as_ref())
             .exactly_one()
@@ -120,14 +121,14 @@ impl InputItems {
     /// Gets exactly one mutable reference to an input side
     /// Panics if zero or more than one sides are set
     pub fn exactly_one_mut(&mut self) -> &mut VecDeque<Item> {
-        let directions = [
+        let sides = [
             &mut self.north,
             &mut self.east,
             &mut self.south,
             &mut self.west,
         ];
 
-        directions
+        sides
             .into_iter()
             .filter_map(|direction| direction.as_mut())
             .exactly_one()
@@ -135,7 +136,7 @@ impl InputItems {
     }
 
     /// Gets a specific input side
-    pub fn get_side(&self, side: &InputSide) -> &InputItemsPart {
+    pub fn get_side(&self, side: &Side) -> &InputItemsPart {
         match side {
             Direction::North => &self.north,
             Direction::East => &self.east,
@@ -145,13 +146,36 @@ impl InputItems {
     }
 
     /// Gets a mutable reference to a specific input side
-    pub fn get_side_mut(&mut self, side: &InputSide) -> &mut InputItemsPart {
+    pub fn get_side_mut(&mut self, side: &Side) -> &mut InputItemsPart {
         match side {
             Direction::North => &mut self.north,
             Direction::East => &mut self.east,
             Direction::South => &mut self.south,
             Direction::West => &mut self.west,
         }
+    }
+
+    /// Returns the count of all items in all fields together
+    pub fn count(&self) -> usize {
+        let directions = [&self.north, &self.east, &self.south, &self.west];
+        let mut count = 0;
+
+        for direction in directions.iter().flat_map(|&direction| direction) {
+            count += direction.len();
+        }
+
+        count
+    }
+
+    /// Gets all items
+    /// Returns a Queue with north being at the beginning, then east, south and west
+    pub fn all(&self) -> VecDeque<&Item> {
+        let sides = [&self.north, &self.east, &self.south, &self.west];
+
+        sides
+            .iter()
+            .flat_map(|side| side.iter().flat_map(|items| items.iter()))
+            .collect()
     }
 }
 

@@ -53,15 +53,19 @@ pub fn update_item_tilemap(
             ForegroundObject::from(*tile_texture_index).should_render_item()
         })
         .for_each(|(tile_pos, _, machine)| {
-            // We know that either `input_items` or `output_items` has one item
-            // We first check if input_items has one item, if that's not the case take the item from output items
-            if let Some(item) = machine
-                .input_items
-                .exactly_one()
-                .front()
-                .or_else(|| machine.output_items.front())
-            {
-                desired_items_state.insert(*tile_pos, *item);
+            // `input_items` and `output_items` together should only have one
+
+            let mut all_items = machine.input_items.all();
+            all_items.extend(&machine.output_items);
+
+            match all_items.front() {
+                None => {}
+                Some(&&item) if all_items.len() == 1 => {
+                    desired_items_state.insert(*tile_pos, item);
+                }
+                Some(_) => {
+                    panic!("There should only be one item on renderable machines at any given time")
+                }
             }
         });
 
