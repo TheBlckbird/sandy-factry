@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_ecs_tilemap::tiles::TileTextureIndex;
+use bevy_ecs_tilemap::prelude::*;
 use itertools::Itertools;
 
 use std::{collections::VecDeque, fmt::Debug};
@@ -79,6 +79,14 @@ impl From<Item> for TileTextureIndex {
             Item::IronIngot => 4,
         })
     }
+}
+
+pub trait MachineVariants<M: MachineType>:
+    From<TileTextureIndex> + Into<TileTextureIndex> + Into<M> + Default
+{
+    fn get_input_sides(&self) -> Option<Vec<Side>>;
+    fn get_output_sides(&self) -> Option<Vec<Side>>;
+    fn should_render_item(&self) -> bool;
 }
 
 pub type InputItemsPart = Option<VecDeque<Item>>;

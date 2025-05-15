@@ -4239,6 +4239,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "sandy_factry_macros"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "scoped-tls"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4580,6 +4588,7 @@ dependencies = [
  "petgraph 0.8.1",
  "rand 0.9.1",
  "sandy_factry_helpers",
+ "sandy_factry_macros",
  "winit",
 ]
 

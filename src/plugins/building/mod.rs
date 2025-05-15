@@ -63,12 +63,12 @@ impl ForegroundObject {
             | ForegroundObject::BeltDownLeft
             | ForegroundObject::BeltLeftUp
             | ForegroundObject::BeltUpRight => Some(Box::new(Belt)),
-            ForegroundObject::Crafter => Some(Box::new(Crafter::new(CrafterRecipe::new(
+            ForegroundObject::Crafter => Some(Box::new(Crafter::new(Some(CrafterRecipe::new(
                 HashMap::from([(Item::Coal, 1), (Item::RawCopper, 2)]),
                 Item::CopperIngot,
                 1,
                 1,
-            )))),
+            ))))),
             ForegroundObject::Miner => Some(Box::new(Miner)),
             ForegroundObject::CombinerUpLeft => {
                 Some(Box::new(Combiner::new([Side::North, Side::West])))

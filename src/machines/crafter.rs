@@ -1,8 +1,9 @@
+use sandy_factry_macros::MachineVariants;
 use std::collections::HashMap;
 
 use crate::plugins::{crafting::recipe_types::CrafterRecipe, world::MiddlegroundObject};
 
-use super::{InputItems, Side, Item, MachineType, OutputItems};
+use super::{InputItems, Item, MachineType, MachineVariants, OutputItems, Side};
 
 #[derive(Debug, Clone, Default)]
 pub struct Crafter {
@@ -19,9 +20,9 @@ impl Crafter {
     const COAL_BURN_TIME: u8 = 50;
     const CRAFTING_BURN_TIME: u8 = 10;
 
-    pub fn new(current_recipe: CrafterRecipe) -> Self {
+    pub fn new(current_recipe: Option<CrafterRecipe>) -> Self {
         Self {
-            current_recipe: Some(current_recipe),
+            current_recipe,
             burn_time: 0,
             crafting_time_left: None,
         }
@@ -138,4 +139,12 @@ impl MachineType for Crafter {
             _ => unreachable!(),
         }
     }
+}
+
+#[derive(Debug, Default, MachineVariants)]
+#[machine_type(Crafter)]
+pub enum CrafterVariants {
+    #[default]
+    #[variant(inputs(North, West), outputs(South), texture = 12, machine = Crafter::default())]
+    UpLeft,
 }

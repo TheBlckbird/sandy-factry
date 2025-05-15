@@ -1,6 +1,8 @@
+use sandy_factry_macros::MachineVariants;
+
 use crate::plugins::world::MiddlegroundObject;
 
-use super::{InputItems, Side, Item, MachineType, OutputItems};
+use super::{InputItems, Item, MachineType, MachineVariants, OutputItems, Side};
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Miner;
@@ -42,4 +44,12 @@ impl MachineType for Miner {
     ) -> bool {
         item == &Item::Coal
     }
+}
+
+#[derive(Debug, Default, MachineVariants)]
+#[machine_type(Miner)]
+pub enum MinerVariants {
+    #[default]
+    #[variant(inputs(North), outputs(South), texture = 13, machine = Miner)]
+    Down,
 }

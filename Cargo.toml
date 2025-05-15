@@ -19,7 +19,8 @@ image = "0.25"
 noise = "0.9"
 rand = "0.9"
 winit = "0.30"
-sandy_factry_helpers = { path = "./sandy_factry_helpers" }
+sandy_factry_helpers = { path = "./crates/sandy_factry_helpers" }
+sandy_factry_macros = { path = "./crates/sandy_factry_macros" }
 itertools.workspace = true
 
 
@@ -28,7 +29,7 @@ workspace = true
 
 
 [workspace]
-members = ["sandy_factry_helpers", "."]
+members = [".", "crates/*"]
 
 [workspace.dependencies]
 bevy = { version = "0.16", features = ["file_watcher"] }
