@@ -41,8 +41,6 @@ impl Variant {
 }
 
 pub fn impl_machine_variants_macro(ast: &DeriveInput) -> TokenStream {
-    println!("{ast:#?}");
-
     let name = &ast.ident;
     let name_str = name.to_string();
     let attrs = &ast.attrs;
