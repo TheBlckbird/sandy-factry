@@ -37,6 +37,7 @@ impl MachineType for Belt {
 #[derive(Debug, Default, MachineVariants)]
 #[machine_type(Belt)]
 #[machine(Belt)]
+#[render]
 pub enum BeltVariants {
     #[default]
     #[variant(inputs(South), outputs(North), texture = 0)]
