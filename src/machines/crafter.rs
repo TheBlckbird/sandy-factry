@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::plugins::{crafting::recipe_types::CrafterRecipe, world::MiddlegroundObject};
 
-use super::{InputItems, Side, Item, MachineType, OutputItems};
+use super::{InputItems, Item, MachineType, OutputItems, Side};
 
 #[derive(Debug, Clone, Default)]
 pub struct Crafter {
@@ -67,7 +67,9 @@ impl MachineType for Crafter {
                     // Crafting finished
                     // Append the crafted item to `output_items`
                     for _ in 0..current_recipe.output_count {
-                        output_items.push_back(current_recipe.output_item);
+                        output_items
+                            .exactly_one_mut()
+                            .push_back(current_recipe.output_item);
                     }
 
                     unset_crafting_time = true;

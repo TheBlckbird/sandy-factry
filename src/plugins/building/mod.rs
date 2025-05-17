@@ -8,6 +8,7 @@ use crate::{
     Direction,
     machines::{
         Item, MachineType, Side, belt::Belt, combiner::Combiner, crafter::Crafter, miner::Miner,
+        splitter::Splitter,
     },
 };
 
@@ -45,6 +46,7 @@ pub enum ForegroundObject {
     CombinerLeftUp,
     CombinerUpRight,
     CombinerRightDown,
+    SplitterDownRight,
 }
 
 impl ForegroundObject {
@@ -94,6 +96,9 @@ impl ForegroundObject {
             ForegroundObject::CombinerRightDown => {
                 Some(Box::new(Combiner::new([Side::East, Side::South])))
             }
+            ForegroundObject::SplitterDownRight => {
+                Some(Box::new(Splitter::new([Side::South, Side::East])))
+            }
         }
     }
 
@@ -122,34 +127,36 @@ impl ForegroundObject {
             ForegroundObject::CombinerLeftUp => Some(vec![Side::West, Side::North]),
             ForegroundObject::CombinerUpRight => Some(vec![Side::North, Side::East]),
             ForegroundObject::CombinerRightDown => Some(vec![Side::East, Side::South]),
+            ForegroundObject::SplitterDownRight => Some(vec![Side::North]),
         }
     }
 
-    pub fn get_output_side(&self) -> Option<Side> {
+    pub fn get_output_sides(&self) -> Option<Vec<Side>> {
         match self {
             ForegroundObject::Nothing => None,
-            ForegroundObject::BeltUp => Some(Side::North),
-            ForegroundObject::BeltDown => Some(Side::South),
-            ForegroundObject::BeltLeft => Some(Side::West),
-            ForegroundObject::BeltRight => Some(Side::East),
-            ForegroundObject::BeltDownRight => Some(Side::East),
-            ForegroundObject::BeltLeftDown => Some(Side::South),
-            ForegroundObject::BeltUpLeft => Some(Side::West),
-            ForegroundObject::BeltRightUp => Some(Side::North),
-            ForegroundObject::BeltRightDown => Some(Side::South),
-            ForegroundObject::BeltDownLeft => Some(Side::West),
-            ForegroundObject::BeltLeftUp => Some(Side::North),
-            ForegroundObject::BeltUpRight => Some(Side::East),
-            ForegroundObject::Crafter => Some(Side::South),
-            ForegroundObject::Miner => Some(Side::South),
-            ForegroundObject::CombinerUpLeft => Some(Side::South),
-            ForegroundObject::CombinerLeftDown => Some(Side::East),
-            ForegroundObject::CombinerDownRight => Some(Side::North),
-            ForegroundObject::CombinerRightUp => Some(Side::West),
-            ForegroundObject::CombinerDownLeft => Some(Side::North),
-            ForegroundObject::CombinerLeftUp => Some(Side::East),
-            ForegroundObject::CombinerUpRight => Some(Side::South),
-            ForegroundObject::CombinerRightDown => Some(Side::West),
+            ForegroundObject::BeltUp => Some(vec![Side::North]),
+            ForegroundObject::BeltDown => Some(vec![Side::South]),
+            ForegroundObject::BeltLeft => Some(vec![Side::West]),
+            ForegroundObject::BeltRight => Some(vec![Side::East]),
+            ForegroundObject::BeltDownRight => Some(vec![Side::East]),
+            ForegroundObject::BeltLeftDown => Some(vec![Side::South]),
+            ForegroundObject::BeltUpLeft => Some(vec![Side::West]),
+            ForegroundObject::BeltRightUp => Some(vec![Side::North]),
+            ForegroundObject::BeltRightDown => Some(vec![Side::South]),
+            ForegroundObject::BeltDownLeft => Some(vec![Side::West]),
+            ForegroundObject::BeltLeftUp => Some(vec![Side::North]),
+            ForegroundObject::BeltUpRight => Some(vec![Side::East]),
+            ForegroundObject::Crafter => Some(vec![Side::South]),
+            ForegroundObject::Miner => Some(vec![Side::South]),
+            ForegroundObject::CombinerUpLeft => Some(vec![Side::South]),
+            ForegroundObject::CombinerLeftDown => Some(vec![Side::East]),
+            ForegroundObject::CombinerDownRight => Some(vec![Side::North]),
+            ForegroundObject::CombinerRightUp => Some(vec![Side::West]),
+            ForegroundObject::CombinerDownLeft => Some(vec![Side::North]),
+            ForegroundObject::CombinerLeftUp => Some(vec![Side::East]),
+            ForegroundObject::CombinerUpRight => Some(vec![Side::South]),
+            ForegroundObject::CombinerRightDown => Some(vec![Side::West]),
+            ForegroundObject::SplitterDownRight => Some(vec![Side::South, Side::East]),
         }
     }
 
@@ -177,13 +184,14 @@ impl ForegroundObject {
             | ForegroundObject::CombinerDownLeft
             | ForegroundObject::CombinerLeftUp
             | ForegroundObject::CombinerUpRight
-            | ForegroundObject::CombinerRightDown => true,
+            | ForegroundObject::CombinerRightDown
+            | ForegroundObject::SplitterDownRight => true,
         }
     }
 
     pub fn select_previous(&mut self) {
         *self = match self {
-            ForegroundObject::Nothing => ForegroundObject::CombinerUpRight,
+            ForegroundObject::Nothing => ForegroundObject::SplitterDownRight,
             ForegroundObject::BeltUp => ForegroundObject::Nothing,
             ForegroundObject::BeltDown => ForegroundObject::BeltUp,
             ForegroundObject::BeltLeft => ForegroundObject::BeltDown,
@@ -206,6 +214,7 @@ impl ForegroundObject {
             ForegroundObject::CombinerLeftUp => ForegroundObject::CombinerDownLeft,
             ForegroundObject::CombinerUpRight => ForegroundObject::CombinerLeftUp,
             ForegroundObject::CombinerRightDown => ForegroundObject::CombinerUpRight,
+            ForegroundObject::SplitterDownRight => ForegroundObject::CombinerRightDown,
         };
     }
 
@@ -233,7 +242,8 @@ impl ForegroundObject {
             ForegroundObject::CombinerDownLeft => ForegroundObject::CombinerLeftUp,
             ForegroundObject::CombinerLeftUp => ForegroundObject::CombinerUpRight,
             ForegroundObject::CombinerUpRight => ForegroundObject::CombinerRightDown,
-            ForegroundObject::CombinerRightDown => ForegroundObject::Nothing,
+            ForegroundObject::CombinerRightDown => ForegroundObject::SplitterDownRight,
+            ForegroundObject::SplitterDownRight => ForegroundObject::Nothing,
         }
     }
 }
@@ -263,6 +273,7 @@ impl From<TileTextureIndex> for ForegroundObject {
             19 => ForegroundObject::CombinerLeftUp,
             20 => ForegroundObject::CombinerUpRight,
             21 => ForegroundObject::CombinerRightDown,
+            26 => ForegroundObject::SplitterDownRight,
             _ => panic!("Can't convert {:?} to a ForegroundObject!", value.0),
         }
     }
@@ -295,6 +306,7 @@ impl TryFrom<ForegroundObject> for TileTextureIndex {
             ForegroundObject::CombinerLeftUp => 19,
             ForegroundObject::CombinerUpRight => 20,
             ForegroundObject::CombinerRightDown => 21,
+            ForegroundObject::SplitterDownRight => 26,
             ForegroundObject::Nothing => {
                 return Err("Building `Nothing` can't be converted to `ForegroundObject`");
             }
@@ -319,7 +331,7 @@ struct HoverBuilding;
 pub struct BuildingInput(pub Option<Vec<Direction>>);
 
 #[derive(Component)]
-pub struct BuildingOutput(pub Option<Direction>);
+pub struct BuildingOutput(pub Option<Vec<Direction>>);
 
 pub struct BuildingPlugin;
 

@@ -32,7 +32,7 @@ impl MachineType for Combiner {
         let current_input_side = self.input_sides[current_input_side_index];
 
         // Check if there are any items on the combiner
-        if output_items.is_empty()
+        if output_items.exactly_one().is_empty()
             && let Some(input_item) = input_items
                 .get_side_mut(&current_input_side)
                 .as_mut()
@@ -41,7 +41,7 @@ impl MachineType for Combiner {
                 })
                 .pop_front()
         {
-            output_items.push_back(input_item);
+            output_items.exactly_one_mut().push_back(input_item);
         }
 
         self.last_input_side_index = current_input_side_index;
@@ -59,7 +59,7 @@ impl MachineType for Combiner {
         input_side: &Side,
     ) -> bool {
         // Only one item is allowed in the combiner
-        if input_items.count() + output_items.len() > 0 {
+        if input_items.count() + output_items.count() > 0 {
             return false;
         }
 

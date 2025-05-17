@@ -10,6 +10,7 @@ pub mod belt;
 pub mod combiner;
 pub mod crafter;
 pub mod miner;
+pub mod splitter;
 
 #[derive(Debug, Component)]
 pub struct Machine {
@@ -57,7 +58,6 @@ pub trait MachineType: Debug + Send + Sync {
     ) -> bool;
 }
 
-type OutputItems = VecDeque<Item>;
 pub type Side = Direction;
 
 #[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash)]
@@ -81,22 +81,24 @@ impl From<Item> for TileTextureIndex {
     }
 }
 
-pub type InputItemsPart = Option<VecDeque<Item>>;
+pub type InputItems = ItemsSet;
+pub type OutputItems = ItemsSet;
+pub type ItemsSetPart = Option<VecDeque<Item>>;
 
 #[derive(Debug, Default, Clone)]
-pub struct InputItems {
-    pub north: InputItemsPart,
-    pub east: InputItemsPart,
-    pub south: InputItemsPart,
-    pub west: InputItemsPart,
+pub struct ItemsSet {
+    pub north: ItemsSetPart,
+    pub east: ItemsSetPart,
+    pub south: ItemsSetPart,
+    pub west: ItemsSetPart,
 }
 
-impl InputItems {
+impl ItemsSet {
     pub fn new(
-        north: InputItemsPart,
-        east: InputItemsPart,
-        south: InputItemsPart,
-        west: InputItemsPart,
+        north: ItemsSetPart,
+        east: ItemsSetPart,
+        south: ItemsSetPart,
+        west: ItemsSetPart,
     ) -> Self {
         Self {
             north,
@@ -136,7 +138,7 @@ impl InputItems {
     }
 
     /// Gets a specific input side
-    pub fn get_side(&self, side: &Side) -> &InputItemsPart {
+    pub fn get_side(&self, side: &Side) -> &ItemsSetPart {
         match side {
             Direction::North => &self.north,
             Direction::East => &self.east,
@@ -146,7 +148,7 @@ impl InputItems {
     }
 
     /// Gets a mutable reference to a specific input side
-    pub fn get_side_mut(&mut self, side: &Side) -> &mut InputItemsPart {
+    pub fn get_side_mut(&mut self, side: &Side) -> &mut ItemsSetPart {
         match side {
             Direction::North => &mut self.north,
             Direction::East => &mut self.east,
