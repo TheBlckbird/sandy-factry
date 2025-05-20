@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
-use generation::generation;
+use generation::{cleanup, generation};
 use rand::Rng;
+
+use super::menu::GameState;
 
 // mod infinite;
 mod generation;
@@ -83,7 +85,15 @@ pub struct WorldPlugin;
 
 impl Plugin for WorldPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(Seed::new())
-            .add_systems(Startup, generation);
+        app.add_systems(OnEnter(GameState::Game), (startup, generation).chain())
+            .add_systems(OnExit(GameState::Game), (cleanup_resources, cleanup));
     }
+}
+
+fn startup(mut commands: Commands) {
+    commands.insert_resource(Seed::new());
+}
+
+fn cleanup_resources(mut commands: Commands) {
+    commands.remove_resource::<Seed>();
 }

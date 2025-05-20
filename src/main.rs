@@ -5,6 +5,7 @@ use plugins::{
     crafting::CraftingPlugin,
     debug_camera::DebugCameraPlugin,
     hud::HudPlugin,
+    menu::MenuPlugin,
     rendering::RenderingPlugin,
     simulation::SimulationPlugin,
     world::WorldPlugin,
@@ -73,8 +74,10 @@ fn main() {
             RenderingPlugin,
             DebugCameraPlugin,
             CraftingPlugin,
+            MenuPlugin,
         ))
         .init_resource::<MouseCoordinates>()
+        .insert_resource(ClearColor(Color::hsl(194.0, 0.71, 0.37)))
         .add_systems(
             Startup,
             (
