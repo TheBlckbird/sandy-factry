@@ -26,7 +26,7 @@ pub fn simulate(
         return;
     }
 
-    println!("{:?}", Dot::new(&simulation_graph.0));
+    info!("{:?}", Dot::new(&simulation_graph.0));
 
     let mut leaf_nodes: Vec<NodeIndex> = simulation_graph
         .0

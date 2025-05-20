@@ -14,6 +14,7 @@ use crate::{
 use super::{
     TilemapLayer,
     crafting::recipe_types::CrafterRecipe,
+    menu::GameState,
     world::{MAP_SIZE, MAP_TYPE, TILE_SIZE},
 };
 
@@ -326,20 +327,23 @@ pub struct BuildingPlugin;
 impl Plugin for BuildingPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<BuildEvent>()
-            .init_resource::<ForegroundObject>()
-            .add_systems(Startup, setup)
+            .add_systems(OnEnter(GameState::Game), setup)
             .add_systems(
                 Update,
                 (
                     select_building,
                     place_buildings,
                     // update_current_foreground_object,
-                ),
-            );
+                )
+                    .run_if(in_state(GameState::Game)),
+            )
+            .add_systems(OnExit(GameState::Game), cleanup);
     }
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.init_resource::<ForegroundObject>();
+
     let foreground_texture_handle: Handle<Image> = asset_server.load("foreground_tiles.png");
 
     let foreground_tile_storage = TileStorage::empty(MAP_SIZE);
@@ -372,6 +376,14 @@ fn select_building(
     } else if keys.just_pressed(KeyCode::KeyQ) {
         *current_building = ForegroundObject::Nothing;
     }
+}
+
+fn cleanup(
+    mut commands: Commands,
+    foreground_tilemap: Single<Entity, (With<TileStorage>, With<Foreground>)>,
+) {
+    commands.entity(foreground_tilemap.entity()).despawn();
+    commands.remove_resource::<ForegroundObject>();
 }
 
 /*

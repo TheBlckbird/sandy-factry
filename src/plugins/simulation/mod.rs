@@ -5,7 +5,9 @@ use graph_to_world::graph_to_world;
 use petgraph::prelude::*;
 use simulate::simulate;
 
-use crate::machines::{Side, Machine};
+use crate::machines::{Machine, Side};
+
+use super::menu::GameState;
 
 mod build_graph;
 mod graph_to_world;
@@ -21,11 +23,26 @@ pub struct SimulationPlugin;
 
 impl Plugin for SimulationPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<SimulationGraph>()
-            .insert_resource(SimulationTimer(Timer::from_seconds(
-                0.1,
-                TimerMode::Repeating,
-            )))
-            .add_systems(FixedUpdate, (build_graph, simulate, graph_to_world).chain());
+        app.add_systems(OnEnter(GameState::Game), startup)
+            .add_systems(
+                FixedUpdate,
+                (build_graph, simulate, graph_to_world)
+                    .chain()
+                    .run_if(in_state(GameState::Game)),
+            )
+            .add_systems(OnExit(GameState::Game), cleanup);
     }
+}
+
+fn startup(mut commands: Commands) {
+    commands.init_resource::<SimulationGraph>();
+    commands.insert_resource(SimulationTimer(Timer::from_seconds(
+        0.1,
+        TimerMode::Repeating,
+    )));
+}
+
+fn cleanup(mut commands: Commands) {
+    commands.remove_resource::<SimulationGraph>();
+    commands.remove_resource::<SimulationTimer>();
 }
