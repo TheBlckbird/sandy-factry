@@ -114,7 +114,7 @@ pub fn place_buildings(
                         Some(building_type) => building_type,
                         None => return,
                     },
-                    VecDeque::new(),
+                    foreground_object.get_input_sides().into(),
                     VecDeque::new(),
                 ),
                 BuildingInput(foreground_object.get_input_sides()),
