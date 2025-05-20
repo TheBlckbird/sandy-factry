@@ -89,55 +89,67 @@ pub fn build_graph(
         add_neighbor(neighbors.south, &mut next);
         add_neighbor(neighbors.west, &mut next);
 
-        let mut build_nodes = |maybe_searched_directions: &Option<Vec<Direction>>,
-                               maybe_self_directions: &Option<Vec<Direction>>,
-                               get_opposite: bool| {
-            for searched_direction in maybe_searched_directions.iter().flatten() {
-                let neighbor_pos = match searched_direction {
-                    Direction::North => neighbors.north,
-                    Direction::East => neighbors.east,
-                    Direction::South => neighbors.south,
-                    Direction::West => neighbors.west,
-                };
+        for input in tile.3.0.iter().flatten() {
+            let neighbor_pos = match input {
+                Direction::North => neighbors.north,
+                Direction::East => neighbors.east,
+                Direction::South => neighbors.south,
+                Direction::West => neighbors.west,
+            };
 
-                if let Some(neighbor_pos) = neighbor_pos
-                    && let Some(neighbor_tile) = tile_query
-                        .iter()
-                        .find(|&(_, &tile_pos, _, _, _, _)| tile_pos == neighbor_pos)
-                    && let Some(self_directions) = maybe_self_directions.as_ref()
-                    && self_directions
-                        .iter()
-                        .any(|self_direction| self_direction.get_opposite() == *searched_direction)
-                {
-                    let building = Machine::new(
-                        neighbor_tile.5.machine_type.clone_box(),
-                        neighbor_tile.5.input_items.clone(),
-                        neighbor_tile.5.output_items.clone(),
-                    );
-                    let new_node_index =
-                        get_or_create_node(&mut factory_graph, (building, &neighbor_pos));
-
-                    if get_opposite {
-                        add_edge_if_not_exists(
-                            &mut factory_graph,
-                            current_node_index,
-                            new_node_index,
-                            searched_direction.get_opposite(),
-                        );
-                    } else {
-                        add_edge_if_not_exists(
-                            &mut factory_graph,
-                            new_node_index,
-                            current_node_index,
-                            *searched_direction,
-                        );
-                    }
-                }
+            if let Some(neighbor_pos) = neighbor_pos
+                && let Some(neighbor_tile) = tile_query
+                    .iter()
+                    .find(|&(_, &tile_pos, _, _, _, _)| tile_pos == neighbor_pos)
+                && let Some(outputs) = neighbor_tile.4.0.as_ref()
+                && outputs.iter().any(|output| output.get_opposite() == *input)
+            {
+                let building = Machine::new(
+                    neighbor_tile.5.machine_type.clone_box(),
+                    neighbor_tile.5.input_items.clone(),
+                    neighbor_tile.5.output_items.clone(),
+                );
+                let new_node_index =
+                    get_or_create_node(&mut factory_graph, (building, &neighbor_pos));
+                add_edge_if_not_exists(
+                    &mut factory_graph,
+                    new_node_index,
+                    current_node_index,
+                    *input,
+                );
             }
-        };
+        }
 
-        build_nodes(&tile.3.0, &tile.4.0, false);
-        build_nodes(&tile.4.0, &tile.3.0, true);
+        for output in tile.4.0.iter().flatten() {
+            let neighbor_pos = match output {
+                Direction::North => neighbors.north,
+                Direction::East => neighbors.east,
+                Direction::South => neighbors.south,
+                Direction::West => neighbors.west,
+            };
+
+            if let Some(neighbor_pos) = neighbor_pos
+                && let Some(neighbor_tile) = tile_query
+                    .iter()
+                    .find(|&(_, &tile_pos, _, _, _, _)| tile_pos == neighbor_pos)
+                && let Some(inputs) = neighbor_tile.3.0.as_ref()
+                && inputs.iter().any(|input| input.get_opposite() == *output)
+            {
+                let building = Machine::new(
+                    neighbor_tile.5.machine_type.clone_box(),
+                    neighbor_tile.5.input_items.clone(),
+                    neighbor_tile.5.output_items.clone(),
+                );
+                let new_node_index =
+                    get_or_create_node(&mut factory_graph, (building, &neighbor_pos));
+                add_edge_if_not_exists(
+                    &mut factory_graph,
+                    current_node_index,
+                    new_node_index,
+                    output.get_opposite(),
+                );
+            }
+        }
     }
 
     simulation_graph.0 = factory_graph;

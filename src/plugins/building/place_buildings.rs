@@ -114,7 +114,16 @@ pub fn place_buildings(
                         Some(building_type) => building_type,
                         None => return,
                     },
-                    foreground_object.get_input_sides().into(),
+                    match foreground_object {
+                        ForegroundObject::Miner => InputItems::new(
+                            Some(VecDeque::from([Item::Coal; 15])),
+                            None,
+                            None,
+                            None,
+                        ),
+                        // ForegroundObject::BeltDown => VecDeque::from([Item::Coal]),
+                        _ => foreground_object.get_input_sides().into(),
+                    },
                     foreground_object.get_output_sides().into(),
                 ),
                 BuildingInput(foreground_object.get_input_sides()),

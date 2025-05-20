@@ -169,6 +169,11 @@ impl ItemsSet {
         count
     }
 
+    /// Checks whether there are any items in any of the fields
+    pub fn is_empty(&self) -> bool {
+        self.count() == 0
+    }
+
     /// Gets all items
     /// Returns a Queue with north being at the beginning, then east, south and west
     pub fn all(&self) -> VecDeque<&Item> {
