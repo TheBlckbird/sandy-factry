@@ -79,7 +79,7 @@ fn main() {
         .init_resource::<MouseCoordinates>()
         .insert_resource(ClearColor(Color::hsl(194.0, 0.71, 0.37)))
         .add_systems(
-            Startup,
+            PreStartup,
             (
                 startup,
                 #[cfg(any(target_os = "windows", target_os = "linux"))]
