@@ -5,7 +5,7 @@ use plugins::{
     crafting::CraftingPlugin,
     debug_camera::DebugCameraPlugin,
     hud::HudPlugin,
-    menu::MenuPlugin,
+    menu::{GameState, MenuPlugin},
     rendering::RenderingPlugin,
     simulation::SimulationPlugin,
     world::WorldPlugin,
@@ -86,7 +86,10 @@ fn main() {
                 set_window_icon,
             ),
         )
-        .add_systems(Update, update_mouse_coords)
+        .add_systems(
+            Update,
+            update_mouse_coords.run_if(in_state(GameState::Game)),
+        )
         .run();
 }
 
