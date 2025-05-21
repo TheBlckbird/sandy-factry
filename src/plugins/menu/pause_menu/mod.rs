@@ -1,11 +1,17 @@
 #![allow(unused)] // [TODO] Remove when finished
 
 use bevy::prelude::*;
+use bevy_pkv::PkvStore;
+use save_game::save_game;
+
+use crate::plugins::world::Seed;
 
 use super::{
     GameMenuButtonAction, GameMenuScreen, GameState, MENU_BACKGROUND, NORMAL_BUTTON,
     PauseMenuState, TEXT_COLOR,
 };
+
+mod save_game;
 
 pub fn show_game_menu(
     current_game_menu_state: Res<State<PauseMenuState>>,
@@ -102,7 +108,11 @@ pub fn update_menu(
     mut app_exit_events: EventWriter<AppExit>,
     mut game_state: ResMut<NextState<GameState>>,
     mut pause_menu_state: ResMut<NextState<PauseMenuState>>,
+    mut pkv: ResMut<PkvStore>,
+    seed: Res<Seed>,
 ) {
+    let mut should_save_game = false;
+
     for (interaction, menu_button_action) in &interaction_query {
         if *interaction == Interaction::Pressed {
             match menu_button_action {
@@ -112,11 +122,17 @@ pub fn update_menu(
                 GameMenuButtonAction::BackToMainMenu => {
                     pause_menu_state.set(PauseMenuState::Hidden);
                     game_state.set(GameState::MainMenu);
+                    should_save_game = true;
                 }
                 GameMenuButtonAction::Quit => {
                     app_exit_events.write(AppExit::Success);
+                    should_save_game = true;
                 }
             }
         }
+    }
+
+    if should_save_game {
+        save_game(&mut pkv, &seed);
     }
 }

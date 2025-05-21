@@ -22,6 +22,10 @@ winit = "0.30"
 sandy_factry_helpers = { path = "./crates/sandy_factry_helpers" }
 sandy_factry_macros = { path = "./crates/sandy_factry_macros" }
 itertools.workspace = true
+bevy_pkv = "0.13.0"
+serde.workspace = true
+strum.workspace = true
+strum_macros.workspace = true
 
 
 [lints]
@@ -36,6 +40,9 @@ bevy = { version = "0.16", features = ["file_watcher"] }
 bevy_ecs_tilemap = "0.16"
 petgraph = "0.8"
 itertools = "0.14"
+serde = { version = "1.0", features = ["derive"] }
+strum = "0.27"
+strum_macros = "0.27"
 
 [workspace.lints.clippy]
 too_many_arguments = "allow"

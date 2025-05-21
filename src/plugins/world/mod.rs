@@ -1,7 +1,11 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
+use bevy_pkv::{GetError, PkvStore};
 use generation::{cleanup, generation};
 use rand::Rng;
+use serde::{Deserialize, Serialize};
+
+use crate::save_keys::SaveKey;
 
 use super::menu::GameState;
 
@@ -13,11 +17,12 @@ pub const MAP_SIZE: TilemapSize = TilemapSize { x: 64, y: 64 };
 pub const TILE_SIZE: TilemapTileSize = TilemapTileSize { x: 8.0, y: 8.0 };
 pub const MAP_TYPE: TilemapType = TilemapType::Square;
 
-#[derive(Resource, Clone, Copy)]
+#[derive(Resource, Clone, Copy, Serialize, Deserialize)]
 pub struct Seed(u32);
 
 impl Seed {
-    fn new() -> Self {
+    /// Generates a new random seed
+    fn random() -> Self {
         Self(rand::rng().random())
     }
 }
@@ -90,8 +95,18 @@ impl Plugin for WorldPlugin {
     }
 }
 
-fn startup(mut commands: Commands) {
-    commands.insert_resource(Seed::new());
+fn startup(mut commands: Commands, pkv: Res<PkvStore>) {
+    let saved_seed: Result<Seed, GetError> = pkv.get(SaveKey::Seed);
+
+    match saved_seed {
+        Ok(seed) => commands.insert_resource(seed),
+        Err(error) => match error {
+            GetError::NotFound => commands.insert_resource(Seed::random()),
+            _ => panic!(
+                "Error with save state\nTry tdo delete the save file (/Users/username/Library/Application Support/louisweigel.sandy-factry/bevy_pkv.redb) on MacOS.\nThis WILL delete all your save data!"
+            ),
+        },
+    }
 }
 
 fn cleanup_resources(mut commands: Commands) {

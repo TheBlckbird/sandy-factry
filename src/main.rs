@@ -1,5 +1,6 @@
 use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
 use bevy_ecs_tilemap::prelude::*;
+use bevy_pkv::PkvStore;
 use plugins::{
     building::{BuildingPlugin, Foreground},
     crafting::CraftingPlugin,
@@ -15,6 +16,7 @@ use winit::window::Icon;
 
 mod machines;
 mod plugins;
+mod save_keys;
 
 #[derive(Resource, Default)]
 pub struct MouseCoordinates {
@@ -58,7 +60,7 @@ fn main() {
             DefaultPlugins
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        title: String::from("The Oil Company"),
+                        title: String::from("Sandy Fact'ry"),
                         ..Default::default()
                     }),
                     ..default()
@@ -76,6 +78,7 @@ fn main() {
             CraftingPlugin,
             MenuPlugin,
         ))
+        .insert_resource(PkvStore::new("com.louisweigel", "sandy-factry"))
         .init_resource::<MouseCoordinates>()
         .insert_resource(ClearColor(Color::hsl(194.0, 0.71, 0.37)))
         .add_systems(
