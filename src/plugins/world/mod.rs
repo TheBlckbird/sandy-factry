@@ -2,15 +2,17 @@ use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use bevy_pkv::{GetError, PkvStore};
 use generation::{cleanup, generation};
+use load_game_save::load_game_save;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 
-use crate::save_keys::SaveKey;
+use crate::save_keys::{GameSave, SaveKey};
 
 use super::menu::GameState;
 
 // mod infinite;
 mod generation;
+mod load_game_save;
 
 // Constants for world generation
 pub const MAP_SIZE: TilemapSize = TilemapSize { x: 64, y: 64 };
@@ -90,22 +92,23 @@ pub struct WorldPlugin;
 
 impl Plugin for WorldPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Game), (startup, generation).chain())
-            .add_systems(OnExit(GameState::Game), (cleanup_resources, cleanup));
+        app.add_systems(
+            OnEnter(GameState::Game),
+            (startup, (generation, load_game_save)).chain(),
+        )
+        .add_systems(OnExit(GameState::Game), (cleanup_resources, cleanup));
     }
 }
 
 fn startup(mut commands: Commands, pkv: Res<PkvStore>) {
-    let saved_seed: Result<Seed, GetError> = pkv.get(SaveKey::Seed);
+    let game_save: Result<GameSave, GetError> = pkv.get(SaveKey::GameSave);
 
-    match saved_seed {
-        Ok(seed) => commands.insert_resource(seed),
-        Err(error) => match error {
-            GetError::NotFound => commands.insert_resource(Seed::random()),
-            _ => panic!(
-                "Error with save state\nTry tdo delete the save file (/Users/username/Library/Application Support/louisweigel.sandy-factry/bevy_pkv.redb) on MacOS.\nThis WILL delete all your save data!"
-            ),
-        },
+    match game_save {
+        Ok(game_save) => commands.insert_resource(game_save.seed),
+        Err(GetError::NotFound) => commands.insert_resource(Seed::random()),
+        _ => panic!(
+            "An Error occured while trying to load the save state\nTry tdo delete the save file (/Users/username/Library/Application Support/louisweigel.sandy-factry/bevy_pkv.redb) on MacOS.\nThis WILL delete all your save data!"
+        ),
     }
 }
 

@@ -12,6 +12,7 @@ use plugins::{
     world::WorldPlugin,
 };
 use sandy_factry_helpers::tilemap::{TilemapSettingsBorrowed, get_mouse_tilepos};
+use serde::{Deserialize, Serialize};
 use winit::window::Icon;
 
 mod machines;
@@ -24,7 +25,7 @@ pub struct MouseCoordinates {
     pub y: u32,
 }
 
-#[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash)]
+#[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize, Deserialize)]
 pub enum Direction {
     North,
     East,

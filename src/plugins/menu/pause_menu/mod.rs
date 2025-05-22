@@ -1,10 +1,9 @@
-#![allow(unused)] // [TODO] Remove when finished
-
 use bevy::prelude::*;
+use bevy_ecs_tilemap::prelude::*;
 use bevy_pkv::PkvStore;
 use save_game::save_game;
 
-use crate::plugins::world::Seed;
+use crate::{machines::Machine, plugins::world::Seed};
 
 use super::{
     GameMenuButtonAction, GameMenuScreen, GameState, MENU_BACKGROUND, NORMAL_BUTTON,
@@ -30,7 +29,7 @@ pub fn show_game_menu(
     }
 }
 
-pub fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn setup_menu(mut commands: Commands) {
     // Common style for all buttons on the screen
     let button_node = Node {
         width: Val::Px(300.0),
@@ -110,6 +109,8 @@ pub fn update_menu(
     mut pause_menu_state: ResMut<NextState<PauseMenuState>>,
     mut pkv: ResMut<PkvStore>,
     seed: Res<Seed>,
+    tile_query: Query<(&TilePos, &TileTextureIndex, &Machine)>,
+    camera: Single<&Transform, With<Camera2d>>,
 ) {
     let mut should_save_game = false;
 
@@ -133,6 +134,11 @@ pub fn update_menu(
     }
 
     if should_save_game {
-        save_game(&mut pkv, &seed);
+        save_game(
+            &mut pkv,
+            &seed,
+            tile_query.iter().collect(),
+            camera.into_inner().translation,
+        );
     }
 }

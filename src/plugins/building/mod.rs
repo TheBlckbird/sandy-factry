@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use place_buildings::place_buildings;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     Direction,
@@ -20,7 +21,7 @@ use super::{
 
 mod place_buildings;
 
-#[derive(Debug, Resource, Default, Clone, Copy, PartialEq)]
+#[derive(Debug, Resource, Default, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum ForegroundObject {
     #[default]
     Nothing,
@@ -316,7 +317,7 @@ pub struct Foreground;
 #[derive(Component)]
 struct HoverBuilding;
 
-#[derive(Component)]
+#[derive(Component, Serialize, Deserialize)]
 pub struct BuildingInput(pub Option<Vec<Direction>>);
 
 #[derive(Component)]

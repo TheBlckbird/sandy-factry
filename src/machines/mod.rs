@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use itertools::Itertools;
+use serde::{Deserialize, Serialize};
 
 use std::{collections::VecDeque, fmt::Debug};
 
@@ -57,10 +58,10 @@ pub trait MachineType: Debug + Send + Sync {
     ) -> bool;
 }
 
-type OutputItems = VecDeque<Item>;
+pub type OutputItems = VecDeque<Item>;
 pub type Side = Direction;
 
-#[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash)]
+#[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize, Deserialize)]
 pub enum Item {
     Coal,
     RawCopper,
@@ -91,7 +92,7 @@ pub trait MachineVariants<M: MachineType>:
 
 pub type InputItemsPart = Option<VecDeque<Item>>;
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct InputItems {
     pub north: InputItemsPart,
     pub east: InputItemsPart,

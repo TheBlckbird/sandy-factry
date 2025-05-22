@@ -1,7 +1,35 @@
+use bevy::prelude::*;
+use bevy_ecs_tilemap::prelude::*;
+
 use bevy_pkv::PkvStore;
 
-use crate::{plugins::world::Seed, save_keys::SaveKey};
+use crate::{
+    machines::Machine,
+    plugins::{building::ForegroundObject, world::Seed},
+    save_keys::{GameSave, MachineTiles, SaveKey},
+};
 
-pub fn save_game(mut pkv: &mut PkvStore, seed: &Seed) {
-    pkv.set(SaveKey::Seed, seed);
+pub fn save_game(
+    pkv: &mut PkvStore,
+    seed: &Seed,
+    machine_tiles: Vec<(&TilePos, &TileTextureIndex, &Machine)>,
+    camera_translation: Vec3,
+) {
+    let mut saved_tiles: MachineTiles = Vec::new();
+
+    for (tile_pos, tile_texture_index, machine) in machine_tiles {
+        let foreground_object = ForegroundObject::from(*tile_texture_index);
+
+        saved_tiles.push((
+            *tile_pos,
+            foreground_object,
+            machine.input_items.clone(),
+            machine.output_items.clone(),
+        ));
+    }
+
+    let game_save = GameSave::new(saved_tiles, *seed, camera_translation);
+
+    pkv.set(SaveKey::GameSave, &game_save)
+        .expect("An error occured while trying to save the game");
 }
