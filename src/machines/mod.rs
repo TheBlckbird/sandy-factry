@@ -1,6 +1,7 @@
 use bevy::prelude::*;
-use bevy_ecs_tilemap::tiles::TileTextureIndex;
+use bevy_ecs_tilemap::prelude::*;
 use itertools::Itertools;
+use serde::{Deserialize, Serialize};
 
 use std::{collections::VecDeque, fmt::Debug};
 
@@ -60,7 +61,7 @@ pub trait MachineType: Debug + Send + Sync {
 
 pub type Side = Direction;
 
-#[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash)]
+#[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize, Deserialize)]
 pub enum Item {
     Coal,
     RawCopper,
@@ -81,11 +82,19 @@ impl From<Item> for TileTextureIndex {
     }
 }
 
+pub trait MachineVariants<M: MachineType>:
+    From<TileTextureIndex> + Into<TileTextureIndex> + Into<M> + Default
+{
+    fn get_input_sides(&self) -> Option<Vec<Side>>;
+    fn get_output_sides(&self) -> Option<Vec<Side>>;
+    fn should_render_item(&self) -> bool;
+}
+
 pub type InputItems = ItemsSet;
 pub type OutputItems = ItemsSet;
 pub type ItemsSetPart = Option<VecDeque<Item>>;
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct ItemsSet {
     pub north: ItemsSetPart,
     pub east: ItemsSetPart,

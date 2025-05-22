@@ -8,7 +8,7 @@ use crate::{
     machines::{Item, Machine},
     plugins::{
         TilemapLayer,
-        building::{Foreground, ForegroundObject},
+        building::{Foreground, foreground_objects::ForegroundObject},
         world::{MAP_SIZE, MAP_TYPE, TILE_SIZE},
     },
 };
@@ -32,7 +32,7 @@ pub fn setup_item_tilemap(mut commands: Commands, asset_server: Res<AssetServer>
 pub fn update_item_tilemap(
     mut commands: Commands,
     tilemap_q: Single<(Entity, &mut TileStorage), With<ItemLayer>>,
-    forground_tiles: Query<(&TilePos, &TileTextureIndex, &Machine), With<Foreground>>,
+    foreground_tiles: Query<(&TilePos, &TileTextureIndex, &Machine), With<Foreground>>,
     item_tiles: Query<(Entity, &TilePos), With<Item>>,
 ) {
     let (tilemap_entity, mut tile_storage) = tilemap_q.into_inner();
@@ -47,7 +47,7 @@ pub fn update_item_tilemap(
     // List all tiles that need to have an item rendered
     let mut desired_items_state = HashMap::new();
 
-    forground_tiles
+    foreground_tiles
         .iter()
         .filter(|&(_, tile_texture_index, _)| {
             // Check if the tile is should render items AND has an item on it
@@ -82,14 +82,26 @@ pub fn update_item_tilemap(
 
     // All the remaining tiles in desired_items_state need to be rendered
     for (tile_pos, item) in desired_items_state.iter() {
-        commands.spawn((
-            TileBundle {
-                position: *tile_pos,
-                tilemap_id: TilemapId(tilemap_entity),
-                texture_index: (*item).into(),
-                ..Default::default()
-            },
-            *item,
-        ));
+        let tile_entity = commands
+            .spawn((
+                TileBundle {
+                    position: *tile_pos,
+                    tilemap_id: TilemapId(tilemap_entity),
+                    texture_index: (*item).into(),
+                    ..Default::default()
+                },
+                *item,
+            ))
+            .id();
+
+        commands.entity(tilemap_entity).add_child(tile_entity);
+        tile_storage.set(tile_pos, tile_entity);
     }
+}
+
+pub fn cleanup(
+    mut commands: Commands,
+    item_tilemap: Single<Entity, (With<TileStorage>, With<ItemLayer>)>,
+) {
+    commands.entity(item_tilemap.entity()).despawn();
 }

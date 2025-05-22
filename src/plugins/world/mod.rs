@@ -1,7 +1,13 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
-use generation::generation;
+use generation::{cleanup, generation};
+
 use rand::Rng;
+use serde::{Deserialize, Serialize};
+
+use crate::game_save_types::LoadedGameSave;
+
+use super::menu::GameState;
 
 // mod infinite;
 mod generation;
@@ -11,11 +17,12 @@ pub const MAP_SIZE: TilemapSize = TilemapSize { x: 64, y: 64 };
 pub const TILE_SIZE: TilemapTileSize = TilemapTileSize { x: 8.0, y: 8.0 };
 pub const MAP_TYPE: TilemapType = TilemapType::Square;
 
-#[derive(Resource, Clone, Copy)]
+#[derive(Resource, Clone, Copy, Serialize, Deserialize)]
 pub struct Seed(u32);
 
 impl Seed {
-    fn new() -> Self {
+    /// Generates a new random seed
+    fn random() -> Self {
         Self(rand::rng().random())
     }
 }
@@ -83,7 +90,18 @@ pub struct WorldPlugin;
 
 impl Plugin for WorldPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(Seed::new())
-            .add_systems(Startup, generation);
+        app.add_systems(OnEnter(GameState::Game), (startup, generation).chain())
+            .add_systems(OnExit(GameState::Game), (cleanup_resources, cleanup));
     }
+}
+
+fn startup(mut commands: Commands, game_save: Res<LoadedGameSave>) {
+    match &**game_save {
+        Some(game_save) => commands.insert_resource(game_save.seed),
+        None => commands.insert_resource(Seed::random()),
+    }
+}
+
+fn cleanup_resources(mut commands: Commands) {
+    commands.remove_resource::<Seed>();
 }

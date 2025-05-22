@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_ecs_tilemap::prelude::*;
 use noise::{NoiseFn, Simplex};
 use sandy_factry_helpers::tilemap::{TilemapSettings, generate_tilemap_layer};
 
@@ -20,7 +21,7 @@ pub fn generation(mut commands: Commands, asset_server: Res<AssetServer>, seed: 
         TilemapLayer::Background.into(),
         TilemapSettings::new(MAP_SIZE, TILE_SIZE, MAP_TYPE, TILE_SIZE.into()),
         Background,
-        |_| Some((BackgroundObject::DefaultTile.into(), Background)),
+        |_| Some((BackgroundObject::Dirt.into(), Background)),
     );
 
     generate_tilemap_layer(
@@ -61,4 +62,13 @@ pub fn generation(mut commands: Commands, asset_server: Res<AssetServer>, seed: 
             }
         },
     );
+}
+
+pub fn cleanup(
+    mut commands: Commands,
+    background_tilemap: Single<Entity, (With<Background>, With<TileStorage>)>,
+    middleground_tilemap: Single<Entity, (With<Middleground>, With<TileStorage>)>,
+) {
+    commands.entity(background_tilemap.entity()).despawn();
+    commands.entity(middleground_tilemap.entity()).despawn();
 }

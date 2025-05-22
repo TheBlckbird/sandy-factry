@@ -20,10 +20,12 @@ pub fn setup(mut commands: Commands) {
 }
 
 pub fn update_coordinates(
-    mut coordinates_text: Query<&mut Text, With<CoordinatesText>>,
+    mut coordinates_text: Single<&mut Text, With<CoordinatesText>>,
     mouse_coords: Res<MouseCoordinates>,
 ) {
-    for mut span in coordinates_text.iter_mut() {
-        **span = format!("X: {}, Y: {}", mouse_coords.x, mouse_coords.y);
-    }
+    coordinates_text.0 = format!("X: {}, Y: {}", mouse_coords.x, mouse_coords.y);
+}
+
+pub fn cleanup(mut commands: Commands, coordinates_text: Single<Entity, With<CoordinatesText>>) {
+    commands.entity(coordinates_text.entity()).despawn();
 }

@@ -1,4 +1,6 @@
-use super::{InputItems, Item, MachineType, OutputItems, Side};
+use sandy_factry_macros::MachineVariants;
+
+use super::{InputItems, Item, MachineType, MachineVariants, OutputItems, Side};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Combiner {
@@ -71,4 +73,27 @@ impl MachineType for Combiner {
 
         input_side == &self.input_sides[input_side_index]
     }
+}
+
+#[derive(Debug, Default, MachineVariants)]
+#[machine_type(Combiner)]
+#[render]
+pub enum CombinerVariants {
+    #[default]
+    #[variant(inputs(North, West), outputs(South), texture = 14, machine = Combiner::new([Side::North, Side::West]))]
+    UpLeft,
+    #[variant(inputs(West, South), outputs(East), texture = 15, machine = Combiner::new([Side::West, Side::South]))]
+    LeftDown,
+    #[variant(inputs(South, East), outputs(North), texture = 16, machine = Combiner::new([Side::South, Side::East]))]
+    DownRight,
+    #[variant(inputs(East, North), outputs(West), texture = 17, machine = Combiner::new([Side::East, Side::North]))]
+    RightUp,
+    #[variant(inputs(South, West), outputs(North), texture = 18, machine = Combiner::new([Side::South, Side::West]))]
+    DownLeft,
+    #[variant(inputs(West, North), outputs(East), texture = 19, machine = Combiner::new([Side::West, Side::North]))]
+    LeftUp,
+    #[variant(inputs(North, East), outputs(South), texture = 20, machine = Combiner::new([Side::North, Side::East]))]
+    UpRight,
+    #[variant(inputs(East, South), outputs(West), texture = 21, machine = Combiner::new([Side::East, Side::South]))]
+    RightDown,
 }

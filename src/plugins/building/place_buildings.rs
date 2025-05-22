@@ -3,12 +3,13 @@ use std::collections::VecDeque;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_ecs_tilemap::prelude::*;
-use sandy_factry_helpers::tilemap::{TilemapSettingsBorrowed, get_mouse_tilepos};
+use sandy_factry_helpers::tilemap::{TilemapSettingsBorrowed, get_mouse_tilepos, remove_tile};
 
 use crate::machines::{InputItems, Item, Machine};
 
 use super::{
-    BuildEvent, BuildingInput, BuildingOutput, Foreground, ForegroundObject, HoverBuilding,
+    BuildEvent, BuildingInput, BuildingOutput, Foreground, HoverBuilding,
+    foreground_objects::ForegroundObject,
 };
 
 pub fn place_buildings(
@@ -67,8 +68,7 @@ pub fn place_buildings(
         if *tile_pos == mouse_tile_pos && hover.is_none() {
             is_other_tile_at_mouse = true;
         } else if hover.is_some() {
-            commands.entity(tile_entity).despawn();
-            tile_storage.remove(tile_pos);
+            remove_tile(&mut commands, &mut tile_storage, tile_entity, tile_pos);
         }
     }
 
@@ -115,6 +115,7 @@ pub fn place_buildings(
                         None => return,
                     },
                     match foreground_object {
+                        // [TODO] Remove debug
                         ForegroundObject::Miner => InputItems::new(
                             Some(VecDeque::from([Item::Coal; 15])),
                             None,
@@ -136,6 +137,7 @@ pub fn place_buildings(
             tile_texture_index.into(),
         ));
 
+        commands.entity(tilemap_entity).add_child(new_tile_entity);
         tile_storage.set(&mouse_tile_pos, new_tile_entity);
     } else {
         // hover mode
@@ -154,6 +156,7 @@ pub fn place_buildings(
             ))
             .id();
 
+        commands.entity(tilemap_entity).add_child(new_tile_entity);
         tile_storage.set(&mouse_tile_pos, new_tile_entity);
     }
 }
