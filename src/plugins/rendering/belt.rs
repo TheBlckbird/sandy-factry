@@ -8,7 +8,7 @@ use crate::{
     machines::{Item, Machine},
     plugins::{
         TilemapLayer,
-        building::{Foreground, ForegroundObject},
+        building::{Foreground, foreground_objects::ForegroundObject},
         world::{MAP_SIZE, MAP_TYPE, TILE_SIZE},
     },
 };

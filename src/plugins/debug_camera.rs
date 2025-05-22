@@ -6,13 +6,22 @@ use bevy::{
     prelude::*,
 };
 
+use crate::game_save_types::LoadedGameSave;
+
 use super::menu::GameState;
 
 pub struct DebugCameraPlugin;
 impl Plugin for DebugCameraPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, movement.run_if(in_state(GameState::Game)))
+        app.add_systems(OnEnter(GameState::Game), startup)
+            .add_systems(Update, movement.run_if(in_state(GameState::Game)))
             .add_systems(OnExit(GameState::Game), cleanup);
+    }
+}
+
+fn startup(game_save: Res<LoadedGameSave>, camera: Single<&mut Transform, With<Camera2d>>) {
+    if let Some(game_save) = &**game_save {
+        camera.into_inner().translation = game_save.camera_translation;
     }
 }
 

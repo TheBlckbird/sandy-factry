@@ -1,5 +1,6 @@
 use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
 use bevy_ecs_tilemap::prelude::*;
+use bevy_pkv::PkvStore;
 use plugins::{
     building::{BuildingPlugin, Foreground},
     crafting::CraftingPlugin,
@@ -11,10 +12,13 @@ use plugins::{
     world::WorldPlugin,
 };
 use sandy_factry_helpers::tilemap::{TilemapSettingsBorrowed, get_mouse_tilepos};
+use serde::{Deserialize, Serialize};
 use winit::window::Icon;
 
+mod game_save_types;
 mod machines;
 mod plugins;
+mod save_keys;
 
 #[derive(Resource, Default)]
 pub struct MouseCoordinates {
@@ -22,7 +26,7 @@ pub struct MouseCoordinates {
     pub y: u32,
 }
 
-#[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash)]
+#[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize, Deserialize)]
 pub enum Direction {
     North,
     East,
@@ -58,7 +62,7 @@ fn main() {
             DefaultPlugins
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        title: String::from("The Oil Company"),
+                        title: String::from("Sandy Fact'ry"),
                         ..Default::default()
                     }),
                     ..default()
@@ -76,6 +80,7 @@ fn main() {
             CraftingPlugin,
             MenuPlugin,
         ))
+        .insert_resource(PkvStore::new("com.louisweigel", "sandy-factry"))
         .init_resource::<MouseCoordinates>()
         .insert_resource(ClearColor(Color::hsl(194.0, 0.71, 0.37)))
         .add_systems(
