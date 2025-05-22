@@ -1,4 +1,6 @@
-use bevy::{color::palettes::css::CRIMSON, prelude::*};
+use bevy::prelude::*;
+
+use crate::game_save_types::LoadedGameSave;
 
 mod main_menu;
 mod pause_menu;
@@ -62,6 +64,7 @@ impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
         app.init_state::<GameState>()
             .init_state::<PauseMenuState>()
+            .init_resource::<LoadedGameSave>()
             // Splash Screen
             .add_systems(
                 OnEnter(GameState::Splash),

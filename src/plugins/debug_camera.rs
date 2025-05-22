@@ -5,9 +5,8 @@ use bevy::{
     },
     prelude::*,
 };
-use bevy_pkv::{GetError, PkvStore};
 
-use crate::save_keys::{GameSave, SaveKey};
+use crate::game_save_types::LoadedGameSave;
 
 use super::menu::GameState;
 
@@ -20,15 +19,9 @@ impl Plugin for DebugCameraPlugin {
     }
 }
 
-fn startup(pkv: Res<PkvStore>, camera: Single<&mut Transform, With<Camera2d>>) {
-    let game_save: Result<GameSave, GetError> = pkv.get(SaveKey::GameSave);
-
-    match game_save {
-        Ok(game_save) => camera.into_inner().translation = game_save.camera_translation,
-        Err(GetError::NotFound) => {}
-        _ => panic!(
-            "An Error occured while trying to load the save state\nTry tdo delete the save file (/Users/username/Library/Application Support/louisweigel.sandy-factry/bevy_pkv.redb) on MacOS.\nThis WILL delete all your save data!"
-        ),
+fn startup(game_save: Res<LoadedGameSave>, camera: Single<&mut Transform, With<Camera2d>>) {
+    if let Some(game_save) = &**game_save {
+        camera.into_inner().translation = game_save.camera_translation;
     }
 }
 

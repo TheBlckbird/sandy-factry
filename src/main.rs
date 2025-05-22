@@ -15,6 +15,7 @@ use sandy_factry_helpers::tilemap::{TilemapSettingsBorrowed, get_mouse_tilepos};
 use serde::{Deserialize, Serialize};
 use winit::window::Icon;
 
+mod game_save_types;
 mod machines;
 mod plugins;
 mod save_keys;

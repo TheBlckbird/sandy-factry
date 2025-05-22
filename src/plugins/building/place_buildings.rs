@@ -8,7 +8,8 @@ use sandy_factry_helpers::tilemap::{TilemapSettingsBorrowed, get_mouse_tilepos, 
 use crate::machines::{InputItems, Item, Machine};
 
 use super::{
-    BuildEvent, BuildingInput, BuildingOutput, Foreground, ForegroundObject, HoverBuilding,
+    BuildEvent, BuildingInput, BuildingOutput, Foreground, HoverBuilding,
+    foreground_objects::ForegroundObject,
 };
 
 pub fn place_buildings(

@@ -1,13 +1,17 @@
-#![allow(unused)] // [TODO] Remove when finished
-
 use bevy::prelude::*;
+use bevy_pkv::{GetError, PkvStore};
+
+use crate::{
+    game_save_types::{GameSave, LoadedGameSave},
+    save_keys::SaveKey,
+};
 
 use super::{
     GameState, MAIN_TEXT_COLOR, MENU_BACKGROUND, MainMenuButtonAction, MainMenuScreen,
     NORMAL_BUTTON, TEXT_COLOR,
 };
 
-pub fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn setup_menu(mut commands: Commands) {
     // Common style for all buttons on the screen
     let button_node = Node {
         width: Val::Px(300.0),
@@ -85,14 +89,28 @@ pub fn update_menu(
     >,
     mut app_exit_events: EventWriter<AppExit>,
     mut game_state: ResMut<NextState<GameState>>,
+    mut current_game_save: ResMut<LoadedGameSave>,
+    pkv: Res<PkvStore>,
 ) {
     for (interaction, menu_button_action) in &interaction_query {
         if *interaction == Interaction::Pressed {
             match menu_button_action {
                 MainMenuButtonAction::Quit => {
+                    // exit the app
                     app_exit_events.write(AppExit::Success);
                 }
                 MainMenuButtonAction::Play => {
+                    // retrieve the saved game
+                    let game_save: Result<GameSave, GetError> = pkv.get(SaveKey::GameSave);
+
+                    **current_game_save = match game_save {
+                        Ok(game_save) => Some(game_save),
+                        Err(GetError::NotFound) => None,
+                        _ => panic!(
+                            "An Error occured while trying to load the save state\nTry tdo delete the save file (/Users/username/Library/Application Support/louisweigel.sandy-factry/bevy_pkv.redb) on MacOS.\nThis WILL delete all your save data!"
+                        ),
+                    };
+
                     game_state.set(GameState::Game);
                 }
             }

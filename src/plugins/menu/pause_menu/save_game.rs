@@ -4,9 +4,10 @@ use bevy_ecs_tilemap::prelude::*;
 use bevy_pkv::PkvStore;
 
 use crate::{
+    game_save_types::{GameSave, MachineTiles},
     machines::Machine,
-    plugins::{building::ForegroundObject, world::Seed},
-    save_keys::{GameSave, MachineTiles, SaveKey},
+    plugins::{building::foreground_objects::ForegroundObject, world::Seed},
+    save_keys::SaveKey,
 };
 
 pub fn save_game(
