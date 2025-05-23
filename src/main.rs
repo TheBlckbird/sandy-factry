@@ -92,7 +92,7 @@ fn main() {
             ),
         )
         .add_systems(
-            Update,
+            PreUpdate,
             update_mouse_coords.run_if(in_state(GameState::Game)),
         )
         .run();

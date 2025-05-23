@@ -12,6 +12,7 @@ pub mod combiner;
 pub mod crafter;
 pub mod miner;
 pub mod splitter;
+pub mod void;
 
 #[derive(Debug, Component)]
 pub struct Machine {

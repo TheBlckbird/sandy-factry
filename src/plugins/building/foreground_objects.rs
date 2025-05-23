@@ -1,6 +1,6 @@
 use crate::machines::{
     Item, MachineType, Side, belt::Belt, combiner::Combiner, crafter::Crafter, miner::Miner,
-    splitter::Splitter,
+    splitter::Splitter, void::Void,
 };
 
 use bevy::prelude::*;
@@ -38,6 +38,7 @@ pub enum ForegroundObject {
     CombinerUpRight,
     CombinerRightDown,
     SplitterDownRight,
+    Void,
 }
 
 impl ForegroundObject {
@@ -90,6 +91,7 @@ impl ForegroundObject {
             ForegroundObject::SplitterDownRight => {
                 Some(Box::new(Splitter::new([Side::South, Side::East])))
             }
+            ForegroundObject::Void => Some(Box::new(Void)),
         }
     }
 
@@ -119,12 +121,13 @@ impl ForegroundObject {
             ForegroundObject::CombinerUpRight => Some(vec![Side::North, Side::East]),
             ForegroundObject::CombinerRightDown => Some(vec![Side::East, Side::South]),
             ForegroundObject::SplitterDownRight => Some(vec![Side::North]),
+            ForegroundObject::Void => Some(vec![Side::North, Side::East, Side::South, Side::West]),
         }
     }
 
     pub fn get_output_sides(&self) -> Option<Vec<Side>> {
         match self {
-            ForegroundObject::Nothing => None,
+            ForegroundObject::Nothing | ForegroundObject::Void => None,
             ForegroundObject::BeltUp => Some(vec![Side::North]),
             ForegroundObject::BeltDown => Some(vec![Side::South]),
             ForegroundObject::BeltLeft => Some(vec![Side::West]),
@@ -153,9 +156,10 @@ impl ForegroundObject {
 
     pub fn should_render_item(&self) -> bool {
         match self {
-            ForegroundObject::Nothing | ForegroundObject::Crafter | ForegroundObject::Miner => {
-                false
-            }
+            ForegroundObject::Nothing
+            | ForegroundObject::Crafter
+            | ForegroundObject::Miner
+            | ForegroundObject::Void => false,
             ForegroundObject::BeltUp
             | ForegroundObject::BeltDown
             | ForegroundObject::BeltLeft
@@ -182,7 +186,7 @@ impl ForegroundObject {
 
     pub fn select_previous(&mut self) {
         *self = match self {
-            ForegroundObject::Nothing => ForegroundObject::SplitterDownRight,
+            ForegroundObject::Nothing => ForegroundObject::Void,
             ForegroundObject::BeltUp => ForegroundObject::Nothing,
             ForegroundObject::BeltDown => ForegroundObject::BeltUp,
             ForegroundObject::BeltLeft => ForegroundObject::BeltDown,
@@ -206,6 +210,7 @@ impl ForegroundObject {
             ForegroundObject::CombinerUpRight => ForegroundObject::CombinerLeftUp,
             ForegroundObject::CombinerRightDown => ForegroundObject::CombinerUpRight,
             ForegroundObject::SplitterDownRight => ForegroundObject::CombinerRightDown,
+            ForegroundObject::Void => ForegroundObject::SplitterDownRight,
         };
     }
 
@@ -234,7 +239,8 @@ impl ForegroundObject {
             ForegroundObject::CombinerLeftUp => ForegroundObject::CombinerUpRight,
             ForegroundObject::CombinerUpRight => ForegroundObject::CombinerRightDown,
             ForegroundObject::CombinerRightDown => ForegroundObject::SplitterDownRight,
-            ForegroundObject::SplitterDownRight => ForegroundObject::Nothing,
+            ForegroundObject::SplitterDownRight => ForegroundObject::Void,
+            ForegroundObject::Void => ForegroundObject::Nothing,
         }
     }
 }
@@ -265,6 +271,7 @@ impl From<TileTextureIndex> for ForegroundObject {
             20 => ForegroundObject::CombinerUpRight,
             21 => ForegroundObject::CombinerRightDown,
             26 => ForegroundObject::SplitterDownRight,
+            29 => ForegroundObject::Void,
             _ => panic!("Can't convert {:?} to a ForegroundObject!", value.0),
         }
     }
@@ -298,6 +305,7 @@ impl TryFrom<ForegroundObject> for TileTextureIndex {
             ForegroundObject::CombinerUpRight => 20,
             ForegroundObject::CombinerRightDown => 21,
             ForegroundObject::SplitterDownRight => 26,
+            ForegroundObject::Void => 29,
             ForegroundObject::Nothing => {
                 return Err("Building `Nothing` can't be converted to `ForegroundObject`");
             }
