@@ -21,7 +21,7 @@ pub fn generation(mut commands: Commands, asset_server: Res<AssetServer>, seed: 
         TilemapLayer::Background.into(),
         TilemapSettings::new(MAP_SIZE, TILE_SIZE, MAP_TYPE, TILE_SIZE.into()),
         Background,
-        |_| Some((BackgroundObject::Dirt.into(), Background)),
+        |_| Some((BackgroundObject::Sand.into(), Background)),
     );
 
     generate_tilemap_layer(

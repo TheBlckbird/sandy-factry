@@ -36,7 +36,7 @@ pub struct Middleground;
 #[allow(unused)]
 #[derive(Default, Clone, Copy)]
 enum BackgroundObject {
-    Dirt,
+    Sand,
     Water,
     #[default]
     DefaultTile,
@@ -45,7 +45,7 @@ enum BackgroundObject {
 impl From<BackgroundObject> for TileTextureIndex {
     fn from(value: BackgroundObject) -> Self {
         let index = match value {
-            BackgroundObject::Dirt => 0,
+            BackgroundObject::Sand => 0,
             BackgroundObject::Water => 1,
             BackgroundObject::DefaultTile => 2,
         };
