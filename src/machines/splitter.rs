@@ -37,8 +37,6 @@ impl MachineType for Splitter {
         if output_items.is_empty()
             && let Some(input_item) = input_items.exactly_one_mut().pop_front()
         {
-            println!("Splitter just ran");
-
             output_items
                 .get_side_mut(&current_output_side)
                 .as_mut()

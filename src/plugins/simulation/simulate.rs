@@ -31,24 +31,24 @@ pub fn simulate(
         return;
     }
 
-    println!(
-        "{:?}",
-        Dot::new(&simulation_graph.map(
-            |_, (machine, tile_pos)| {
-                let mut machine_type = format!("{:?}", machine.machine_type);
-                machine_type = machine_type
-                    .split(' ')
-                    .next()
-                    .expect("Whoops, no machine?")
-                    .to_string();
+    // println!(
+    //     "{:?}",
+    //     Dot::new(&simulation_graph.map(
+    //         |_, (machine, tile_pos)| {
+    //             let mut machine_type = format!("{:?}", machine.machine_type);
+    //             machine_type = machine_type
+    //                 .split(' ')
+    //                 .next()
+    //                 .expect("Whoops, no machine?")
+    //                 .to_string();
 
-                let tile_pos = format!("{}, {}", tile_pos.x, tile_pos.y);
+    //             let tile_pos = format!("{}, {}", tile_pos.x, tile_pos.y);
 
-                format!("{machine_type}; {tile_pos}")
-            },
-            |_, edge| edge,
-        ))
-    );
+    //             format!("{machine_type}; {tile_pos}")
+    //         },
+    //         |_, edge| edge,
+    //     ))
+    // );
 
     let mut leaf_nodes: Vec<NodeIndex> = simulation_graph
         .externals(petgraph::Direction::Outgoing)
@@ -163,8 +163,6 @@ pub fn simulate(
                             .push_back(item);
                     }
                 }
-
-                println!();
             } else {
                 visited.push_back(node_index);
                 let (building, building_tile_pos) = &mut simulation_graph[node_index];
