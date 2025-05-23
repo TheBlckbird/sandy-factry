@@ -44,9 +44,9 @@ impl MachineType for Splitter {
                     panic!("Splitter should have the output side `{current_output_side:?}`")
                 })
                 .push_back(input_item);
-        }
 
-        self.last_output_side_index = current_output_side_index;
+            self.last_output_side_index = current_output_side_index;
+        }
     }
 
     fn clone_box(&self) -> Box<dyn MachineType> {
