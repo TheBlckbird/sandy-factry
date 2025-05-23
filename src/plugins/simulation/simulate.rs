@@ -86,14 +86,19 @@ pub fn simulate(
     for leaf_node in leaf_nodes {
         simulation_graph.reverse();
 
-        let mut bfs = Bfs::new(&**simulation_graph, leaf_node);
+        // let mut bfs = Bfs::new(&**simulation_graph, leaf_node);
 
-        while let Some(node_index) = bfs.next(&**simulation_graph) {
-            // Problem: Splitter is being executed with the right argument but at the wrong time
-            // at the second input, it's not the last, but the first machine to be executed...
+        let mut next_nodes = VecDeque::from([leaf_node]);
+
+        while
+        /*let Some(node_index) = next_nodes.pop_front()*/
+        !next_nodes.is_empty() {
+            let node_index = next_nodes
+                .pop_front()
+                .expect("The `nodes` queue should have an entry, we just checked");
 
             if visited.contains(&node_index) {
-                break;
+                continue;
             }
 
             let next_building_indices: Vec<(NodeIndex, Side)> = simulation_graph
@@ -116,7 +121,15 @@ pub fn simulate(
                     .expect("This was just inserted/updated, so it should exist");
 
                 if *times_loop_ran != next_building_indices_len as u32 {
-                    break;
+                    continue;
+                }
+
+                for adjacent_node in
+                    simulation_graph.neighbors_directed(node_index, Direction::Outgoing)
+                {
+                    if !visited.contains(&adjacent_node) {
+                        next_nodes.push_back(adjacent_node);
+                    }
                 }
 
                 for (i, (next_building_index, input_side)) in
@@ -124,7 +137,7 @@ pub fn simulate(
                 {
                     let output_side = input_side.get_opposite();
 
-                    let ((building, building_tile_pos), (next_building, next_building_tile_pos)) =
+                    let ((building, building_tile_pos), (next_building, _)) =
                         simulation_graph.index_twice_mut(node_index, next_building_index);
 
                     if i == 0 && *times_loop_ran == next_building_indices_len as u32 {
@@ -164,6 +177,14 @@ pub fn simulate(
                     }
                 }
             } else {
+                for adjacent_node in
+                    simulation_graph.neighbors_directed(node_index, Direction::Outgoing)
+                {
+                    if !visited.contains(&adjacent_node) {
+                        next_nodes.push_back(adjacent_node);
+                    }
+                }
+
                 visited.push_back(node_index);
                 let (building, building_tile_pos) = &mut simulation_graph[node_index];
 
