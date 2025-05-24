@@ -110,7 +110,7 @@ pub fn place_buildings(
                 },
                 Foreground,
                 Machine::new(
-                    match foreground_object.into_building_type() {
+                    match foreground_object.try_into().ok() {
                         Some(building_type) => building_type,
                         None => return,
                     },
