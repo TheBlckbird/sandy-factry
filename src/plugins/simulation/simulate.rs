@@ -1,12 +1,8 @@
-use std::collections::{HashSet, VecDeque};
+use std::collections::VecDeque;
 
 use bevy::{platform::collections::HashMap, prelude::*};
 use bevy_ecs_tilemap::tiles::{TilePos, TileTextureIndex};
-use petgraph::{
-    algo::{connected_components, tarjan_scc},
-    dot::Dot,
-    prelude::*,
-};
+use petgraph::{algo::tarjan_scc, prelude::*};
 
 use crate::{
     machines::Side,
@@ -34,7 +30,7 @@ pub fn simulate(
     // println!(
     //     "{:?}",
     //     Dot::new(&simulation_graph.map(
-    //         |_, (machine, tile_pos)| {
+    //         |node_index, (machine, tile_pos)| {
     //             let mut machine_type = format!("{:?}", machine.machine_type);
     //             machine_type = machine_type
     //                 .split(' ')
@@ -44,46 +40,18 @@ pub fn simulate(
 
     //             let tile_pos = format!("{}, {}", tile_pos.x, tile_pos.y);
 
-    //             format!("{machine_type}; {tile_pos}")
+    //             format!("{}: {machine_type}; {tile_pos}", node_index.index())
     //         },
     //         |_, edge| edge,
     //     ))
     // );
 
-    let mut leaf_nodes: Vec<NodeIndex> = simulation_graph
-        .externals(petgraph::Direction::Outgoing)
-        .collect();
-
-    // [FIXME] circular refernces still won't work
-    let sub_graphs_count = connected_components(&**simulation_graph);
-
-    // let mut additional_starting_nodes = Vec::with_capacity(sub_graphs_count - leaf_nodes.len());
-    let mut additional_starting_nodes = Vec::new();
-
-    // if leaf_nodes.len() < sub_graphs_count {
-    //     tarjan_scc(&simulation_graph)
-    //         .iter()
-    //         .filter(|subgraph| {
-    //             !subgraph
-    //                 .iter()
-    //                 .any(|subgraph_node| leaf_nodes.contains(subgraph_node))
-    //         })
-    //         .for_each(|subgraph| {
-    //             additional_starting_nodes.push(
-    //                 *subgraph
-    //                     .first()
-    //                     .expect("There should be at least one subgraph"),
-    //             )
-    //         });
-    // }
-
+    let scc = tarjan_scc(&**simulation_graph);
     let mut visited = VecDeque::new();
-
-    leaf_nodes.append(&mut additional_starting_nodes);
 
     let mut times_loops_ran: HashMap<NodeIndex, u32> = HashMap::new();
 
-    for leaf_node in leaf_nodes {
+    for leaf_node in scc.iter().map(|component| component[0]) {
         simulation_graph.reverse();
 
         // let mut bfs = Bfs::new(&**simulation_graph, leaf_node);

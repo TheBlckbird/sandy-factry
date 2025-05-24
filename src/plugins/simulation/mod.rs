@@ -67,7 +67,7 @@ impl Plugin for SimulationPlugin {
 fn startup(mut commands: Commands) {
     commands.init_resource::<SimulationGraph>();
     commands.insert_resource(SimulationTimer(Timer::from_seconds(
-        1.0, // [TODO] Remove debug
+        0.1,
         TimerMode::Repeating,
     )));
 }
