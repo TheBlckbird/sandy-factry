@@ -12,10 +12,10 @@ impl MachineType for Belt {
         output_items: &mut OutputItems,
         _middleground_object: Option<MiddlegroundObject>,
     ) {
-        if output_items.is_empty()
+        if output_items.exactly_one().is_empty()
             && let Some(input_item) = input_items.exactly_one_mut().pop_front()
         {
-            output_items.push_back(input_item);
+            output_items.exactly_one_mut().push_back(input_item);
         }
     }
 
@@ -30,7 +30,7 @@ impl MachineType for Belt {
         output_items: &OutputItems,
         _input_side: &Side,
     ) -> bool {
-        (input_items.exactly_one().len() + output_items.len()) == 0
+        (input_items.exactly_one().len() + output_items.exactly_one().len()) == 0
     }
 }
 

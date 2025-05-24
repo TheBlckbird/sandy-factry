@@ -33,7 +33,7 @@ struct HoverBuilding;
 pub struct BuildingInput(pub Option<Vec<Direction>>);
 
 #[derive(Component)]
-pub struct BuildingOutput(pub Option<Direction>);
+pub struct BuildingOutput(pub Option<Vec<Direction>>);
 
 pub struct BuildingPlugin;
 

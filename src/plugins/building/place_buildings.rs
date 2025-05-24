@@ -110,15 +110,15 @@ pub fn place_buildings(
                 },
                 Foreground,
                 Machine::new(
-                    match foreground_object.into_building_type() {
+                    match foreground_object.try_into().ok() {
                         Some(building_type) => building_type,
                         None => return,
                     },
                     foreground_object.get_input_sides().into(),
-                    VecDeque::new(),
+                    foreground_object.get_output_sides().into(),
                 ),
                 BuildingInput(foreground_object.get_input_sides()),
-                BuildingOutput(foreground_object.get_output_side()),
+                BuildingOutput(foreground_object.get_output_sides()),
             ))
             .id();
 

@@ -29,7 +29,7 @@ pub fn load_game_save(
                     },
                     Foreground,
                     Machine::new(
-                        match foreground_object.into_building_type() {
+                        match (*foreground_object).try_into().ok() {
                             Some(building_type) => building_type,
                             None => return,
                         },
@@ -37,7 +37,7 @@ pub fn load_game_save(
                         output_items.clone(),
                     ),
                     BuildingInput(foreground_object.get_input_sides()),
-                    BuildingOutput(foreground_object.get_output_side()),
+                    BuildingOutput(foreground_object.get_output_sides()),
                 ))
                 .id();
 

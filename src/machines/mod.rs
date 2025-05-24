@@ -11,6 +11,8 @@ pub mod belt;
 pub mod combiner;
 pub mod crafter;
 pub mod miner;
+pub mod splitter;
+pub mod void;
 
 #[derive(Debug, Component)]
 pub struct Machine {
@@ -58,7 +60,6 @@ pub trait MachineType: Debug + Send + Sync {
     ) -> bool;
 }
 
-pub type OutputItems = VecDeque<Item>;
 pub type Side = Direction;
 
 #[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize, Deserialize)]
@@ -90,22 +91,24 @@ pub trait MachineVariants<M: MachineType>:
     fn should_render_item(&self) -> bool;
 }
 
-pub type InputItemsPart = Option<VecDeque<Item>>;
+pub type InputItems = ItemsSet;
+pub type OutputItems = ItemsSet;
+pub type ItemsSetPart = Option<VecDeque<Item>>;
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
-pub struct InputItems {
-    pub north: InputItemsPart,
-    pub east: InputItemsPart,
-    pub south: InputItemsPart,
-    pub west: InputItemsPart,
+pub struct ItemsSet {
+    pub north: ItemsSetPart,
+    pub east: ItemsSetPart,
+    pub south: ItemsSetPart,
+    pub west: ItemsSetPart,
 }
 
-impl InputItems {
+impl ItemsSet {
     pub fn new(
-        north: InputItemsPart,
-        east: InputItemsPart,
-        south: InputItemsPart,
-        west: InputItemsPart,
+        north: ItemsSetPart,
+        east: ItemsSetPart,
+        south: ItemsSetPart,
+        west: ItemsSetPart,
     ) -> Self {
         Self {
             north,
@@ -145,7 +148,7 @@ impl InputItems {
     }
 
     /// Gets a specific input side
-    pub fn get_side(&self, side: &Side) -> &InputItemsPart {
+    pub fn get_side(&self, side: &Side) -> &ItemsSetPart {
         match side {
             Direction::North => &self.north,
             Direction::East => &self.east,
@@ -155,7 +158,7 @@ impl InputItems {
     }
 
     /// Gets a mutable reference to a specific input side
-    pub fn get_side_mut(&mut self, side: &Side) -> &mut InputItemsPart {
+    pub fn get_side_mut(&mut self, side: &Side) -> &mut ItemsSetPart {
         match side {
             Direction::North => &mut self.north,
             Direction::East => &mut self.east,
@@ -174,6 +177,11 @@ impl InputItems {
         }
 
         count
+    }
+
+    /// Checks whether there are any items in any of the fields
+    pub fn is_empty(&self) -> bool {
+        self.count() == 0
     }
 
     /// Gets all items

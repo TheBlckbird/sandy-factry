@@ -63,7 +63,7 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: String::from("Sandy Fact'ry"),
-                        ..Default::default()
+                        ..default()
                     }),
                     ..default()
                 })
@@ -92,7 +92,7 @@ fn main() {
             ),
         )
         .add_systems(
-            Update,
+            PreUpdate,
             update_mouse_coords.run_if(in_state(GameState::Game)),
         )
         .run();
@@ -120,7 +120,11 @@ fn set_window_icon(windows: NonSend<WinitWindows>) {
 }
 
 fn startup(mut commands: Commands) {
-    commands.spawn((Camera2d, Transform::from_scale(Vec3::new(0.2, 0.2, 1.0))));
+    commands.spawn((
+        Camera2d,
+        Transform::from_scale(Vec3::new(0.2, 0.2, 1.0)),
+        Msaa::Off,
+    ));
 }
 
 fn update_mouse_coords(

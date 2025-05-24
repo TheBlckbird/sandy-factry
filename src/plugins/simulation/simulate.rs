@@ -1,12 +1,13 @@
-use bevy::prelude::*;
-use bevy_ecs_tilemap::tiles::{TilePos, TileTextureIndex};
-use petgraph::{
-    algo::{connected_components, tarjan_scc},
-    dot::Dot,
-    prelude::*,
-};
+use std::collections::VecDeque;
 
-use crate::plugins::world::Middleground;
+use bevy::{platform::collections::HashMap, prelude::*};
+use bevy_ecs_tilemap::tiles::{TilePos, TileTextureIndex};
+use petgraph::{algo::tarjan_scc, prelude::*};
+
+use crate::{
+    machines::Side,
+    plugins::world::{Middleground, MiddlegroundObject},
+};
 
 use super::{SimulationGraph, SimulationTimer};
 
@@ -17,79 +18,111 @@ pub fn simulate(
     time: Res<Time>,
 ) {
     // Check if this tick is a simulation tick
-    if !simulation_timer.0.tick(time.delta()).just_finished() {
+    if !simulation_timer.tick(time.delta()).just_finished() {
         return;
     }
 
     // Return if the simulation graph is empty aka there are no machines in the world
-    if simulation_graph.0.node_count() == 0 {
+    if simulation_graph.node_count() == 0 {
         return;
     }
 
-    info!("{:?}", Dot::new(&simulation_graph.0));
+    // println!(
+    //     "{:?}",
+    //     Dot::new(&simulation_graph.map(
+    //         |node_index, (machine, tile_pos)| {
+    //             let mut machine_type = format!("{:?}", machine.machine_type);
+    //             machine_type = machine_type
+    //                 .split(' ')
+    //                 .next()
+    //                 .expect("Whoops, no machine?")
+    //                 .to_string();
 
-    let mut leaf_nodes: Vec<NodeIndex> = simulation_graph
-        .0
-        .externals(petgraph::Direction::Outgoing)
-        .collect(); // [FIXME] This won't work anymore when the splitter is added
+    //             let tile_pos = format!("{}, {}", tile_pos.x, tile_pos.y);
 
-    let sub_graphs_count = connected_components(&simulation_graph.0);
+    //             format!("{}: {machine_type}; {tile_pos}", node_index.index())
+    //         },
+    //         |_, edge| edge,
+    //     ))
+    // );
 
-    let mut additional_starting_nodes = Vec::with_capacity(sub_graphs_count - leaf_nodes.len());
+    let scc = tarjan_scc(&**simulation_graph);
+    let mut visited = VecDeque::new();
 
-    if leaf_nodes.len() < sub_graphs_count {
-        tarjan_scc(&simulation_graph.0)
-            .iter()
-            .filter(|subgraph| {
-                !subgraph
-                    .iter()
-                    .any(|subgraph_node| leaf_nodes.contains(subgraph_node))
-            })
-            .for_each(|subgraph| {
-                additional_starting_nodes.push(
-                    *subgraph
-                        .first()
-                        .expect("There should be at least one subgraph"),
-                )
-            });
-    }
+    let mut times_loops_ran: HashMap<NodeIndex, u32> = HashMap::new();
 
-    leaf_nodes.append(&mut additional_starting_nodes);
+    for leaf_node in scc.iter().map(|component| component[0]) {
+        simulation_graph.reverse();
 
-    for leaf_node in leaf_nodes {
-        simulation_graph.0.reverse();
+        // let mut bfs = Bfs::new(&**simulation_graph, leaf_node);
 
-        let mut bfs = Bfs::new(&simulation_graph.0, leaf_node);
+        let mut next_nodes = VecDeque::from([leaf_node]);
 
-        while let Some(node_index) = bfs.next(&simulation_graph.0) {
-            let maybe_next_building_index = simulation_graph
-                .0
+        while
+        /*let Some(node_index) = next_nodes.pop_front()*/
+        !next_nodes.is_empty() {
+            let node_index = next_nodes
+                .pop_front()
+                .expect("The `nodes` queue should have an entry, we just checked");
+
+            if visited.contains(&node_index) {
+                continue;
+            }
+
+            let next_building_indices: Vec<(NodeIndex, Side)> = simulation_graph
                 .edges_directed(node_index, Direction::Incoming)
-                .next()
-                .map(|next_building_edge| next_building_edge.source());
+                .map(|next_building_edge| {
+                    (next_building_edge.source(), *next_building_edge.weight())
+                })
+                .collect();
 
-            let get_middleground_object = |searched_tile_pos| {
-                tile_query
-                    .iter()
-                    .find(|(tile_pos, _)| tile_pos == &searched_tile_pos)
-                    .and_then(|(_, tile_texture_index)| (*tile_texture_index).try_into().ok())
-            };
+            let next_building_indices_len = next_building_indices.len();
 
-            match maybe_next_building_index {
-                Some(next_building_index) => {
-                    let input_side = *simulation_graph.0.edge_weight(
-                            simulation_graph
-                                .0
-                                .find_edge(next_building_index, node_index).expect("There should be an edge between the next building and the current building")
-                        ).expect("This edge should exist");
+            if !next_building_indices.is_empty() {
+                times_loops_ran
+                    .entry(node_index)
+                    .and_modify(|count| *count += 1)
+                    .or_insert(1);
 
-                    let ((building, building_tile_pos), (next_building, _)) = simulation_graph
-                        .0
-                        .index_twice_mut(node_index, next_building_index);
+                let times_loop_ran = times_loops_ran
+                    .get(&node_index)
+                    .expect("This was just inserted/updated, so it should exist");
 
-                    building.perform_action(get_middleground_object(building_tile_pos));
+                if *times_loop_ran != next_building_indices_len as u32 {
+                    continue;
+                }
 
-                    let Some(item) = building.output_items.front() else {
+                for adjacent_node in
+                    simulation_graph.neighbors_directed(node_index, Direction::Outgoing)
+                {
+                    if !visited.contains(&adjacent_node) {
+                        next_nodes.push_back(adjacent_node);
+                    }
+                }
+
+                for (i, (next_building_index, input_side)) in
+                    next_building_indices.into_iter().enumerate()
+                {
+                    let output_side = input_side.get_opposite();
+
+                    let ((building, building_tile_pos), (next_building, _)) =
+                        simulation_graph.index_twice_mut(node_index, next_building_index);
+
+                    if i == 0 && *times_loop_ran == next_building_indices_len as u32 {
+                        visited.push_back(node_index);
+                        building.perform_action(get_middleground_object(
+                            &tile_query,
+                            building_tile_pos,
+                        ));
+                    }
+
+                    let Some(output_items) =
+                        building.output_items.get_side_mut(&output_side).as_mut()
+                    else {
+                        continue;
+                    };
+
+                    let Some(item) = output_items.front() else {
                         continue;
                     };
 
@@ -99,8 +132,8 @@ pub fn simulate(
                         &next_building.output_items,
                         &input_side,
                     ) {
-                        let Some(item) = building.output_items.pop_front() else {
-                            continue; // this is technically redundant, but I don't want the game to crash, sooo...
+                        let Some(item) = output_items.pop_front() else {
+                            continue;
                         };
 
                         next_building
@@ -111,14 +144,32 @@ pub fn simulate(
                             .push_back(item);
                     }
                 }
-                None => {
-                    let (building, building_tile_pos) = &mut simulation_graph.0[node_index];
-
-                    building.perform_action(get_middleground_object(building_tile_pos));
+            } else {
+                for adjacent_node in
+                    simulation_graph.neighbors_directed(node_index, Direction::Outgoing)
+                {
+                    if !visited.contains(&adjacent_node) {
+                        next_nodes.push_back(adjacent_node);
+                    }
                 }
+
+                visited.push_back(node_index);
+                let (building, building_tile_pos) = &mut simulation_graph[node_index];
+
+                building.perform_action(get_middleground_object(&tile_query, building_tile_pos));
             }
         }
 
-        simulation_graph.0.reverse();
+        simulation_graph.reverse();
     }
+}
+
+fn get_middleground_object(
+    tile_query: &Query<(&TilePos, &TileTextureIndex), With<Middleground>>,
+    searched_tile_pos: &mut TilePos,
+) -> Option<MiddlegroundObject> {
+    tile_query
+        .iter()
+        .find(|(tile_pos, _)| tile_pos == &searched_tile_pos)
+        .and_then(|(_, tile_texture_index)| (*tile_texture_index).try_into().ok())
 }

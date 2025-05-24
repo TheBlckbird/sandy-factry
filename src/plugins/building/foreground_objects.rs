@@ -1,294 +1,85 @@
 use crate::machines::{
-    Item, MachineType, Side, belt::Belt, combiner::Combiner, crafter::Crafter, miner::Miner,
+    Side, belt::Belt, combiner::Combiner, crafter::Crafter, miner::Miner, splitter::Splitter,
+    void::Void,
 };
 
 use bevy::prelude::*;
-use bevy_ecs_tilemap::prelude::*;
+use sandy_factry_macros::ForegroundObjects;
 use serde::{Deserialize, Serialize};
 
-use std::collections::HashMap;
-
-use super::super::crafting::recipe_types::CrafterRecipe;
-
-#[derive(Debug, Resource, Default, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(
+    Debug, Resource, Default, Clone, Copy, PartialEq, Serialize, Deserialize, ForegroundObjects,
+)]
 pub enum ForegroundObject {
     #[default]
+    #[variant(texture = -1, machine = Nothing)]
     Nothing,
+    #[variant(inputs(South), outputs(North), texture = 0, machine = Belt, render = true)]
     BeltUp,
+    #[variant(inputs(North), outputs(South), texture = 1, machine = Belt, render = true)]
     BeltDown,
+    #[variant(inputs(East), outputs(West), texture = 2, machine = Belt, render = true)]
     BeltLeft,
+    #[variant(inputs(West), outputs(East), texture = 3, machine = Belt, render = true)]
     BeltRight,
+
+    #[variant(inputs(South), outputs(East), texture = 4, machine = Belt, render = true)]
     BeltDownRight,
+    #[variant(inputs(West), outputs(South), texture = 5, machine = Belt, render = true)]
     BeltLeftDown,
+    #[variant(inputs(North), outputs(West), texture = 6, machine = Belt, render = true)]
     BeltUpLeft,
+    #[variant(inputs(East), outputs(North), texture = 7, machine = Belt, render = true)]
     BeltRightUp,
+    #[variant(inputs(East), outputs(South), texture = 8, machine = Belt, render = true)]
     BeltRightDown,
+    #[variant(inputs(South), outputs(West), texture = 9, machine = Belt, render = true)]
     BeltDownLeft,
+    #[variant(inputs(West), outputs(North), texture = 10, machine = Belt, render = true)]
     BeltLeftUp,
+    #[variant(inputs(North), outputs(East), texture = 11, machine = Belt, render = true)]
     BeltUpRight,
+
+    #[variant(inputs(North, West), outputs(South), texture = 12, machine = Crafter::default())]
     Crafter,
+
+    #[variant(inputs(North), outputs(South), texture = 13, machine = Miner)]
     Miner,
+
+    #[variant(inputs(North, West), outputs(South), texture = 14, machine = Combiner::new([Side::North, Side::West]), render = true)]
     CombinerUpLeft,
+    #[variant(inputs(West, South), outputs(East), texture = 15, machine = Combiner::new([Side::West, Side::South]), render = true)]
     CombinerLeftDown,
+    #[variant(inputs(South, East), outputs(North), texture = 16, machine = Combiner::new([Side::South, Side::East]), render = true)]
     CombinerDownRight,
+    #[variant(inputs(East, North), outputs(West), texture = 17, machine = Combiner::new([Side::East, Side::North]), render = true)]
     CombinerRightUp,
+    #[variant(inputs(South, West), outputs(North), texture = 18, machine = Combiner::new([Side::South, Side::West]), render = true)]
     CombinerDownLeft,
+    #[variant(inputs(West, North), outputs(East), texture = 19, machine = Combiner::new([Side::West, Side::North]), render = true)]
     CombinerLeftUp,
+    #[variant(inputs(North, East), outputs(South), texture = 20, machine = Combiner::new([Side::North, Side::East]), render = true)]
     CombinerUpRight,
+    #[variant(inputs(East, South), outputs(West), texture = 21, machine = Combiner::new([Side::East, Side::South]), render = true)]
     CombinerRightDown,
-}
 
-impl ForegroundObject {
-    pub fn into_building_type(self) -> Option<Box<dyn MachineType>> {
-        match self {
-            ForegroundObject::Nothing => None,
-            ForegroundObject::BeltUp
-            | ForegroundObject::BeltDown
-            | ForegroundObject::BeltLeft
-            | ForegroundObject::BeltRight
-            | ForegroundObject::BeltDownRight
-            | ForegroundObject::BeltLeftDown
-            | ForegroundObject::BeltUpLeft
-            | ForegroundObject::BeltRightUp
-            | ForegroundObject::BeltRightDown
-            | ForegroundObject::BeltDownLeft
-            | ForegroundObject::BeltLeftUp
-            | ForegroundObject::BeltUpRight => Some(Box::new(Belt)),
-            ForegroundObject::Crafter => Some(Box::new(Crafter::new(Some(CrafterRecipe::new(
-                HashMap::from([(Item::Coal, 1), (Item::RawCopper, 2)]),
-                Item::CopperIngot,
-                1,
-                1,
-            ))))),
-            ForegroundObject::Miner => Some(Box::new(Miner)),
-            ForegroundObject::CombinerUpLeft => {
-                Some(Box::new(Combiner::new([Side::North, Side::West])))
-            }
-            ForegroundObject::CombinerLeftDown => {
-                Some(Box::new(Combiner::new([Side::West, Side::South])))
-            }
-            ForegroundObject::CombinerDownRight => {
-                Some(Box::new(Combiner::new([Side::South, Side::East])))
-            }
-            ForegroundObject::CombinerRightUp => {
-                Some(Box::new(Combiner::new([Side::East, Side::North])))
-            }
-            ForegroundObject::CombinerDownLeft => {
-                Some(Box::new(Combiner::new([Side::South, Side::West])))
-            }
-            ForegroundObject::CombinerLeftUp => {
-                Some(Box::new(Combiner::new([Side::West, Side::North])))
-            }
-            ForegroundObject::CombinerUpRight => {
-                Some(Box::new(Combiner::new([Side::North, Side::East])))
-            }
-            ForegroundObject::CombinerRightDown => {
-                Some(Box::new(Combiner::new([Side::East, Side::South])))
-            }
-        }
-    }
+    #[variant(inputs(North), outputs(South, East), texture = 26, machine = Splitter::new([Side::South, Side::East]), render = true)]
+    SplitterDownRight,
+    #[variant(inputs(East), outputs(West, South), texture = 27, machine = Splitter::new([Side::West, Side::South]), render = true)]
+    SplitterLeftDown,
+    #[variant(inputs(South), outputs(North, East), texture = 28, machine = Splitter::new([Side::North, Side::East]), render = true)]
+    SplitterUpLeft,
+    #[variant(inputs(West), outputs(East, North), texture = 29, machine = Splitter::new([Side::East, Side::North]), render = true)]
+    SplitterRightUp,
+    #[variant(inputs(North), outputs(South, West), texture = 30, machine = Splitter::new([Side::South, Side::West]), render = true)]
+    SplitterDownLeft,
+    #[variant(inputs(East), outputs(West, North), texture = 31, machine = Splitter::new([Side::West, Side::North]), render = true)]
+    SplitterLeftUp,
+    #[variant(inputs(South), outputs(North, East), texture = 32, machine = Splitter::new([Side::North, Side::East]), render = true)]
+    SplitterUpRight,
+    #[variant(inputs(West), outputs(East, South), texture = 33, machine = Splitter::new([Side::East, Side::South]), render = true)]
+    SplitterRightDown,
 
-    pub fn get_input_sides(&self) -> Option<Vec<Side>> {
-        match self {
-            ForegroundObject::Nothing => None,
-            ForegroundObject::BeltUp => Some(vec![Side::South]),
-            ForegroundObject::BeltDown => Some(vec![Side::North]),
-            ForegroundObject::BeltLeft => Some(vec![Side::East]),
-            ForegroundObject::BeltRight => Some(vec![Side::West]),
-            ForegroundObject::BeltDownRight => Some(vec![Side::South]),
-            ForegroundObject::BeltLeftDown => Some(vec![Side::West]),
-            ForegroundObject::BeltUpLeft => Some(vec![Side::North]),
-            ForegroundObject::BeltRightUp => Some(vec![Side::East]),
-            ForegroundObject::BeltRightDown => Some(vec![Side::East]),
-            ForegroundObject::BeltDownLeft => Some(vec![Side::South]),
-            ForegroundObject::BeltLeftUp => Some(vec![Side::West]),
-            ForegroundObject::BeltUpRight => Some(vec![Side::North]),
-            ForegroundObject::Crafter => Some(vec![Side::North, Side::West]),
-            ForegroundObject::Miner => Some(vec![Side::North]),
-            ForegroundObject::CombinerUpLeft => Some(vec![Side::North, Side::West]),
-            ForegroundObject::CombinerLeftDown => Some(vec![Side::West, Side::South]),
-            ForegroundObject::CombinerDownRight => Some(vec![Side::South, Side::East]),
-            ForegroundObject::CombinerRightUp => Some(vec![Side::East, Side::North]),
-            ForegroundObject::CombinerDownLeft => Some(vec![Side::South, Side::West]),
-            ForegroundObject::CombinerLeftUp => Some(vec![Side::West, Side::North]),
-            ForegroundObject::CombinerUpRight => Some(vec![Side::North, Side::East]),
-            ForegroundObject::CombinerRightDown => Some(vec![Side::East, Side::South]),
-        }
-    }
-
-    pub fn get_output_side(&self) -> Option<Side> {
-        match self {
-            ForegroundObject::Nothing => None,
-            ForegroundObject::BeltUp => Some(Side::North),
-            ForegroundObject::BeltDown => Some(Side::South),
-            ForegroundObject::BeltLeft => Some(Side::West),
-            ForegroundObject::BeltRight => Some(Side::East),
-            ForegroundObject::BeltDownRight => Some(Side::East),
-            ForegroundObject::BeltLeftDown => Some(Side::South),
-            ForegroundObject::BeltUpLeft => Some(Side::West),
-            ForegroundObject::BeltRightUp => Some(Side::North),
-            ForegroundObject::BeltRightDown => Some(Side::South),
-            ForegroundObject::BeltDownLeft => Some(Side::West),
-            ForegroundObject::BeltLeftUp => Some(Side::North),
-            ForegroundObject::BeltUpRight => Some(Side::East),
-            ForegroundObject::Crafter => Some(Side::South),
-            ForegroundObject::Miner => Some(Side::South),
-            ForegroundObject::CombinerUpLeft => Some(Side::South),
-            ForegroundObject::CombinerLeftDown => Some(Side::East),
-            ForegroundObject::CombinerDownRight => Some(Side::North),
-            ForegroundObject::CombinerRightUp => Some(Side::West),
-            ForegroundObject::CombinerDownLeft => Some(Side::North),
-            ForegroundObject::CombinerLeftUp => Some(Side::East),
-            ForegroundObject::CombinerUpRight => Some(Side::South),
-            ForegroundObject::CombinerRightDown => Some(Side::West),
-        }
-    }
-
-    pub fn should_render_item(&self) -> bool {
-        match self {
-            ForegroundObject::Nothing | ForegroundObject::Crafter | ForegroundObject::Miner => {
-                false
-            }
-            ForegroundObject::BeltUp
-            | ForegroundObject::BeltDown
-            | ForegroundObject::BeltLeft
-            | ForegroundObject::BeltRight
-            | ForegroundObject::BeltDownRight
-            | ForegroundObject::BeltLeftDown
-            | ForegroundObject::BeltUpLeft
-            | ForegroundObject::BeltRightUp
-            | ForegroundObject::BeltRightDown
-            | ForegroundObject::BeltDownLeft
-            | ForegroundObject::BeltLeftUp
-            | ForegroundObject::BeltUpRight
-            | ForegroundObject::CombinerUpLeft
-            | ForegroundObject::CombinerLeftDown
-            | ForegroundObject::CombinerDownRight
-            | ForegroundObject::CombinerRightUp
-            | ForegroundObject::CombinerDownLeft
-            | ForegroundObject::CombinerLeftUp
-            | ForegroundObject::CombinerUpRight
-            | ForegroundObject::CombinerRightDown => true,
-        }
-    }
-
-    pub fn select_previous(&mut self) {
-        *self = match self {
-            ForegroundObject::Nothing => ForegroundObject::CombinerUpRight,
-            ForegroundObject::BeltUp => ForegroundObject::Nothing,
-            ForegroundObject::BeltDown => ForegroundObject::BeltUp,
-            ForegroundObject::BeltLeft => ForegroundObject::BeltDown,
-            ForegroundObject::BeltRight => ForegroundObject::BeltLeft,
-            ForegroundObject::BeltDownRight => ForegroundObject::BeltRight,
-            ForegroundObject::BeltLeftDown => ForegroundObject::BeltDownRight,
-            ForegroundObject::BeltUpLeft => ForegroundObject::BeltLeftDown,
-            ForegroundObject::BeltRightUp => ForegroundObject::BeltUpLeft,
-            ForegroundObject::BeltRightDown => ForegroundObject::BeltRightUp,
-            ForegroundObject::BeltDownLeft => ForegroundObject::BeltRightDown,
-            ForegroundObject::BeltLeftUp => ForegroundObject::BeltDownLeft,
-            ForegroundObject::BeltUpRight => ForegroundObject::BeltLeftUp,
-            ForegroundObject::Crafter => ForegroundObject::BeltUpRight,
-            ForegroundObject::Miner => ForegroundObject::Crafter,
-            ForegroundObject::CombinerUpLeft => ForegroundObject::Miner,
-            ForegroundObject::CombinerLeftDown => ForegroundObject::CombinerUpLeft,
-            ForegroundObject::CombinerDownRight => ForegroundObject::CombinerLeftDown,
-            ForegroundObject::CombinerRightUp => ForegroundObject::CombinerDownRight,
-            ForegroundObject::CombinerDownLeft => ForegroundObject::CombinerRightUp,
-            ForegroundObject::CombinerLeftUp => ForegroundObject::CombinerDownLeft,
-            ForegroundObject::CombinerUpRight => ForegroundObject::CombinerLeftUp,
-            ForegroundObject::CombinerRightDown => ForegroundObject::CombinerUpRight,
-        };
-    }
-
-    pub fn select_next(&mut self) {
-        *self = match self {
-            ForegroundObject::Nothing => ForegroundObject::BeltUp,
-            ForegroundObject::BeltUp => ForegroundObject::BeltDown,
-            ForegroundObject::BeltDown => ForegroundObject::BeltLeft,
-            ForegroundObject::BeltLeft => ForegroundObject::BeltRight,
-            ForegroundObject::BeltRight => ForegroundObject::BeltDownRight,
-            ForegroundObject::BeltDownRight => ForegroundObject::BeltLeftDown,
-            ForegroundObject::BeltLeftDown => ForegroundObject::BeltUpLeft,
-            ForegroundObject::BeltUpLeft => ForegroundObject::BeltRightUp,
-            ForegroundObject::BeltRightUp => ForegroundObject::BeltRightDown,
-            ForegroundObject::BeltRightDown => ForegroundObject::BeltDownLeft,
-            ForegroundObject::BeltDownLeft => ForegroundObject::BeltLeftUp,
-            ForegroundObject::BeltLeftUp => ForegroundObject::BeltUpRight,
-            ForegroundObject::BeltUpRight => ForegroundObject::Crafter,
-            ForegroundObject::Crafter => ForegroundObject::Miner,
-            ForegroundObject::Miner => ForegroundObject::CombinerUpLeft,
-            ForegroundObject::CombinerUpLeft => ForegroundObject::CombinerLeftDown,
-            ForegroundObject::CombinerLeftDown => ForegroundObject::CombinerDownRight,
-            ForegroundObject::CombinerDownRight => ForegroundObject::CombinerRightUp,
-            ForegroundObject::CombinerRightUp => ForegroundObject::CombinerDownLeft,
-            ForegroundObject::CombinerDownLeft => ForegroundObject::CombinerLeftUp,
-            ForegroundObject::CombinerLeftUp => ForegroundObject::CombinerUpRight,
-            ForegroundObject::CombinerUpRight => ForegroundObject::CombinerRightDown,
-            ForegroundObject::CombinerRightDown => ForegroundObject::Nothing,
-        }
-    }
-}
-
-impl From<TileTextureIndex> for ForegroundObject {
-    fn from(value: TileTextureIndex) -> Self {
-        match value.0 {
-            0 => ForegroundObject::BeltUp,
-            1 => ForegroundObject::BeltDown,
-            2 => ForegroundObject::BeltRight,
-            3 => ForegroundObject::BeltLeft,
-            4 => ForegroundObject::BeltDownRight,
-            5 => ForegroundObject::BeltLeftDown,
-            6 => ForegroundObject::BeltUpLeft,
-            7 => ForegroundObject::BeltRightUp,
-            8 => ForegroundObject::BeltRightDown,
-            9 => ForegroundObject::BeltDownLeft,
-            10 => ForegroundObject::BeltLeftUp,
-            11 => ForegroundObject::BeltUpRight,
-            12 => ForegroundObject::Crafter,
-            13 => ForegroundObject::Miner,
-            14 => ForegroundObject::CombinerUpLeft,
-            15 => ForegroundObject::CombinerLeftDown,
-            16 => ForegroundObject::CombinerDownRight,
-            17 => ForegroundObject::CombinerRightUp,
-            18 => ForegroundObject::CombinerDownLeft,
-            19 => ForegroundObject::CombinerLeftUp,
-            20 => ForegroundObject::CombinerUpRight,
-            21 => ForegroundObject::CombinerRightDown,
-            _ => panic!("Can't convert {:?} to a ForegroundObject!", value.0),
-        }
-    }
-}
-
-impl TryFrom<ForegroundObject> for TileTextureIndex {
-    type Error = &'static str;
-
-    fn try_from(value: ForegroundObject) -> Result<Self, Self::Error> {
-        Ok(TileTextureIndex(match value {
-            ForegroundObject::BeltUp => 0,
-            ForegroundObject::BeltDown => 1,
-            ForegroundObject::BeltRight => 2,
-            ForegroundObject::BeltLeft => 3,
-            ForegroundObject::BeltDownRight => 4,
-            ForegroundObject::BeltLeftDown => 5,
-            ForegroundObject::BeltUpLeft => 6,
-            ForegroundObject::BeltRightUp => 7,
-            ForegroundObject::BeltRightDown => 8,
-            ForegroundObject::BeltDownLeft => 9,
-            ForegroundObject::BeltLeftUp => 10,
-            ForegroundObject::BeltUpRight => 11,
-            ForegroundObject::Crafter => 12,
-            ForegroundObject::Miner => 13,
-            ForegroundObject::CombinerUpLeft => 14,
-            ForegroundObject::CombinerLeftDown => 15,
-            ForegroundObject::CombinerDownRight => 16,
-            ForegroundObject::CombinerRightUp => 17,
-            ForegroundObject::CombinerDownLeft => 18,
-            ForegroundObject::CombinerLeftUp => 19,
-            ForegroundObject::CombinerUpRight => 20,
-            ForegroundObject::CombinerRightDown => 21,
-            ForegroundObject::Nothing => {
-                return Err("Building `Nothing` can't be converted to `ForegroundObject`");
-            }
-        }))
-    }
+    #[variant(inputs(North, East, South, West), texture = 34, machine = Void)]
+    Void,
 }

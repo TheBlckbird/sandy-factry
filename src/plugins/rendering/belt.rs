@@ -57,7 +57,7 @@ pub fn update_item_tilemap(
             // `input_items` and `output_items` together should only have one
 
             let mut all_items = machine.input_items.all();
-            all_items.extend(&machine.output_items);
+            all_items.extend(&machine.output_items.all());
 
             match all_items.front() {
                 None => {}

@@ -19,14 +19,6 @@ impl Crafter {
     const MAX_BURN_TIME: u8 = 100;
     const COAL_BURN_TIME: u8 = 50;
     const CRAFTING_BURN_TIME: u8 = 10;
-
-    pub fn new(current_recipe: Option<CrafterRecipe>) -> Self {
-        Self {
-            current_recipe,
-            burn_time: 0,
-            crafting_time_left: None,
-        }
-    }
 }
 
 impl MachineType for Crafter {
@@ -68,7 +60,9 @@ impl MachineType for Crafter {
                     // Crafting finished
                     // Append the crafted item to `output_items`
                     for _ in 0..current_recipe.output_count {
-                        output_items.push_back(current_recipe.output_item);
+                        output_items
+                            .exactly_one_mut()
+                            .push_back(current_recipe.output_item);
                     }
 
                     unset_crafting_time = true;

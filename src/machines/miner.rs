@@ -13,7 +13,7 @@ impl MachineType for Miner {
         output_items: &mut OutputItems,
         middleground_object: Option<MiddlegroundObject>,
     ) {
-        if output_items.len() < 50
+        if output_items.exactly_one().len() < 50
             && let Some(middleground_object) = middleground_object
             // We know for sure that only coal can be in the input items so we check for that
             && !input_items.exactly_one().is_empty()
@@ -27,7 +27,7 @@ impl MachineType for Miner {
             // Remove one coal, if mining was successful
             input_items.exactly_one_mut().pop_front();
             // Append the resource under the miner
-            output_items.push_back(item);
+            output_items.exactly_one_mut().push_back(item);
         }
     }
 
