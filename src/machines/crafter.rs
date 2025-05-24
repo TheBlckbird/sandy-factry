@@ -1,9 +1,8 @@
-use sandy_factry_macros::MachineVariants;
 use std::collections::HashMap;
 
 use crate::plugins::{crafting::recipe_types::CrafterRecipe, world::MiddlegroundObject};
 
-use super::{InputItems, Item, MachineType, MachineVariants, OutputItems, Side};
+use super::{InputItems, Item, MachineType, OutputItems, Side};
 
 #[derive(Debug, Clone, Default)]
 pub struct Crafter {
@@ -133,12 +132,4 @@ impl MachineType for Crafter {
             _ => unreachable!(),
         }
     }
-}
-
-#[derive(Debug, Default, MachineVariants)]
-#[machine_type(Crafter)]
-pub enum CrafterVariants {
-    #[default]
-    #[variant(inputs(North, West), outputs(South), texture = 12, machine = Crafter::default())]
-    UpLeft,
 }

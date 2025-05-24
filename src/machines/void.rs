@@ -1,7 +1,6 @@
 use crate::plugins::world::MiddlegroundObject;
-use sandy_factry_macros::MachineVariants;
 
-use super::{InputItems, Item, MachineType, MachineVariants, OutputItems, Side};
+use super::{InputItems, Item, MachineType, OutputItems, Side};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Void;
@@ -28,14 +27,4 @@ impl MachineType for Void {
     ) -> bool {
         true
     }
-}
-
-#[derive(Debug, Default, MachineVariants)]
-#[machine_type(Void)]
-#[machine(Void)]
-#[render]
-pub enum VoidVariants {
-    #[default]
-    #[variant(inputs(North, East, South, West), texture = 28)]
-    All,
 }

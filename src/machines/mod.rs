@@ -83,14 +83,6 @@ impl From<Item> for TileTextureIndex {
     }
 }
 
-pub trait MachineVariants<M: MachineType>:
-    From<TileTextureIndex> + Into<TileTextureIndex> + Into<M> + Default
-{
-    fn get_input_sides(&self) -> Option<Vec<Side>>;
-    fn get_output_sides(&self) -> Option<Vec<Side>>;
-    fn should_render_item(&self) -> bool;
-}
-
 pub type InputItems = ItemsSet;
 pub type OutputItems = ItemsSet;
 pub type ItemsSetPart = Option<VecDeque<Item>>;
