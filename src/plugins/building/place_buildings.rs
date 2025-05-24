@@ -1,11 +1,9 @@
-use std::collections::VecDeque;
-
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_ecs_tilemap::prelude::*;
 use sandy_factry_helpers::tilemap::{TilemapSettingsBorrowed, get_mouse_tilepos, remove_tile};
 
-use crate::machines::{InputItems, Item, Machine};
+use crate::machines::Machine;
 
 use super::{
     BuildEvent, BuildingInput, BuildingOutput, Foreground, HoverBuilding,
