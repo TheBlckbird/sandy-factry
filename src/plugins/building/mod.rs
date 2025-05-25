@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
+use foreground_objects::CurrentMachine;
 use load_game_save::load_game_save;
 use place_buildings::place_buildings;
 use serde::{Deserialize, Serialize};
@@ -55,7 +56,7 @@ impl Plugin for BuildingPlugin {
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.init_resource::<foreground_objects::ForegroundObject>();
+    commands.init_resource::<CurrentMachine>();
 
     let foreground_texture_handle: Handle<Image> = asset_server.load("foreground_tiles.png");
 
@@ -78,16 +79,43 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 }
 
-fn select_building(
-    mut current_building: ResMut<foreground_objects::ForegroundObject>,
-    keys: Res<ButtonInput<KeyCode>>,
-) {
+fn select_building(mut current_building: ResMut<CurrentMachine>, keys: Res<ButtonInput<KeyCode>>) {
     if keys.just_pressed(KeyCode::KeyX) {
-        current_building.select_next();
+        current_building.select_next_machine();
     } else if keys.just_pressed(KeyCode::KeyZ) {
-        current_building.select_previous();
+        current_building.select_prev_machine();
+    } else if keys.just_pressed(KeyCode::KeyR) {
+        current_building.select_next_variant();
+    } else if keys.just_pressed(KeyCode::KeyF) {
+        current_building.select_prev_variant();
     } else if keys.just_pressed(KeyCode::KeyQ) {
-        *current_building = foreground_objects::ForegroundObject::Nothing;
+        current_building.deselect();
+    }
+
+    let mut n = None;
+
+    if keys.just_pressed(KeyCode::Digit1) {
+        n = Some(1);
+    } else if keys.just_pressed(KeyCode::Digit2) {
+        n = Some(2);
+    } else if keys.just_pressed(KeyCode::Digit3) {
+        n = Some(3);
+    } else if keys.just_pressed(KeyCode::Digit4) {
+        n = Some(4);
+    } else if keys.just_pressed(KeyCode::Digit5) {
+        n = Some(5);
+    } else if keys.just_pressed(KeyCode::Digit6) {
+        n = Some(6);
+    } else if keys.just_pressed(KeyCode::Digit7) {
+        n = Some(7);
+    } else if keys.just_pressed(KeyCode::Digit8) {
+        n = Some(8);
+    } else if keys.just_pressed(KeyCode::Digit9) {
+        n = Some(9);
+    }
+
+    if let Some(n) = n {
+        current_building.select_nth_machine(n);
     }
 }
 
@@ -96,7 +124,7 @@ fn cleanup(
     foreground_tilemap: Single<Entity, (With<TileStorage>, With<Foreground>)>,
 ) {
     commands.entity(foreground_tilemap.entity()).despawn();
-    commands.remove_resource::<foreground_objects::ForegroundObject>();
+    commands.remove_resource::<CurrentMachine>();
 }
 
 /*

@@ -7,9 +7,7 @@ use bevy::prelude::*;
 use sandy_factry_macros::ForegroundObjects;
 use serde::{Deserialize, Serialize};
 
-#[derive(
-    Debug, Resource, Default, Clone, Copy, PartialEq, Serialize, Deserialize, ForegroundObjects,
-)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Serialize, Deserialize, ForegroundObjects)]
 pub enum ForegroundObject {
     #[default]
     #[variant(texture = -1, machine = Nothing)]
@@ -18,10 +16,10 @@ pub enum ForegroundObject {
     BeltUp,
     #[variant(inputs(North), outputs(South), texture = 1, machine = Belt, render = true)]
     BeltDown,
-    #[variant(inputs(East), outputs(West), texture = 2, machine = Belt, render = true)]
-    BeltLeft,
-    #[variant(inputs(West), outputs(East), texture = 3, machine = Belt, render = true)]
+    #[variant(inputs(West), outputs(East), texture = 2, machine = Belt, render = true)]
     BeltRight,
+    #[variant(inputs(East), outputs(West), texture = 3, machine = Belt, render = true)]
+    BeltLeft,
 
     #[variant(inputs(South), outputs(East), texture = 4, machine = Belt, render = true)]
     BeltDownRight,
@@ -82,4 +80,157 @@ pub enum ForegroundObject {
 
     #[variant(inputs(North, East, South, West), texture = 34, machine = Void)]
     Void,
+}
+
+impl ForegroundObject {
+    fn get_groups() -> Vec<(Self, Vec<Self>)> {
+        vec![
+            (
+                Self::BeltUp,
+                vec![
+                    Self::BeltUp,
+                    Self::BeltRight,
+                    Self::BeltDown,
+                    Self::BeltLeft,
+                ],
+            ),
+            (
+                Self::BeltDownRight,
+                vec![
+                    Self::BeltDownRight,
+                    Self::BeltLeftDown,
+                    Self::BeltUpLeft,
+                    Self::BeltRightUp,
+                    Self::BeltRightDown,
+                    Self::BeltDownLeft,
+                    Self::BeltLeftUp,
+                    Self::BeltUpRight,
+                ],
+            ),
+            (Self::Crafter, vec![Self::Crafter]),
+            (Self::Miner, vec![Self::Miner]),
+            (
+                Self::CombinerDownLeft,
+                vec![
+                    Self::CombinerUpLeft,
+                    Self::CombinerLeftDown,
+                    Self::CombinerDownRight,
+                    Self::CombinerRightUp,
+                    Self::CombinerDownLeft,
+                    Self::CombinerLeftUp,
+                    Self::CombinerUpRight,
+                    Self::CombinerRightDown,
+                ],
+            ),
+            (
+                Self::SplitterDownLeft,
+                vec![
+                    Self::SplitterDownRight,
+                    Self::SplitterLeftDown,
+                    Self::SplitterUpLeft,
+                    Self::SplitterRightUp,
+                    Self::SplitterDownLeft,
+                    Self::SplitterLeftUp,
+                    Self::SplitterUpRight,
+                    Self::SplitterRightDown,
+                ],
+            ),
+            (Self::Void, vec![Self::Void]),
+        ]
+    }
+}
+
+#[derive(Resource, Clone)]
+pub struct CurrentMachine {
+    all_machines: Vec<ForegroundObject>,
+    machine_index: Option<usize>,
+    variant_index: usize,
+}
+
+impl CurrentMachine {
+    pub fn get_current_foreground_object(&self) -> Option<ForegroundObject> {
+        Some(ForegroundObject::get_groups()[self.machine_index?].1[self.variant_index])
+    }
+
+    pub fn deselect(&mut self) {
+        self.machine_index = None;
+        self.variant_index = 0;
+    }
+
+    pub fn select_next_machine(&mut self) {
+        match &self.machine_index {
+            Some(machine_index) => {
+                let mut next_index = machine_index + 1;
+
+                if next_index == self.all_machines.len() {
+                    next_index = 0;
+                }
+
+                self.machine_index = Some(next_index);
+            }
+            None => self.machine_index = Some(0),
+        }
+
+        self.variant_index = 0;
+    }
+
+    pub fn select_nth_machine(&mut self, mut n: usize) {
+        n -= 1;
+
+        if n < self.all_machines.len() {
+            match self.machine_index {
+                Some(machine_index) if machine_index == n => {}
+                _ => {
+                    self.machine_index = Some(n);
+                    self.variant_index = 0;
+                }
+            }
+        }
+    }
+
+    pub fn select_prev_machine(&mut self) {
+        match self.machine_index {
+            Some(machine_index) => {
+                if machine_index == 0 {
+                    self.machine_index = Some(self.all_machines.len() - 1);
+                } else {
+                    self.machine_index = Some(machine_index - 1);
+                }
+            }
+            None => self.machine_index = Some(0),
+        }
+    }
+
+    pub fn select_next_variant(&mut self) {
+        if let Some(machine_index) = self.machine_index {
+            self.variant_index += 1;
+
+            if self.variant_index == ForegroundObject::get_groups()[machine_index].1.len() {
+                self.variant_index = 0;
+            }
+        }
+    }
+
+    pub fn select_prev_variant(&mut self) {
+        if let Some(machine_index) = self.machine_index {
+            if self.variant_index == 0 {
+                self.variant_index = ForegroundObject::get_groups()[machine_index].1.len() - 1;
+            } else {
+                self.variant_index -= 1;
+            }
+        }
+    }
+}
+
+impl Default for CurrentMachine {
+    fn default() -> Self {
+        Self {
+            all_machines: ForegroundObject::get_groups()
+                .iter()
+                .map(|(machine_icon, _)| *machine_icon)
+                .collect(),
+            machine_index: None,
+            variant_index: 0,
+        }
+    }
 }

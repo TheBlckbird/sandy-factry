@@ -1,13 +1,15 @@
+use std::collections::VecDeque;
+
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_ecs_tilemap::prelude::*;
 use sandy_factry_helpers::tilemap::{TilemapSettingsBorrowed, get_mouse_tilepos, remove_tile};
 
-use crate::machines::Machine;
+use crate::machines::{InputItems, Item, Machine};
 
 use super::{
     BuildEvent, BuildingInput, BuildingOutput, Foreground, HoverBuilding,
-    foreground_objects::ForegroundObject,
+    foreground_objects::{CurrentMachine, ForegroundObject},
 };
 
 pub fn place_buildings(
@@ -32,7 +34,7 @@ pub fn place_buildings(
         (Entity, &TilePos, Option<&HoverBuilding>, &TileTextureIndex),
         With<Foreground>,
     >,
-    current_building: Res<ForegroundObject>,
+    current_machine: Res<CurrentMachine>,
     mut event_writer: EventWriter<BuildEvent>,
 ) {
     let (camera, camera_transform) = camera_q.into_inner();
@@ -85,7 +87,9 @@ pub fn place_buildings(
         return;
     }
 
-    let foreground_object: ForegroundObject = *current_building;
+    let Some(foreground_object) = current_machine.get_current_foreground_object() else {
+        return;
+    };
 
     let Ok(tile_texture_index) = foreground_object.try_into() else {
         return;
