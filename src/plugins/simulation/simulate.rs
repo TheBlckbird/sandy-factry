@@ -34,11 +34,6 @@ pub fn simulate(
 
     let mut times_machines_hit: HashMap<NodeIndex, u32> = HashMap::new();
 
-    // Reverse the graph, because we want to traverse it bottom up,
-    // but it's currently directed in the way, the factory goes
-    // [TODO] Optimize this away: Maybe flip all checks for direction
-    simulation_graph.reverse();
-
     // Loop through all the first nodes of the SCCs
     for scc_start_node in scc.iter().map(|component| component[0]) {
         let mut next_nodes = VecDeque::from([scc_start_node]);
@@ -50,10 +45,9 @@ pub fn simulate(
             }
 
             // Get all the indices of the machines, we could theoretically push to
-            // We search for `Incoming` instead of `Outgoing` edges, because the graph has been flipped
             let next_machine_indices: Vec<(NodeIndex, Side)> = simulation_graph
-                .edges_directed(node_index, Direction::Incoming)
-                .map(|next_machine_edge| (next_machine_edge.source(), *next_machine_edge.weight()))
+                .edges_directed(node_index, Direction::Outgoing)
+                .map(|next_machine_edge| (next_machine_edge.target(), *next_machine_edge.weight()))
                 .collect();
 
             let next_machine_indices_len = next_machine_indices.len(); // The value needs to be copied, because else the borrow checker would complain
@@ -76,9 +70,9 @@ pub fn simulate(
                     continue;
                 }
 
-                // Insert all `Outgoing` neighbors into `next_nodes`
+                // Insert all neighbors we want to visit into the queue
                 for adjacent_node in
-                    simulation_graph.neighbors_directed(node_index, Direction::Outgoing)
+                    simulation_graph.neighbors_directed(node_index, Direction::Incoming)
                 {
                     if !visited.contains(&adjacent_node) {
                         next_nodes.push_back(adjacent_node);
@@ -138,9 +132,9 @@ pub fn simulate(
             } else {
                 // ... because if not, all the additional steps for trying to push items can be skipped
 
-                // Insert all `Outgoing` nodes into `next_nodes`
+                // Insert all neighbors we want to visit into the queue
                 for adjacent_node in
-                    simulation_graph.neighbors_directed(node_index, Direction::Outgoing)
+                    simulation_graph.neighbors_directed(node_index, Direction::Incoming)
                 {
                     if !visited.contains(&adjacent_node) {
                         next_nodes.push_back(adjacent_node);
@@ -156,8 +150,6 @@ pub fn simulate(
             }
         }
     }
-
-    simulation_graph.reverse();
 }
 
 /// Get the middleground object at `searched_tile_pos`
