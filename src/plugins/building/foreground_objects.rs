@@ -41,8 +41,14 @@ pub enum ForegroundObject {
     #[variant(inputs(North, West), outputs(South), texture = 12, machine = Crafter::default())]
     Crafter,
 
-    #[variant(inputs(North), outputs(South), texture = 13, machine = Miner)]
-    Miner,
+    #[variant(inputs(North), outputs(South), texture = 34, machine = Miner)]
+    MinerDown,
+    #[variant(inputs(East), outputs(West), texture = 35, machine = Miner)]
+    MinerLeft,
+    #[variant(inputs(South), outputs(North), texture = 36, machine = Miner)]
+    MinerUp,
+    #[variant(inputs(West), outputs(East), texture = 37, machine = Miner)]
+    MinerRight,
 
     #[variant(inputs(North, West), outputs(South), texture = 14, machine = Combiner::new([Side::North, Side::West]), render = true)]
     CombinerUpLeft,
@@ -78,7 +84,7 @@ pub enum ForegroundObject {
     #[variant(inputs(West), outputs(East, South), texture = 33, machine = Splitter::new([Side::East, Side::South]), render = true)]
     SplitterRightDown,
 
-    #[variant(inputs(North, East, South, West), texture = 34, machine = Void)]
+    #[variant(inputs(North, East, South, West), texture = 13, machine = Void)]
     Void,
 }
 
@@ -108,7 +114,15 @@ impl ForegroundObject {
                 ],
             ),
             (Self::Crafter, vec![Self::Crafter]),
-            (Self::Miner, vec![Self::Miner]),
+            (
+                Self::MinerDown,
+                vec![
+                    Self::MinerDown,
+                    Self::MinerRight,
+                    Self::MinerDown,
+                    Self::MinerLeft,
+                ],
+            ),
             (
                 Self::CombinerDownLeft,
                 vec![
