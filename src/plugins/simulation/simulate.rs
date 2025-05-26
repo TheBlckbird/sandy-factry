@@ -11,13 +11,14 @@ use crate::{
 
 use super::{SimulationGraph, SimulationTimer};
 
+/// Do a single simulation step of the world based on the `SimulationGraph`
 pub fn simulate(
     mut simulation_graph: ResMut<SimulationGraph>,
     tile_query: Query<(&TilePos, &TileTextureIndex), With<Middleground>>,
     mut simulation_timer: ResMut<SimulationTimer>,
     time: Res<Time>,
 ) {
-    // Check if this tick is a simulation tick
+    // Check if this tick even is a simulation tick
     if !simulation_timer.tick(time.delta()).just_finished() {
         return;
     }
@@ -27,71 +28,55 @@ pub fn simulate(
         return;
     }
 
-    // println!(
-    //     "{:?}",
-    //     Dot::new(&simulation_graph.map(
-    //         |node_index, (machine, tile_pos)| {
-    //             let mut machine_type = format!("{:?}", machine.machine_type);
-    //             machine_type = machine_type
-    //                 .split(' ')
-    //                 .next()
-    //                 .expect("Whoops, no machine?")
-    //                 .to_string();
-
-    //             let tile_pos = format!("{}, {}", tile_pos.x, tile_pos.y);
-
-    //             format!("{}: {machine_type}; {tile_pos}", node_index.index())
-    //         },
-    //         |_, edge| edge,
-    //     ))
-    // );
-
+    // Get all the SCCs (Strongly Connected Components) using Tarjan's algorithm
     let scc = tarjan_scc(&**simulation_graph);
     let mut visited = VecDeque::new();
 
-    let mut times_loops_ran: HashMap<NodeIndex, u32> = HashMap::new();
+    let mut times_machines_hit: HashMap<NodeIndex, u32> = HashMap::new();
 
-    for leaf_node in scc.iter().map(|component| component[0]) {
-        simulation_graph.reverse();
+    // Reverse the graph, because we want to traverse it bottom up,
+    // but it's currently directed in the way, the factory goes
+    // [TODO] Optimize this away: Maybe flip all checks for direction
+    simulation_graph.reverse();
 
-        // let mut bfs = Bfs::new(&**simulation_graph, leaf_node);
+    // Loop through all the first nodes of the SCCs
+    for scc_start_node in scc.iter().map(|component| component[0]) {
+        let mut next_nodes = VecDeque::from([scc_start_node]);
 
-        let mut next_nodes = VecDeque::from([leaf_node]);
-
-        while
-        /*let Some(node_index) = next_nodes.pop_front()*/
-        !next_nodes.is_empty() {
-            let node_index = next_nodes
-                .pop_front()
-                .expect("The `nodes` queue should have an entry, we just checked");
-
+        // Run the BFS while there are nodes in the queue
+        while let Some(node_index) = next_nodes.pop_front() {
             if visited.contains(&node_index) {
                 continue;
             }
 
-            let next_building_indices: Vec<(NodeIndex, Side)> = simulation_graph
+            // Get all the indices of the machines, we could theoretically push to
+            // We search for `Incoming` instead of `Outgoing` edges, because the graph has been flipped
+            let next_machine_indices: Vec<(NodeIndex, Side)> = simulation_graph
                 .edges_directed(node_index, Direction::Incoming)
-                .map(|next_building_edge| {
-                    (next_building_edge.source(), *next_building_edge.weight())
-                })
+                .map(|next_machine_edge| (next_machine_edge.source(), *next_machine_edge.weight()))
                 .collect();
 
-            let next_building_indices_len = next_building_indices.len();
+            let next_machine_indices_len = next_machine_indices.len(); // The value needs to be copied, because else the borrow checker would complain
 
-            if !next_building_indices.is_empty() {
-                times_loops_ran
+            // Check whether there are even any machines to try to push to
+            if !next_machine_indices.is_empty() {
+                // Either increase the value this machine has been hit or insert one
+                times_machines_hit
                     .entry(node_index)
                     .and_modify(|count| *count += 1)
                     .or_insert(1);
 
-                let times_loop_ran = times_loops_ran
+                let times_machine_hit = times_machines_hit
                     .get(&node_index)
                     .expect("This was just inserted/updated, so it should exist");
 
-                if *times_loop_ran != next_building_indices_len as u32 {
+                // If the machine hasn't been hit the amount of outputs it has, continue,
+                // because we don't want to process it before it has been hit by all its outputs
+                if *times_machine_hit != next_machine_indices_len as u32 {
                     continue;
                 }
 
+                // Insert all `Outgoing` neighbors into `next_nodes`
                 for adjacent_node in
                     simulation_graph.neighbors_directed(node_index, Direction::Outgoing)
                 {
@@ -100,43 +85,49 @@ pub fn simulate(
                     }
                 }
 
-                for (i, (next_building_index, input_side)) in
-                    next_building_indices.into_iter().enumerate()
+                // Go through all machines the current machine could try to push to
+                for (i, (next_machine_index, input_side)) in
+                    next_machine_indices.into_iter().enumerate()
                 {
+                    // The output side of the connected machine is the opposite of the current machine's input side
                     let output_side = input_side.get_opposite();
 
-                    let ((building, building_tile_pos), (next_building, _)) =
-                        simulation_graph.index_twice_mut(node_index, next_building_index);
+                    // Retrieve the nodes of the current and connected machine
+                    // This can't be done earlier, because of the borrow checker
+                    let ((machine, machine_tile_pos), (next_machine, _)) =
+                        simulation_graph.index_twice_mut(node_index, next_machine_index);
 
-                    if i == 0 && *times_loop_ran == next_building_indices_len as u32 {
+                    // Check whether this is the first time this loop is being run
+                    // If this check wasn't made, the machine's action would be performed multiple times per frame
+                    if i == 0 {
                         visited.push_back(node_index);
-                        building.perform_action(get_middleground_object(
-                            &tile_query,
-                            building_tile_pos,
-                        ));
+
+                        // Perform the machine's action
+                        machine
+                            .perform_action(get_middleground_object(&tile_query, machine_tile_pos));
                     }
 
+                    // Get the output items of the side being currently checked, if they exist
                     let Some(output_items) =
-                        building.output_items.get_side_mut(&output_side).as_mut()
+                        machine.output_items.get_side_mut(&output_side).as_mut()
                     else {
                         continue;
                     };
 
+                    // Get the frontmost output item, if it exists
                     let Some(item) = output_items.front() else {
                         continue;
                     };
 
-                    if next_building.machine_type.can_accept(
+                    // If the connected machine can accept the item, push it to the correct input side
+                    if next_machine.machine_type.can_accept(
                         item,
-                        &next_building.input_items,
-                        &next_building.output_items,
+                        &next_machine.input_items,
+                        &next_machine.output_items,
                         &input_side,
-                    ) {
-                        let Some(item) = output_items.pop_front() else {
-                            continue;
-                        };
-
-                        next_building
+                    ) && let Some(item) = output_items.pop_front()
+                    {
+                        next_machine
                             .input_items
                             .get_side_mut(&input_side)
                             .as_mut()
@@ -145,6 +136,9 @@ pub fn simulate(
                     }
                 }
             } else {
+                // ... because if not, all the additional steps for trying to push items can be skipped
+
+                // Insert all `Outgoing` nodes into `next_nodes`
                 for adjacent_node in
                     simulation_graph.neighbors_directed(node_index, Direction::Outgoing)
                 {
@@ -153,17 +147,22 @@ pub fn simulate(
                     }
                 }
 
+                // Always mark this node as visited
                 visited.push_back(node_index);
-                let (building, building_tile_pos) = &mut simulation_graph[node_index];
+                let (machine, machine_tile_pos) = &mut simulation_graph[node_index];
 
-                building.perform_action(get_middleground_object(&tile_query, building_tile_pos));
+                // Perform the machine's action
+                machine.perform_action(get_middleground_object(&tile_query, machine_tile_pos));
             }
         }
-
-        simulation_graph.reverse();
     }
+
+    simulation_graph.reverse();
 }
 
+/// Get the middleground object at `searched_tile_pos`
+///
+/// Returns `None` if there is no middleground object at that position
 fn get_middleground_object(
     tile_query: &Query<(&TilePos, &TileTextureIndex), With<Middleground>>,
     searched_tile_pos: &mut TilePos,
