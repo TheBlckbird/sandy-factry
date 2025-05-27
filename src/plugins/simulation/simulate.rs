@@ -123,7 +123,6 @@ pub fn simulate(
                         next_machine
                             .input_items
                             .get_side_mut(&input_side)
-                            .as_mut()
                             .expect("The input side should be set; it's connected in the graph")
                             .push_back(item);
                     }
