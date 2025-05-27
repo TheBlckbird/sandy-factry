@@ -34,7 +34,9 @@ impl MachineType for Miner {
     ) {
         // Convert the coal to burn time
         // We already know, there's only one coal in here
-        if input_items.exactly_one().len() == 1 {
+        if self.burn_time + Self::SINGLE_COAL_BURN_TIME <= Self::MAX_BURN_TIME
+            && input_items.exactly_one_mut().pop_front().is_some()
+        {
             self.burn_time += Self::SINGLE_COAL_BURN_TIME;
         } else if !input_items.exactly_one().is_empty() {
             panic!("There should only be one single coal in the miner fuel input");
@@ -78,10 +80,10 @@ impl MachineType for Miner {
     fn can_accept(
         &self,
         item: &Item,
-        _input_items: &InputItems,
+        input_items: &InputItems,
         _output_items: &OutputItems,
         _input_side: &Side,
     ) -> bool {
-        *item == Item::Coal && Self::MAX_BURN_TIME - self.burn_time >= Self::SINGLE_COAL_BURN_TIME
+        *item == Item::Coal && input_items.count() < 50
     }
 }

@@ -52,13 +52,13 @@ impl MachineType for Crafter {
             .expect("A Crafter should have a west input");
 
         // We already know, there's only coal in here
-        if coal_input.len() == 1 {
+        if self.burn_time + Self::COAL_BURN_TIME <= Self::MAX_BURN_TIME
+            && coal_input.pop_front().is_some()
+        {
             self.burn_time += Self::COAL_BURN_TIME;
         } else if !coal_input.is_empty() {
             panic!("There should only be one single coal in the miner fuel input");
         }
-
-        coal_input.clear();
 
         // Crafting
 
@@ -136,14 +136,14 @@ impl MachineType for Crafter {
     fn can_accept(
         &self,
         item: &Item,
-        _input_items: &InputItems,
+        input_items: &InputItems,
         _output_items: &OutputItems,
         input_side: &Side,
     ) -> bool {
         if *input_side == self.input_side {
             true
         } else if *input_side == self.coal_input_side {
-            *item == Item::Coal && Self::MAX_BURN_TIME - self.burn_time >= Self::COAL_BURN_TIME
+            *item == Item::Coal && input_items.count() < 50
         } else {
             unreachable!()
         }
