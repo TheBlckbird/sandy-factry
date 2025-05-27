@@ -141,23 +141,25 @@ impl ItemsSet {
     }
 
     /// Gets a specific input side
-    pub fn get_side(&self, side: &Side) -> &ItemsSetPart {
+    pub fn get_side(&self, side: &Side) -> Option<&VecDeque<Item>> {
         match side {
             Direction::North => &self.north,
             Direction::East => &self.east,
             Direction::South => &self.south,
             Direction::West => &self.west,
         }
+        .as_ref()
     }
 
     /// Gets a mutable reference to a specific input side
-    pub fn get_side_mut(&mut self, side: &Side) -> &mut ItemsSetPart {
+    pub fn get_side_mut(&mut self, side: &Side) -> Option<&mut VecDeque<Item>> {
         match side {
             Direction::North => &mut self.north,
             Direction::East => &mut self.east,
             Direction::South => &mut self.south,
             Direction::West => &mut self.west,
         }
+        .as_mut()
     }
 
     /// Returns the count of all items in all fields together

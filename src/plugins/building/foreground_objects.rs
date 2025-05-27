@@ -38,7 +38,7 @@ pub enum ForegroundObject {
     #[variant(inputs(North), outputs(East), texture = 11, machine = Belt, render = true)]
     BeltUpRight,
 
-    #[variant(inputs(North, West), outputs(South), texture = 12, machine = Crafter::default())]
+    #[variant(inputs(North, West), outputs(South), texture = 12, machine = Crafter::new(Side::North, Side::West))]
     Crafter,
 
     #[variant(inputs(North), outputs(South), texture = 34, machine = Miner)]

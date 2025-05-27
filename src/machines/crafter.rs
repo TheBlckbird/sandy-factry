@@ -4,20 +4,38 @@ use crate::plugins::{crafting::recipe_types::CrafterRecipe, world::MiddlegroundO
 
 use super::{InputItems, Item, MachineType, OutputItems, Side};
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct Crafter {
     current_recipe: Option<CrafterRecipe>,
+
     /// Burn time left
     burn_time: u8,
+
     /// Crafting time left
     /// `None` if nothing is currently being crafting
     crafting_time_left: Option<u8>,
+
+    /// The side where items are inputted
+    input_side: Side,
+
+    /// The side where coal is inputted
+    coal_input_side: Side,
 }
 
 impl Crafter {
     const MAX_BURN_TIME: u8 = 100;
     const COAL_BURN_TIME: u8 = 50;
     const CRAFTING_BURN_TIME: u8 = 10;
+
+    pub fn new(input_side: Side, coal_input_side: Side) -> Self {
+        Self {
+            current_recipe: None,
+            burn_time: 0,
+            crafting_time_left: None,
+            input_side,
+            coal_input_side,
+        }
+    }
 }
 
 impl MachineType for Crafter {
@@ -30,8 +48,7 @@ impl MachineType for Crafter {
         // Convert the coal to burn time
 
         let coal_input = input_items
-            .west
-            .as_mut()
+            .get_side_mut(&self.coal_input_side)
             .expect("A Crafter should have a west input");
 
         // We already know, there's only coal in here
@@ -74,8 +91,7 @@ impl MachineType for Crafter {
                 if self.burn_time >= Self::CRAFTING_BURN_TIME {
                     let mut items = HashMap::new();
                     let items_input = input_items
-                        .north
-                        .as_mut()
+                        .get_side_mut(&self.input_side)
                         .expect("A Crafter should have a north input");
 
                     // Convert the queue into a HashMap of all the items and their count
@@ -124,12 +140,12 @@ impl MachineType for Crafter {
         _output_items: &OutputItems,
         input_side: &Side,
     ) -> bool {
-        match input_side {
-            crate::Direction::North => true,
-            crate::Direction::West => {
-                *item == Item::Coal && Self::MAX_BURN_TIME - self.burn_time >= Self::COAL_BURN_TIME
-            }
-            _ => unreachable!(),
+        if *input_side == self.input_side {
+            true
+        } else if *input_side == self.coal_input_side {
+            *item == Item::Coal && Self::MAX_BURN_TIME - self.burn_time >= Self::COAL_BURN_TIME
+        } else {
+            unreachable!()
         }
     }
 }

@@ -103,9 +103,7 @@ pub fn simulate(
                     }
 
                     // Get the output items of the side being currently checked, if they exist
-                    let Some(output_items) =
-                        machine.output_items.get_side_mut(&output_side).as_mut()
-                    else {
+                    let Some(output_items) = machine.output_items.get_side_mut(&output_side) else {
                         continue;
                     };
 

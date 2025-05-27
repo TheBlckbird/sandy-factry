@@ -7,6 +7,7 @@ use super::{InputItems, Item, MachineType, OutputItems, Side};
 #[derive(Debug, Clone)]
 pub struct Furnace {
     current_recipe: Option<FurnaceRecipe>,
+
     /// burn time left
     burn_time: u8,
 
@@ -14,10 +15,10 @@ pub struct Furnace {
     /// `None` if nothing is currently being crafting
     crafting_time_left: Option<u8>,
 
-    /// The side where items get in
+    /// The side where items are inputted
     input_side: Side,
 
-    /// The side where coal gets in
+    /// The side where coal is inputted
     coal_input_side: Side,
 }
 
@@ -29,6 +30,16 @@ impl Furnace {
     pub fn new(input_side: Side, coal_input_side: Side) -> Self {
         Self {
             current_recipe: None,
+            burn_time: 0,
+            crafting_time_left: None,
+            input_side,
+            coal_input_side,
+        }
+    }
+
+    pub fn new_with_recipe(recipe: FurnaceRecipe, input_side: Side, coal_input_side: Side) -> Self {
+        Self {
+            current_recipe: Some(recipe),
             burn_time: 0,
             crafting_time_left: None,
             input_side,
@@ -48,7 +59,6 @@ impl MachineType for Furnace {
 
         let coal_input = input_items
             .get_side_mut(&self.coal_input_side)
-            .as_mut()
             .unwrap_or_else(|| {
                 panic!(
                     "A Furnace should have the coal input at {:?}",
@@ -97,7 +107,6 @@ impl MachineType for Furnace {
                     let mut items = HashMap::new();
                     let items_input = input_items
                         .get_side_mut(&self.input_side)
-                        .as_mut()
                         .expect("A Furnace should have a north input");
 
                     // Convert the queue into a HashMap of all the items and their count
@@ -146,12 +155,12 @@ impl MachineType for Furnace {
         _output_items: &OutputItems,
         input_side: &Side,
     ) -> bool {
-        match input_side {
-            crate::Direction::North => true,
-            crate::Direction::West => {
-                *item == Item::Coal && Self::MAX_BURN_TIME - self.burn_time >= Self::COAL_BURN_TIME
-            }
-            _ => unreachable!(),
+        if *input_side == self.input_side {
+            true
+        } else if *input_side == self.coal_input_side {
+            *item == Item::Coal && Self::MAX_BURN_TIME - self.burn_time >= Self::COAL_BURN_TIME
+        } else {
+            unreachable!()
         }
     }
 }
