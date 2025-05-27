@@ -1,6 +1,6 @@
 use crate::machines::{
-    Side, belt::Belt, combiner::Combiner, crafter::Crafter, miner::Miner, splitter::Splitter,
-    void::Void,
+    Side, belt::Belt, combiner::Combiner, crafter::Crafter, furnace::Furnace, miner::Miner,
+    splitter::Splitter, void::Void,
 };
 
 use bevy::prelude::*;
@@ -86,6 +86,9 @@ pub enum ForegroundObject {
 
     #[variant(inputs(North, East, South, West), texture = 13, machine = Void)]
     Void,
+
+    #[variant(inputs(North, West), outputs(South), texture = 38, machine = Furnace::new(Side::North, Side::West))]
+    Furnace,
 }
 
 impl ForegroundObject {
@@ -123,6 +126,7 @@ impl ForegroundObject {
                     Self::MinerLeft,
                 ],
             ),
+            (Self::Furnace, vec![Self::Furnace]),
             (
                 Self::CombinerDownLeft,
                 vec![

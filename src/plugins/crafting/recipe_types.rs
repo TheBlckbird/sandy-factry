@@ -55,19 +55,44 @@ impl CrafterRecipe {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct FurnaceRecipe {
-    pub ingredient: Item,
-    pub output_item: Item,
+    pub ingredient: (Item, u16),
+    pub output_item: (Item, u16),
     pub burn_time: u8,
 }
 
 impl FurnaceRecipe {
-    pub fn new(ingredient: Item, output_item: Item, burn_time: u8) -> Self {
+    pub fn new(ingredient: (Item, u16), output_item: (Item, u16), burn_time: u8) -> Self {
         Self {
             ingredient,
             output_item,
             burn_time,
         }
+    }
+
+    pub fn try_crafting(
+        &self,
+        external_ingredients: &HashMap<Item, u16>,
+    ) -> Option<HashMap<Item, u16>> {
+        let mut remaining_ingredients = external_ingredients.clone();
+
+        // Check for each ingredient if it exists in the provided ingredients
+        if let Some(external_item_count) = remaining_ingredients.get_mut(&self.ingredient.0)
+            && *external_item_count >= self.ingredient.1
+        {
+            *external_item_count -= self.ingredient.1;
+
+            // Remove the entry completely from the HashMap if the count is zero after this
+            // (This is theoretically irrelevant with the current crafter implementation, but ´
+            // I'm still doing this, in case I ever change this code)
+            if *external_item_count == 0 {
+                remaining_ingredients.remove(&self.ingredient.0);
+            }
+        } else {
+            return None;
+        }
+
+        Some(remaining_ingredients)
     }
 }
