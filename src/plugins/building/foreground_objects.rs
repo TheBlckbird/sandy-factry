@@ -41,13 +41,13 @@ pub enum ForegroundObject {
     #[variant(inputs(North, West), outputs(South), texture = 12, machine = Crafter::new(Side::North, Side::West))]
     Crafter,
 
-    #[variant(inputs(North), outputs(South), texture = 34, machine = Miner)]
+    #[variant(inputs(North), outputs(South), texture = 34, machine = Miner::new())]
     MinerDown,
-    #[variant(inputs(East), outputs(West), texture = 35, machine = Miner)]
+    #[variant(inputs(East), outputs(West), texture = 35, machine = Miner::new())]
     MinerLeft,
-    #[variant(inputs(South), outputs(North), texture = 36, machine = Miner)]
+    #[variant(inputs(South), outputs(North), texture = 36, machine = Miner::new())]
     MinerUp,
-    #[variant(inputs(West), outputs(East), texture = 37, machine = Miner)]
+    #[variant(inputs(West), outputs(East), texture = 37, machine = Miner::new())]
     MinerRight,
 
     #[variant(inputs(North, West), outputs(South), texture = 14, machine = Combiner::new([Side::North, Side::West]), render = true)]
