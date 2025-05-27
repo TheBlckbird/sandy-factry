@@ -29,6 +29,7 @@ pub fn simulate(
     }
 
     // Get all the SCCs (Strongly Connected Components) using Tarjan's algorithm
+    // This function also performs a topological sort on the result
     let scc = tarjan_scc(&**simulation_graph);
     let mut visited = VecDeque::new();
 
