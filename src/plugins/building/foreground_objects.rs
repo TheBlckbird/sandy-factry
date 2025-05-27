@@ -97,10 +97,10 @@ impl ForegroundObject {
             (
                 Self::BeltUp,
                 vec![
-                    Self::BeltUp,
-                    Self::BeltRight,
                     Self::BeltDown,
                     Self::BeltLeft,
+                    Self::BeltUp,
+                    Self::BeltRight,
                 ],
             ),
             (
@@ -121,9 +121,9 @@ impl ForegroundObject {
                 Self::MinerDown,
                 vec![
                     Self::MinerDown,
-                    Self::MinerRight,
-                    Self::MinerDown,
                     Self::MinerLeft,
+                    Self::MinerUp,
+                    Self::MinerRight,
                 ],
             ),
             (Self::Furnace, vec![Self::Furnace]),
@@ -131,9 +131,9 @@ impl ForegroundObject {
                 Self::CombinerDownLeft,
                 vec![
                     Self::CombinerUpLeft,
-                    Self::CombinerLeftDown,
-                    Self::CombinerDownRight,
                     Self::CombinerRightUp,
+                    Self::CombinerDownRight,
+                    Self::CombinerLeftDown,
                     Self::CombinerDownLeft,
                     Self::CombinerLeftUp,
                     Self::CombinerUpRight,
@@ -148,9 +148,9 @@ impl ForegroundObject {
                     Self::SplitterUpLeft,
                     Self::SplitterRightUp,
                     Self::SplitterDownLeft,
-                    Self::SplitterLeftUp,
-                    Self::SplitterUpRight,
                     Self::SplitterRightDown,
+                    Self::SplitterUpRight,
+                    Self::SplitterLeftUp,
                 ],
             ),
             (Self::Void, vec![Self::Void]),
