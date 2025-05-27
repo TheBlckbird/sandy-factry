@@ -1,10 +1,12 @@
 use std::collections::HashMap;
 
+use serde::{Deserialize, Serialize};
+
 use crate::plugins::{crafting::recipe_types::CrafterRecipe, world::MiddlegroundObject};
 
 use super::{InputItems, Item, MachineType, OutputItems, Side};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Crafter {
     current_recipe: Option<CrafterRecipe>,
 
@@ -38,6 +40,7 @@ impl Crafter {
     }
 }
 
+#[typetag::serde]
 impl MachineType for Crafter {
     fn perform_action(
         &mut self,
@@ -56,8 +59,6 @@ impl MachineType for Crafter {
             && coal_input.pop_front().is_some()
         {
             self.burn_time += Self::COAL_BURN_TIME;
-        } else if !coal_input.is_empty() {
-            panic!("There should only be one single coal in the miner fuel input");
         }
 
         // Crafting

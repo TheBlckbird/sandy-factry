@@ -1,9 +1,13 @@
+use serde::{Deserialize, Serialize};
+
 use crate::plugins::world::MiddlegroundObject;
 
 use super::{InputItems, Item, MachineType, OutputItems, Side};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Void;
+
+#[typetag::serde]
 impl MachineType for Void {
     fn perform_action(
         &mut self,

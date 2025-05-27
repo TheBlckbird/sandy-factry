@@ -26,6 +26,7 @@ bevy_pkv = "0.13.0"
 serde.workspace = true
 strum.workspace = true
 strum_macros.workspace = true
+typetag = "0.2.20"
 
 
 [lints]

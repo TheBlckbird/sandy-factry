@@ -1,8 +1,10 @@
+use serde::{Deserialize, Serialize};
+
 use crate::plugins::world::MiddlegroundObject;
 
 use super::{InputItems, Item, MachineType, OutputItems, Side};
 
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
 pub struct Miner {
     /// burn time left
     burn_time: u8,
@@ -25,6 +27,7 @@ impl Miner {
     }
 }
 
+#[typetag::serde]
 impl MachineType for Miner {
     fn perform_action(
         &mut self,
@@ -38,8 +41,6 @@ impl MachineType for Miner {
             && input_items.exactly_one_mut().pop_front().is_some()
         {
             self.burn_time += Self::SINGLE_COAL_BURN_TIME;
-        } else if !input_items.exactly_one().is_empty() {
-            panic!("There should only be one single coal in the miner fuel input");
         }
 
         input_items.exactly_one_mut().clear();
