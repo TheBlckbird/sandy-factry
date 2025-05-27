@@ -16,7 +16,9 @@ pub fn load_game_save(
     let (tilemap_entity, mut tile_storage) = foreground_tilemap.into_inner();
 
     if let Some(game_save) = &**game_save {
-        for (tile_pos, foreground_object, input_items, output_items) in &game_save.machines {
+        for (tile_pos, foreground_object, machine_type, input_items, output_items) in
+            &game_save.machines
+        {
             let new_tile_entity = commands
                 .spawn((
                     TileBundle {
@@ -29,10 +31,7 @@ pub fn load_game_save(
                     },
                     Foreground,
                     Machine::new(
-                        match (*foreground_object).try_into().ok() {
-                            Some(building_type) => building_type,
-                            None => return,
-                        },
+                        machine_type.clone_box(),
                         input_items.clone(),
                         output_items.clone(),
                     ),

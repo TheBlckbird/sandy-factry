@@ -24,6 +24,7 @@ pub fn save_game(
         saved_tiles.push((
             *tile_pos,
             foreground_object,
+            machine.machine_type.clone_box(),
             machine.input_items.clone(),
             machine.output_items.clone(),
         ));

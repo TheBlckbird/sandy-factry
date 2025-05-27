@@ -1,8 +1,10 @@
+use serde::{Deserialize, Serialize};
+
 use crate::plugins::world::MiddlegroundObject;
 
 use super::{MachineType, Side};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Splitter {
     output_sides: [Side; 2],
     last_output_side_index: usize,
@@ -17,6 +19,7 @@ impl Splitter {
     }
 }
 
+#[typetag::serde]
 impl MachineType for Splitter {
     fn perform_action(
         &mut self,

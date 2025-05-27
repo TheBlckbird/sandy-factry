@@ -1,6 +1,8 @@
+use serde::{Deserialize, Serialize};
+
 use super::{InputItems, Item, MachineType, OutputItems, Side};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Combiner {
     input_sides: [Side; 2],
     last_input_side_index: usize,
@@ -15,6 +17,7 @@ impl Combiner {
     }
 }
 
+#[typetag::serde]
 impl MachineType for Combiner {
     fn perform_action(
         &mut self,

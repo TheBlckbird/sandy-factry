@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 
+use serde::{Deserialize, Serialize};
+
 use crate::machines::Item;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CrafterRecipe {
     pub ingredients: HashMap<Item, u16>,
     pub output_item: Item,
@@ -55,7 +57,7 @@ impl CrafterRecipe {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct FurnaceRecipe {
     pub ingredient: (Item, u16),
     pub output_item: (Item, u16),

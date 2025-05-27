@@ -15,7 +15,7 @@ pub mod miner;
 pub mod splitter;
 pub mod void;
 
-#[derive(Debug, Component)]
+#[derive(Debug, Component, Serialize, Deserialize)]
 pub struct Machine {
     pub machine_type: Box<dyn MachineType>,
     pub input_items: InputItems,
@@ -44,6 +44,7 @@ impl Machine {
     }
 }
 
+#[typetag::serde(tag = "type")]
 pub trait MachineType: Debug + Send + Sync {
     fn perform_action(
         &mut self,

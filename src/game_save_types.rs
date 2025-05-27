@@ -3,7 +3,7 @@ use bevy_ecs_tilemap::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    machines::{InputItems, OutputItems},
+    machines::{InputItems, MachineType, OutputItems},
     plugins::{building::foreground_objects::ForegroundObject, world::Seed},
 };
 
@@ -27,4 +27,10 @@ impl GameSave {
     }
 }
 
-pub type MachineTiles = Vec<(TilePos, ForegroundObject, InputItems, OutputItems)>;
+pub type MachineTiles = Vec<(
+    TilePos,
+    ForegroundObject,
+    Box<dyn MachineType>,
+    InputItems,
+    OutputItems,
+)>;
