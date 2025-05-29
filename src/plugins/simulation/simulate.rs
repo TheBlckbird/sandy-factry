@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use bevy::{platform::collections::HashMap, prelude::*};
 use bevy_ecs_tilemap::tiles::{TilePos, TileTextureIndex};
-use petgraph::{algo::tarjan_scc, prelude::*};
+use petgraph::{algo::tarjan_scc, dot::Dot, prelude::*};
 
 use crate::{
     machines::Side,
@@ -31,8 +31,8 @@ pub fn simulate(
     // Get all the SCCs (Strongly Connected Components) using Tarjan's algorithm
     // This function also performs a topological sort on the result
     let scc = tarjan_scc(&**simulation_graph);
-    let mut visited = VecDeque::new();
 
+    let mut visited = VecDeque::new();
     let mut times_machines_hit: HashMap<NodeIndex, u32> = HashMap::new();
 
     // Loop through all the first nodes of the SCCs
