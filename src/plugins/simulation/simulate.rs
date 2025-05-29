@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use bevy::{platform::collections::HashMap, prelude::*};
 use bevy_ecs_tilemap::tiles::{TilePos, TileTextureIndex};
-use petgraph::{algo::tarjan_scc, dot::Dot, prelude::*};
+use petgraph::{algo::tarjan_scc, prelude::*};
 
 use crate::{
     machines::Side,
