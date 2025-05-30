@@ -217,6 +217,8 @@ impl CurrentMachine {
             }
             None => self.machine_index = Some(0),
         }
+
+        self.variant_index = 0;
     }
 
     pub fn select_next_variant(&mut self) {
