@@ -1,6 +1,6 @@
-# The Oil Company
+# Sandy Fact'ry
 
-The Oil Company is a factory builder for school.
+Sandy Fact'ry is a factory builder developed for a school project.
 
 ## Task tracking
 
