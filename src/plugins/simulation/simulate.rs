@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+use std::collections::{HashSet, VecDeque};
 
 use bevy::{platform::collections::HashMap, prelude::*};
 use bevy_ecs_tilemap::tiles::{TilePos, TileTextureIndex};
@@ -32,7 +32,7 @@ pub fn simulate(
     // This function also performs a topological sort on the result
     let scc = tarjan_scc(&**simulation_graph);
 
-    let mut visited = VecDeque::new();
+    let mut visited = HashSet::new();
     let mut times_machines_hit: HashMap<NodeIndex, u32> = HashMap::new();
 
     // Loop through all the first nodes of the SCCs
@@ -94,18 +94,23 @@ pub fn simulate(
 
                     // Check whether this is the first time this loop is being run
                     // If this check wasn't made, the machine's action would be performed multiple times per frame
+                    // The check has to be done in the loop, because of borrow checker rules (`index_twice_mut` is the problem)
+                    // But this is the same as if it was done right before the loop
                     if i == 0 {
-                        visited.push_back(node_index);
+                        visited.insert(node_index);
 
                         // Perform the machine's action
                         machine
                             .perform_action(get_middleground_object(&tile_query, machine_tile_pos));
                     }
 
-                    // Get the output items of the side being currently checked, if they exist
-                    let Some(output_items) = machine.output_items.get_side_mut(&output_side) else {
-                        continue;
-                    };
+                    // Get the output items of the side being currently checked
+                    let output_items = machine
+                        .output_items
+                        .get_side_mut(&output_side)
+                        .unwrap_or_else(|| {
+                            panic!("The side {output_side:?} should exist on this machine")
+                        });
 
                     // Get the frontmost output item, if it exists
                     let Some(item) = output_items.front() else {
@@ -118,8 +123,11 @@ pub fn simulate(
                         &next_machine.input_items,
                         &next_machine.output_items,
                         &input_side,
-                    ) && let Some(item) = output_items.pop_front()
-                    {
+                    ) {
+                        let item = output_items
+                            .pop_front()
+                            .expect("There should be an item in `output_items`");
+
                         next_machine
                             .input_items
                             .get_side_mut(&input_side)
@@ -140,7 +148,7 @@ pub fn simulate(
                 }
 
                 // Always mark this node as visited
-                visited.push_back(node_index);
+                visited.insert(node_index);
                 let (machine, machine_tile_pos) = &mut simulation_graph[node_index];
 
                 // Perform the machine's action
