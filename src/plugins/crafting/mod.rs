@@ -1,5 +1,4 @@
 #![allow(unused)] // [TODO] Remove once this is all implemented
-use std::collections::HashMap;
 
 use bevy::prelude::*;
 use recipe_types::{CrafterRecipe, FurnaceRecipe};
