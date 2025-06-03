@@ -56,7 +56,7 @@ impl Direction {
     }
 }
 
-fn main() {
+fn main() -> AppExit {
     App::new()
         .add_plugins((
             DefaultPlugins
@@ -95,7 +95,7 @@ fn main() {
             PreUpdate,
             update_mouse_coords.run_if(in_state(GameState::Game)),
         )
-        .run();
+        .run()
 }
 
 #[allow(unused)]
