@@ -149,4 +149,8 @@ impl MachineType for Crafter {
             unreachable!()
         }
     }
+
+    fn is_selectable(&self) -> bool {
+        true
+    }
 }

@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::Direction;
 
 use super::{
-    TilemapLayer,
+    RenderLayer,
     menu::GameState,
     world::{MAP_SIZE, MAP_TYPE, TILE_SIZE},
 };
@@ -71,7 +71,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             storage: foreground_tile_storage,
             texture: TilemapTexture::Single(foreground_texture_handle),
             tile_size: TILE_SIZE,
-            transform: Transform::from_xyz(0.0, 0.0, TilemapLayer::Foreground.into()),
+            transform: Transform::from_xyz(0.0, 0.0, RenderLayer::Foreground.into()),
             anchor: TilemapAnchor::Center,
             ..Default::default()
         },

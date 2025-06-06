@@ -164,4 +164,8 @@ impl MachineType for Furnace {
             unreachable!()
         }
     }
+
+    fn is_selectable(&self) -> bool {
+        true
+    }
 }

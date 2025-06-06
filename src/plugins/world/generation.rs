@@ -3,7 +3,7 @@ use bevy_ecs_tilemap::prelude::*;
 use noise::{NoiseFn, Simplex};
 use sandy_factry_helpers::tilemap::{TilemapSettings, generate_tilemap_layer};
 
-use crate::plugins::TilemapLayer;
+use crate::plugins::RenderLayer;
 
 use super::{
     Background, BackgroundObject, MAP_SIZE, MAP_TYPE, Middleground, MiddlegroundObject, Seed,
@@ -18,7 +18,7 @@ pub fn generation(mut commands: Commands, asset_server: Res<AssetServer>, seed: 
     generate_tilemap_layer(
         &mut commands,
         background_texture_handle,
-        TilemapLayer::Background.into(),
+        RenderLayer::Background.into(),
         TilemapSettings::new(MAP_SIZE, TILE_SIZE, MAP_TYPE, TILE_SIZE.into()),
         Background,
         |_| Some((BackgroundObject::Sand.into(), Background)),
@@ -27,7 +27,7 @@ pub fn generation(mut commands: Commands, asset_server: Res<AssetServer>, seed: 
     generate_tilemap_layer(
         &mut commands,
         middleground_texture_handle,
-        TilemapLayer::Middleground.into(),
+        RenderLayer::Middleground.into(),
         TilemapSettings::new(MAP_SIZE, TILE_SIZE, MAP_TYPE, TILE_SIZE.into()),
         Middleground,
         |tile_pos| {

@@ -60,6 +60,10 @@ pub trait MachineType: Debug + Send + Sync {
         output_items: &OutputItems,
         input_side: &Side,
     ) -> bool;
+
+    fn is_selectable(&self) -> bool {
+        false
+    }
 }
 
 pub type Side = Direction;
