@@ -15,6 +15,7 @@ pub fn update_selection_marker(
     cursor_position: Res<MouseCoordinates>,
     selection_marker: Single<(&mut Transform, &mut Visibility), With<SelectionMarker>>,
     machine_tiles: Query<(&Machine, &TilePos)>,
+    mouse_buttons: Res<ButtonInput<MouseButton>>,
 ) {
     let cursor_position = TilePos::new(cursor_position.x, cursor_position.y);
     let (mut selection_marker_transform, mut visibility) = selection_marker.into_inner();
@@ -27,7 +28,10 @@ pub fn update_selection_marker(
 
     match machine_under_cursor {
         // Check if the machine currently under the cursor is selectable
-        Some(machine_under_cursor) if machine_under_cursor.machine_type.is_selectable() => {
+        Some(machine_under_cursor)
+            if machine_under_cursor.machine_type.is_selectable()
+                && !mouse_buttons.pressed(MouseButton::Right) =>
+        {
             *visibility = Visibility::Visible;
 
             // Set the marker's transform to the current cursor position
