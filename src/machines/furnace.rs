@@ -38,16 +38,6 @@ impl Furnace {
             coal_input_side,
         }
     }
-
-    pub fn new_with_recipe(recipe: FurnaceRecipe, input_side: Side, coal_input_side: Side) -> Self {
-        Self {
-            current_recipe: Some(recipe),
-            burn_time: 0,
-            crafting_time_left: None,
-            input_side,
-            coal_input_side,
-        }
-    }
 }
 
 #[typetag::serde]
