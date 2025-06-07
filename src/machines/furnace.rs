@@ -135,10 +135,6 @@ impl MachineType for Furnace {
         }
     }
 
-    fn clone_box(&self) -> Box<dyn MachineType> {
-        Box::new(self.clone())
-    }
-
     fn can_accept(
         &self,
         item: &Item,

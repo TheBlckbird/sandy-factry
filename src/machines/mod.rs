@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
+use dyn_clone::DynClone;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -45,14 +46,13 @@ impl Machine {
 }
 
 #[typetag::serde(tag = "type")]
-pub trait MachineType: Debug + Send + Sync {
+pub trait MachineType: Debug + Send + Sync + DynClone {
     fn perform_action(
         &mut self,
         input_items: &mut InputItems,
         output_items: &mut OutputItems,
         middleground_object: Option<MiddlegroundObject>,
     );
-    fn clone_box(&self) -> Box<dyn MachineType>;
     fn can_accept(
         &self,
         item: &Item,

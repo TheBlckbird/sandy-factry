@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
 use bevy_pkv::PkvStore;
+use dyn_clone::clone_box;
 
 use crate::{
     game_save_types::{GameSave, MachineTiles},
@@ -24,7 +25,7 @@ pub fn save_game(
         saved_tiles.push((
             *tile_pos,
             foreground_object,
-            machine.machine_type.clone_box(),
+            clone_box(&*machine.machine_type),
             machine.input_items.clone(),
             machine.output_items.clone(),
         ));

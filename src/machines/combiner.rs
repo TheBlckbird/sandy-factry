@@ -50,10 +50,6 @@ impl MachineType for Combiner {
         self.last_input_side_index = current_input_side_index;
     }
 
-    fn clone_box(&self) -> Box<dyn MachineType> {
-        Box::new(*self)
-    }
-
     fn can_accept(
         &self,
         _item: &Item,
