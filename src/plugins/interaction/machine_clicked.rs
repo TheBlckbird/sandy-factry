@@ -23,23 +23,34 @@ pub struct RecipeButton(CrafterRecipe);
 #[allow(unused)]
 pub fn update_recipe_screen(
     mut recipe_detail_text: Single<&mut Text, With<RecipeDetailText>>,
-    interaction_query: Query<(&Interaction, &RecipeButton), (Changed<Interaction>, With<Button>)>,
+    interaction_query: Query<(&Interaction, &RecipeButton), (With<Button>)>,
 ) {
-    for (interaction, recipe_button) in interaction_query {
+    let mut is_nothing_hovered = true;
+
+    for (interaction, recipe) in interaction_query {
         match interaction {
             Interaction::Pressed => todo!(),
             Interaction::Hovered => {
                 let mut ingredients_list = String::new();
 
-                for (ingredient, ingredient_count) in &recipe_button.ingredients {
+                for (ingredient, ingredient_count) in &recipe.ingredients {
                     ingredients_list
-                        .push_str(format!("- #{ingredient_count} {ingredient}\n").as_str());
+                        .push_str(format!("- {ingredient_count}x {ingredient}\n").as_str());
                 }
 
-                ***recipe_detail_text = format!("Ingredients:\n{ingredients_list}");
+                ***recipe_detail_text = format!(
+                    "{}\n\nIngredients:\n{ingredients_list}\nCrafting Time: {} ticks",
+                    recipe.output_item, recipe.crafting_time,
+                );
+
+                is_nothing_hovered = false;
             }
             Interaction::None => {}
         }
+    }
+
+    if is_nothing_hovered {
+        ***recipe_detail_text = String::new();
     }
 }
 
@@ -68,7 +79,6 @@ pub fn create_recipe_screen(mut commands: Commands, recipes: Res<CrafterRecipes>
                     Node {
                         padding: UiRect::all(Val::Px(5.0)),
                         flex_direction: FlexDirection::Column,
-                        row_gap: Val::Px(10.0),
                         width: Val::Percent(50.0),
                         overflow: Overflow {
                             x: OverflowAxis::Hidden,
@@ -83,10 +93,11 @@ pub fn create_recipe_screen(mut commands: Commands, recipes: Res<CrafterRecipes>
                             parent.spawn((
                                 Node {
                                     min_height: Val::Px(LINE_HEIGHT),
+                                    padding: UiRect::vertical(Val::Px(5.0)),
                                     ..default()
                                 },
                                 Text::new(format!(
-                                    "#{} {}",
+                                    "{}x {}",
                                     recipe.output_count, recipe.output_item
                                 )),
                                 TextColor(BLACK.into()),
