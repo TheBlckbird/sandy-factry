@@ -8,20 +8,44 @@ use bevy::{
     picking::hover::HoverMap,
     prelude::*,
 };
-use bevy_ecs_tilemap::prelude::*;
 
-use crate::{MouseCoordinates, machines::Machine, plugins::interaction::RecipeScreen};
+use crate::plugins::crafting::{CrafterRecipes, recipe_types::CrafterRecipe};
+
+#[derive(Component)]
+pub struct RecipeScreen;
+
+#[derive(Component)]
+pub struct RecipeDetailText;
+
+#[derive(Component, Deref)]
+pub struct RecipeButton(CrafterRecipe);
 
 #[allow(unused)]
 pub fn update_recipe_screen(
-    cursor_position: Res<MouseCoordinates>,
-    machine_tiles: Query<(&Machine, &TilePos)>,
-    mouse_buttons: Res<ButtonInput<MouseButton>>,
+    mut recipe_detail_text: Single<&mut Text, With<RecipeDetailText>>,
+    interaction_query: Query<(&Interaction, &RecipeButton), (Changed<Interaction>, With<Button>)>,
 ) {
-    // todo!()
+    for (interaction, recipe_button) in interaction_query {
+        match interaction {
+            Interaction::Pressed => todo!(),
+            Interaction::Hovered => {
+                let mut ingredients_list = String::new();
+
+                for (ingredient, ingredient_count) in &recipe_button.ingredients {
+                    ingredients_list
+                        .push_str(format!("- #{ingredient_count} {ingredient}\n").as_str());
+                }
+
+                ***recipe_detail_text = format!("Ingredients:\n{ingredients_list}");
+            }
+            Interaction::None => {}
+        }
+    }
 }
 
-pub fn create_recipe_screen(mut commands: Commands) {
+pub fn create_recipe_screen(mut commands: Commands, recipes: Res<CrafterRecipes>) {
+    let recipes = recipes.clone();
+
     commands.spawn((
         Node {
             width: Val::Percent(100.0),
@@ -32,8 +56,8 @@ pub fn create_recipe_screen(mut commands: Commands) {
         },
         children![(
             Node {
-                width: Val::Px(200.0),
-                height: Val::Px(100.0),
+                width: Val::Px(600.0),
+                height: Val::Px(300.0),
                 justify_content: JustifyContent::SpaceBetween,
                 column_gap: Val::Px(10.0),
                 ..default()
@@ -54,18 +78,24 @@ pub fn create_recipe_screen(mut commands: Commands) {
                     },
                     BackgroundColor(LIGHT_GRAY.into()),
                     Children::spawn(SpawnWith(|parent: &mut ChildSpawner| {
-                        for i in 0..5000 {
+                        // Spawn the recipe buttons
+                        for recipe in recipes {
                             parent.spawn((
                                 Node {
                                     min_height: Val::Px(LINE_HEIGHT),
                                     ..default()
                                 },
-                                Text::new(format!("#{}", i + 1)),
+                                Text::new(format!(
+                                    "#{} {}",
+                                    recipe.output_count, recipe.output_item
+                                )),
                                 TextColor(BLACK.into()),
                                 Pickable {
                                     should_block_lower: false,
                                     ..default()
                                 },
+                                RecipeButton(recipe),
+                                Button,
                             ));
                         }
                     }))
@@ -78,7 +108,7 @@ pub fn create_recipe_screen(mut commands: Commands) {
                         ..default()
                     },
                     BackgroundColor(LIGHT_GRAY.into()),
-                    children![(Text::new("Hi"), TextColor(BLACK.into()))]
+                    children![(Text::new(""), TextColor(BLACK.into()), RecipeDetailText)]
                 )
             ],
         )],

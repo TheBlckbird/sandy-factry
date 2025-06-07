@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use strum_macros::Display;
 
 use std::{collections::VecDeque, fmt::Debug};
 
@@ -72,13 +73,24 @@ pub trait MachineType: Debug + Send + Sync {
 
 pub type Side = Direction;
 
-#[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize, Deserialize)]
+#[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize, Deserialize, Display)]
 pub enum Item {
+    #[strum(to_string = "Coal")]
     Coal,
+    #[strum(to_string = "Raw Copper")]
     RawCopper,
+    #[strum(to_string = "Raw Iron")]
     RawIron,
+    #[strum(to_string = "Copper Ingot")]
     CopperIngot,
+    #[strum(to_string = "Iron Ingot")]
     IronIngot,
+    #[strum(to_string = "Iron Plate")]
+    IronPlate,
+    #[strum(to_string = "Copper Plate")]
+    CopperPlate,
+    #[strum(to_string = "Gear")]
+    Gear,
 }
 
 impl From<Item> for TileTextureIndex {
@@ -89,6 +101,9 @@ impl From<Item> for TileTextureIndex {
             Item::RawIron => 2,
             Item::CopperIngot => 3,
             Item::IronIngot => 4,
+            Item::IronPlate => 4,
+            Item::CopperPlate => 4,
+            Item::Gear => 4,
         })
     }
 }

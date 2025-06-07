@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::plugins::{
+    crafting,
     interaction::{
         machine_clicked::{
             create_recipe_screen, despawn_recipe_screen, update_recipe_screen,
@@ -22,7 +23,10 @@ impl Plugin for MachineInteractionPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             OnEnter(GameState::Game),
-            (setup_selection_marker, create_recipe_screen),
+            (
+                setup_selection_marker,
+                create_recipe_screen.after(crafting::startup),
+            ),
         )
         .add_systems(
             Update,
@@ -42,6 +46,3 @@ impl Plugin for MachineInteractionPlugin {
 
 #[derive(Component)]
 struct SelectionMarker;
-
-#[derive(Component)]
-struct RecipeScreen;
