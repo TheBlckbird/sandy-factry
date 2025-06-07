@@ -52,6 +52,10 @@ pub trait MachineType: Debug + Send + Sync {
         output_items: &mut OutputItems,
         middleground_object: Option<MiddlegroundObject>,
     );
+
+    /// Needed for technical reasons.
+    ///
+    /// Usually just returns `Box::new(self.clone())` or `Box::new(*self)` if `Self` is `Copy`
     fn clone_box(&self) -> Box<dyn MachineType>;
     fn can_accept(
         &self,

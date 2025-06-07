@@ -1,10 +1,4 @@
-use bevy::{
-    input::{
-        ButtonInput,
-        mouse::{MouseScrollUnit, MouseWheel},
-    },
-    prelude::*,
-};
+use bevy::{input::ButtonInput, prelude::*};
 
 use crate::game_save_types::LoadedGameSave;
 
@@ -27,36 +21,36 @@ fn startup(game_save: Res<LoadedGameSave>, camera: Single<&mut Transform, With<C
 
 fn movement(
     camera: Single<(&mut Projection, &mut Transform)>,
-    mut evr_scroll: EventReader<MouseWheel>,
+    // mut evr_scroll: EventReader<MouseWheel>,
     keys: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
 ) {
-    let mut zoom_add = 0.0;
+    // let mut zoom_add = 0.0;
     let (mut projection, mut camera) = camera.into_inner();
     let Projection::Orthographic(projection) = &mut *projection else {
         return;
     };
 
-    for event in evr_scroll.read() {
-        match event.unit {
-            MouseScrollUnit::Pixel => {
-                if projection.scale >= 0.1 {
-                    zoom_add += event.y * 0.1;
-                }
-            }
-            MouseScrollUnit::Line => {
-                if projection.scale >= 0.1 {
-                    zoom_add += event.y * 5.0;
-                }
-            }
-        }
-    }
+    // for event in evr_scroll.read() {
+    //     match event.unit {
+    //         MouseScrollUnit::Pixel => {
+    //             if projection.scale >= 0.1 {
+    //                 zoom_add += event.y * 0.1;
+    //             }
+    //         }
+    //         MouseScrollUnit::Line => {
+    //             if projection.scale >= 0.1 {
+    //                 zoom_add += event.y * 5.0;
+    //             }
+    //         }
+    //     }
+    // }
 
-    projection.scale += zoom_add * time.delta_secs();
+    // projection.scale += zoom_add * time.delta_secs();
 
-    if projection.scale < 0.1 {
-        projection.scale = 0.1;
-    }
+    // if projection.scale < 0.1 {
+    //     projection.scale = 0.1;
+    // }
 
     let mut translation = Vec2::ZERO;
 
