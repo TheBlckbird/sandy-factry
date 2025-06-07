@@ -1,3 +1,4 @@
+use as_any::AsAny;
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use itertools::Itertools;
@@ -46,7 +47,7 @@ impl Machine {
 }
 
 #[typetag::serde(tag = "type")]
-pub trait MachineType: Debug + Send + Sync {
+pub trait MachineType: Debug + Send + Sync + AsAny {
     fn perform_action(
         &mut self,
         input_items: &mut InputItems,
