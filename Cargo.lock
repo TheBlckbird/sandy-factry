@@ -4723,6 +4723,7 @@ dependencies = [
  "bevy_pkv",
  "image",
  "itertools 0.14.0",
+ "log",
  "noise",
  "petgraph 0.8.1",
  "rand 0.9.1",
@@ -4731,6 +4732,7 @@ dependencies = [
  "serde",
  "strum 0.27.1",
  "strum_macros 0.27.1",
+ "tracing",
  "typetag",
  "winit",
 ]

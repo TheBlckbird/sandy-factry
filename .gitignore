@@ -3,3 +3,6 @@
 .vscode
 out
 temp
+
+# This is used for environment specific settings
+.cargo/config.toml
