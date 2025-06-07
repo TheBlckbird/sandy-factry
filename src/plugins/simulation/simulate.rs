@@ -9,20 +9,13 @@ use crate::{
     plugins::world::{Middleground, MiddlegroundObject},
 };
 
-use super::{SimulationGraph, SimulationTimer};
+use super::SimulationGraph;
 
 /// Do a single simulation step of the world based on the `SimulationGraph`
 pub fn simulate(
     mut simulation_graph: ResMut<SimulationGraph>,
     tile_query: Query<(&TilePos, &TileTextureIndex), With<Middleground>>,
-    mut simulation_timer: ResMut<SimulationTimer>,
-    time: Res<Time>,
 ) {
-    // Check if this tick even is a simulation tick
-    if !simulation_timer.tick(time.delta()).just_finished() {
-        return;
-    }
-
     // Return if the simulation graph is empty aka there are no machines in the world
     if simulation_graph.node_count() == 0 {
         return;
