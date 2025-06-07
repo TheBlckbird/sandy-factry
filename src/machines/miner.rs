@@ -74,10 +74,6 @@ impl MachineType for Miner {
         }
     }
 
-    fn clone_box(&self) -> Box<(dyn MachineType + 'static)> {
-        Box::new(*self)
-    }
-
     fn can_accept(
         &self,
         item: &Item,

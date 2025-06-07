@@ -2,6 +2,7 @@ use std::collections::VecDeque;
 
 use bevy::prelude::*;
 use bevy_ecs_tilemap::{helpers::square_grid::neighbors::Neighbors, prelude::*};
+use dyn_clone::clone_box;
 use petgraph::Graph;
 use sandy_factry_helpers::graph::{add_edge_if_not_exists, get_or_create_node};
 
@@ -66,7 +67,7 @@ pub fn build_graph(
             );
 
         let building = Machine::new(
-            tile.5.machine_type.clone_box(),
+            clone_box(&*tile.5.machine_type),
             tile.5.input_items.clone(),
             tile.5.output_items.clone(),
         );
@@ -105,7 +106,7 @@ pub fn build_graph(
                 && outputs.iter().any(|output| output.get_opposite() == *input)
             {
                 let building = Machine::new(
-                    neighbor_tile.5.machine_type.clone_box(),
+                    clone_box(&*neighbor_tile.5.machine_type),
                     neighbor_tile.5.input_items.clone(),
                     neighbor_tile.5.output_items.clone(),
                 );
@@ -136,7 +137,7 @@ pub fn build_graph(
                 && inputs.iter().any(|input| input.get_opposite() == *output)
             {
                 let building = Machine::new(
-                    neighbor_tile.5.machine_type.clone_box(),
+                    clone_box(&*neighbor_tile.5.machine_type),
                     neighbor_tile.5.input_items.clone(),
                     neighbor_tile.5.output_items.clone(),
                 );

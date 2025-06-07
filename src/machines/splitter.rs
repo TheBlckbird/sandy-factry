@@ -52,10 +52,6 @@ impl MachineType for Splitter {
         }
     }
 
-    fn clone_box(&self) -> Box<dyn MachineType> {
-        Box::new(*self)
-    }
-
     fn can_accept(
         &self,
         _item: &super::Item,

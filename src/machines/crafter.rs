@@ -130,10 +130,6 @@ impl MachineType for Crafter {
         }
     }
 
-    fn clone_box(&self) -> Box<(dyn MachineType + 'static)> {
-        Box::new(self.clone())
-    }
-
     fn can_accept(
         &self,
         item: &Item,

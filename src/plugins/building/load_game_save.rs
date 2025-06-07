@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
+use dyn_clone::clone_box;
 
 use crate::{
     game_save_types::LoadedGameSave,
@@ -31,7 +32,7 @@ pub fn load_game_save(
                     },
                     Foreground,
                     Machine::new(
-                        machine_type.clone_box(),
+                        clone_box(&**machine_type),
                         input_items.clone(),
                         output_items.clone(),
                     ),

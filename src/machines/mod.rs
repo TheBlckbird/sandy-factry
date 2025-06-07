@@ -1,6 +1,7 @@
 use as_any::AsAny;
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
+use dyn_clone::DynClone;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use strum_macros::Display;
@@ -47,18 +48,13 @@ impl Machine {
 }
 
 #[typetag::serde(tag = "type")]
-pub trait MachineType: Debug + Send + Sync + AsAny {
+pub trait MachineType: Debug + Send + Sync + AsAny + DynClone {
     fn perform_action(
         &mut self,
         input_items: &mut InputItems,
         output_items: &mut OutputItems,
         middleground_object: Option<MiddlegroundObject>,
     );
-
-    /// Needed for technical reasons.
-    ///
-    /// Usually just returns `Box::new(self.clone())` or `Box::new(*self)` if `Self` is `Copy`
-    fn clone_box(&self) -> Box<dyn MachineType>;
     fn can_accept(
         &self,
         item: &Item,

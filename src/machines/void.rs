@@ -18,10 +18,6 @@ impl MachineType for Void {
         input_items.all().clear();
     }
 
-    fn clone_box(&self) -> Box<(dyn MachineType + 'static)> {
-        Box::new(*self)
-    }
-
     fn can_accept(
         &self,
         _item: &Item,

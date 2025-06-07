@@ -22,10 +22,6 @@ impl MachineType for Belt {
         }
     }
 
-    fn clone_box(&self) -> Box<(dyn MachineType + 'static)> {
-        Box::new(*self)
-    }
-
     fn can_accept(
         &self,
         _item: &Item,

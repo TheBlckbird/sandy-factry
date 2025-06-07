@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
+use dyn_clone::clone_box;
 
 use crate::machines::Machine;
 
@@ -23,6 +24,6 @@ pub fn graph_to_world(
 
         machine_component.input_items = machine.input_items.clone();
         machine_component.output_items = machine.output_items.clone();
-        machine_component.machine_type = machine.machine_type.clone_box();
+        machine_component.machine_type = clone_box(&*machine.machine_type);
     }
 }
