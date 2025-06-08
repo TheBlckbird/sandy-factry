@@ -88,6 +88,8 @@ pub enum Item {
     CopperPlate,
     #[strum(to_string = "Gear")]
     Gear,
+    #[strum(to_string = "Steel")]
+    Steel,
 }
 
 impl From<Item> for TileTextureIndex {
@@ -101,6 +103,7 @@ impl From<Item> for TileTextureIndex {
             Item::IronPlate => 4,
             Item::CopperPlate => 4,
             Item::Gear => 4,
+            Item::Steel => 4,
         })
     }
 }

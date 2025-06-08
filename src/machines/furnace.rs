@@ -8,7 +8,7 @@ use super::{InputItems, Item, MachineType, OutputItems, Side};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Furnace {
-    current_recipe: Option<FurnaceRecipe>,
+    pub current_recipe: Option<FurnaceRecipe>,
 
     /// burn time left
     burn_time: u8,

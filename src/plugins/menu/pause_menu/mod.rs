@@ -6,24 +6,24 @@ use save_game::save_game;
 use crate::{machines::Machine, plugins::world::Seed};
 
 use super::{
-    GameMenuButtonAction, GameMenuScreen, GameState, MENU_BACKGROUND, NORMAL_BUTTON,
-    PauseMenuState, TEXT_COLOR,
+    GameMenuButtonAction, GameMenuScreen, GameMenuState, GameState, MENU_BACKGROUND, NORMAL_BUTTON,
+    TEXT_COLOR,
 };
 
 mod save_game;
 
 pub fn show_game_menu(
-    current_game_menu_state: Res<State<PauseMenuState>>,
-    mut pause_menu_state: ResMut<NextState<PauseMenuState>>,
+    current_game_menu_state: Res<State<GameMenuState>>,
+    mut game_menu_state: ResMut<NextState<GameMenuState>>,
     keys: Res<ButtonInput<KeyCode>>,
 ) {
     if keys.just_pressed(KeyCode::Escape) {
         match current_game_menu_state.get() {
-            PauseMenuState::Hidden => {
-                pause_menu_state.set(PauseMenuState::Shown);
+            GameMenuState::Hidden => {
+                game_menu_state.set(GameMenuState::Pause);
             }
-            PauseMenuState::Shown => {
-                pause_menu_state.set(PauseMenuState::Hidden);
+            GameMenuState::Pause | GameMenuState::Recipe => {
+                game_menu_state.set(GameMenuState::Hidden);
             }
         }
     }
@@ -106,7 +106,7 @@ pub fn update_menu(
     >,
     mut app_exit_events: EventWriter<AppExit>,
     mut game_state: ResMut<NextState<GameState>>,
-    mut pause_menu_state: ResMut<NextState<PauseMenuState>>,
+    mut pause_menu_state: ResMut<NextState<GameMenuState>>,
     mut pkv: ResMut<PkvStore>,
     seed: Res<Seed>,
     tile_query: Query<(&TilePos, &TileTextureIndex, &Machine)>,
@@ -118,10 +118,10 @@ pub fn update_menu(
         if *interaction == Interaction::Pressed {
             match menu_button_action {
                 GameMenuButtonAction::BackToGame => {
-                    pause_menu_state.set(PauseMenuState::Hidden);
+                    pause_menu_state.set(GameMenuState::Hidden);
                 }
                 GameMenuButtonAction::BackToMainMenu => {
-                    pause_menu_state.set(PauseMenuState::Hidden);
+                    pause_menu_state.set(GameMenuState::Hidden);
                     game_state.set(GameState::MainMenu);
                     should_save_game = true;
                 }

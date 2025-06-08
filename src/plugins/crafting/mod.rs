@@ -1,5 +1,3 @@
-#![allow(unused)] // [TODO] Remove once this is all implemented
-
 use std::collections::HashMap;
 
 use bevy::prelude::*;
@@ -26,7 +24,7 @@ impl Plugin for CraftingPlugin {
     }
 }
 
-pub fn startup(mut commands: Commands) {
+fn startup(mut commands: Commands) {
     commands.insert_resource(CrafterRecipes(vec![
         CrafterRecipe::new(HashMap::from([(Item::IronIngot, 2)]), Item::IronPlate, 1, 7),
         CrafterRecipe::new(
@@ -38,7 +36,11 @@ pub fn startup(mut commands: Commands) {
         CrafterRecipe::new(HashMap::from([(Item::IronPlate, 1)]), Item::Gear, 1, 10),
     ]));
 
-    commands.init_resource::<FurnaceRecipes>();
+    commands.insert_resource(FurnaceRecipes(vec![
+        FurnaceRecipe::new((Item::RawCopper, 1), (Item::CopperIngot, 1), 10),
+        FurnaceRecipe::new((Item::RawIron, 1), (Item::IronIngot, 1), 10),
+        FurnaceRecipe::new((Item::Steel, 1), (Item::IronPlate, 1), 50),
+    ]));
 }
 
 fn cleanup(mut commands: Commands) {

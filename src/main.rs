@@ -1,3 +1,5 @@
+#![feature(if_let_guard)] // [TODO] This can probably be removed in a few days
+
 use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
 use bevy_ecs_tilemap::prelude::*;
 use bevy_pkv::PkvStore;
