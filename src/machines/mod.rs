@@ -1,8 +1,10 @@
+use as_any::AsAny;
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use dyn_clone::DynClone;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use strum_macros::Display;
 
 use std::{collections::VecDeque, fmt::Debug};
 
@@ -46,7 +48,7 @@ impl Machine {
 }
 
 #[typetag::serde(tag = "type")]
-pub trait MachineType: Debug + Send + Sync + DynClone {
+pub trait MachineType: Debug + Send + Sync + AsAny + DynClone {
     fn perform_action(
         &mut self,
         input_items: &mut InputItems,
@@ -60,17 +62,34 @@ pub trait MachineType: Debug + Send + Sync + DynClone {
         output_items: &OutputItems,
         input_side: &Side,
     ) -> bool;
+
+    fn is_selectable(&self) -> bool {
+        false
+    }
 }
 
 pub type Side = Direction;
 
-#[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize, Deserialize)]
+#[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize, Deserialize, Display)]
 pub enum Item {
+    #[strum(to_string = "Coal")]
     Coal,
+    #[strum(to_string = "Raw Copper")]
     RawCopper,
+    #[strum(to_string = "Raw Iron")]
     RawIron,
+    #[strum(to_string = "Copper Ingot")]
     CopperIngot,
+    #[strum(to_string = "Iron Ingot")]
     IronIngot,
+    #[strum(to_string = "Iron Plate")]
+    IronPlate,
+    #[strum(to_string = "Copper Plate")]
+    CopperPlate,
+    #[strum(to_string = "Gear")]
+    Gear,
+    #[strum(to_string = "Steel")]
+    Steel,
 }
 
 impl From<Item> for TileTextureIndex {
@@ -81,6 +100,10 @@ impl From<Item> for TileTextureIndex {
             Item::RawIron => 2,
             Item::CopperIngot => 3,
             Item::IronIngot => 4,
+            Item::IronPlate => 4,
+            Item::CopperPlate => 4,
+            Item::Gear => 4,
+            Item::Steel => 4,
         })
     }
 }

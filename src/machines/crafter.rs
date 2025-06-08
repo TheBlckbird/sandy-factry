@@ -8,7 +8,7 @@ use super::{InputItems, Item, MachineType, OutputItems, Side};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Crafter {
-    current_recipe: Option<CrafterRecipe>,
+    pub current_recipe: Option<CrafterRecipe>,
 
     /// Burn time left
     burn_time: u8,
@@ -144,5 +144,9 @@ impl MachineType for Crafter {
         } else {
             unreachable!()
         }
+    }
+
+    fn is_selectable(&self) -> bool {
+        true
     }
 }

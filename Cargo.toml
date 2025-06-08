@@ -36,6 +36,7 @@ tracing = { version = "0.1", features = [
     "max_level_debug",
     "release_max_level_warn",
 ] }
+as-any.workspace = true
 dyn-clone.workspace = true
 
 
@@ -54,6 +55,7 @@ itertools = "0.14"
 serde = { version = "1.0", features = ["derive"] }
 strum = "0.27"
 strum_macros = "0.27"
+as-any = "0.3"
 dyn-clone = "1.0"
 
 [workspace.lints.clippy]

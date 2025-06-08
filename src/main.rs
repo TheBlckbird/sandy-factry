@@ -1,3 +1,5 @@
+#![feature(if_let_guard)] // [TODO] This can probably be removed in a few days
+
 use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
 use bevy_ecs_tilemap::prelude::*;
 use bevy_pkv::PkvStore;
@@ -14,6 +16,8 @@ use plugins::{
 use sandy_factry_helpers::tilemap::{TilemapSettingsBorrowed, get_mouse_tilepos};
 use serde::{Deserialize, Serialize};
 use winit::window::Icon;
+
+use crate::plugins::interaction::MachineInteractionPlugin;
 
 mod game_save_types;
 mod machines;
@@ -79,6 +83,7 @@ fn main() -> AppExit {
             DebugCameraPlugin,
             CraftingPlugin,
             MenuPlugin,
+            MachineInteractionPlugin,
         ))
         .insert_resource(PkvStore::new("com.louisweigel", "sandy-factry"))
         .init_resource::<MouseCoordinates>()

@@ -6,15 +6,22 @@ use bevy::{
     prelude::*,
 };
 
-use crate::game_save_types::LoadedGameSave;
-
-use super::menu::GameState;
+use crate::{
+    game_save_types::LoadedGameSave,
+    plugins::{
+        interaction::{can_interact_with_world, game_not_paused},
+        menu::GameState,
+    },
+};
 
 pub struct DebugCameraPlugin;
+
 impl Plugin for DebugCameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::Game), startup)
-            .add_systems(Update, movement.run_if(in_state(GameState::Game)))
+            // We want the player to still be able to move around when in a menu, but he shouldn't be able to move
+            .add_systems(Update, zoom.run_if(can_interact_with_world))
+            .add_systems(Update, movement.run_if(game_not_paused))
             .add_systems(OnExit(GameState::Game), cleanup);
     }
 }
@@ -27,36 +34,13 @@ fn startup(game_save: Res<LoadedGameSave>, camera: Single<&mut Transform, With<C
 
 fn movement(
     camera: Single<(&mut Projection, &mut Transform)>,
-    mut evr_scroll: EventReader<MouseWheel>,
     keys: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
 ) {
-    let mut zoom_add = 0.0;
     let (mut projection, mut camera) = camera.into_inner();
     let Projection::Orthographic(projection) = &mut *projection else {
         return;
     };
-
-    for event in evr_scroll.read() {
-        match event.unit {
-            MouseScrollUnit::Pixel => {
-                if projection.scale >= 0.1 {
-                    zoom_add += event.y * 0.1;
-                }
-            }
-            MouseScrollUnit::Line => {
-                if projection.scale >= 0.1 {
-                    zoom_add += event.y * 5.0;
-                }
-            }
-        }
-    }
-
-    projection.scale += zoom_add * time.delta_secs();
-
-    if projection.scale < 0.1 {
-        projection.scale = 0.1;
-    }
 
     let mut translation = Vec2::ZERO;
 
@@ -79,6 +63,44 @@ fn movement(
     translation = translation.normalize_or_zero() * 120.0 * projection.scale * time.delta_secs();
 
     camera.translation += translation.extend(0.0);
+}
+
+fn zoom(
+    camera_projection: Single<&mut Projection>,
+    mut evr_scroll: EventReader<MouseWheel>,
+    keys: Res<ButtonInput<KeyCode>>,
+    time: Res<Time>,
+) {
+    let Projection::Orthographic(projection) = &mut *camera_projection.into_inner() else {
+        return;
+    };
+
+    let mut zoom_add = 0.0;
+
+    for event in evr_scroll.read() {
+        match event.unit {
+            MouseScrollUnit::Pixel => {
+                if projection.scale >= 0.1 {
+                    zoom_add += event.y * 0.1;
+                }
+            }
+            MouseScrollUnit::Line => {
+                if projection.scale >= 0.1 {
+                    zoom_add += event.y * 5.0;
+                }
+            }
+        }
+    }
+
+    projection.scale += zoom_add * time.delta_secs();
+
+    if keys.just_pressed(KeyCode::Space) {
+        projection.scale = 1.0;
+    }
+
+    if projection.scale < 0.1 {
+        projection.scale = 0.1;
+    }
 }
 
 fn cleanup(camera: Single<(&mut Projection, &mut Transform)>) {

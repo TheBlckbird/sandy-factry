@@ -7,7 +7,7 @@ use sandy_factry_helpers::tilemap::{TilemapSettings, generate_tilemap_layer, rem
 use crate::{
     machines::{Item, Machine},
     plugins::{
-        TilemapLayer,
+        RenderLayer,
         building::{Foreground, foreground_objects::ForegroundObject},
         world::{MAP_SIZE, MAP_TYPE, TILE_SIZE},
     },
@@ -22,7 +22,7 @@ pub fn setup_item_tilemap(mut commands: Commands, asset_server: Res<AssetServer>
     generate_tilemap_layer(
         &mut commands,
         texture_handle,
-        TilemapLayer::Items.into(),
+        RenderLayer::Items.into(),
         TilemapSettings::new(MAP_SIZE, TILE_SIZE, MAP_TYPE, TILE_SIZE.into()),
         ItemLayer,
         |_| -> Option<(TileTextureIndex, Item)> { None },

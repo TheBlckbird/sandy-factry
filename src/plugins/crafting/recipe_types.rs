@@ -4,7 +4,12 @@ use serde::{Deserialize, Serialize};
 
 use crate::machines::Item;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum Recipe {
+    Crafter(CrafterRecipe),
+    Furnace(FurnaceRecipe),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct CrafterRecipe {
     pub ingredients: HashMap<Item, u16>,
     pub output_item: Item,
@@ -13,6 +18,7 @@ pub struct CrafterRecipe {
 }
 
 impl CrafterRecipe {
+    #[allow(unused)]
     pub fn new(
         ingredients: HashMap<Item, u16>,
         output_item: Item,
@@ -57,7 +63,7 @@ impl CrafterRecipe {
     }
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 pub struct FurnaceRecipe {
     pub ingredient: (Item, u16),
     pub output_item: (Item, u16),
@@ -65,6 +71,7 @@ pub struct FurnaceRecipe {
 }
 
 impl FurnaceRecipe {
+    #[allow(unused)]
     pub fn new(ingredient: (Item, u16), output_item: (Item, u16), burn_time: u8) -> Self {
         Self {
             ingredient,

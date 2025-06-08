@@ -7,9 +7,10 @@ use graph_to_world::graph_to_world;
 use petgraph::prelude::*;
 use simulate::simulate;
 
-use crate::machines::{Machine, Side};
-
-use super::menu::GameState;
+use crate::{
+    machines::{Machine, Side},
+    plugins::{interaction::game_not_paused, menu::GameState},
+};
 
 mod build_graph;
 mod graph_to_world;
@@ -30,7 +31,7 @@ impl Plugin for SimulationPlugin {
                 SimulationUpdate,
                 (build_graph, simulate, graph_to_world)
                     .chain()
-                    .run_if(in_state(GameState::Game)),
+                    .run_if(game_not_paused),
             )
             .add_systems(OnExit(GameState::Game), cleanup);
     }
