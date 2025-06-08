@@ -5,12 +5,14 @@ use load_game_save::load_game_save;
 use place_buildings::place_buildings;
 use serde::{Deserialize, Serialize};
 
-use crate::Direction;
-
-use super::{
-    RenderLayer,
-    menu::GameState,
-    world::{MAP_SIZE, MAP_TYPE, TILE_SIZE},
+use crate::{
+    Direction,
+    plugins::{
+        RenderLayer,
+        interaction::can_interact_with_world,
+        menu::{GameMenuState, GameState},
+        world::{MAP_SIZE, MAP_TYPE, TILE_SIZE},
+    },
 };
 
 pub mod foreground_objects;
@@ -44,13 +46,9 @@ impl Plugin for BuildingPlugin {
             .add_systems(OnEnter(GameState::Game), (setup, load_game_save).chain())
             .add_systems(
                 Update,
-                (
-                    select_building,
-                    place_buildings,
-                    // update_current_foreground_object,
-                )
-                    .run_if(in_state(GameState::Game)),
+                (select_building, place_buildings).run_if(can_interact_with_world),
             )
+            .add_systems(OnExit(GameMenuState::Hidden), deselect_current_building)
             .add_systems(OnExit(GameState::Game), cleanup);
     }
 }
@@ -117,6 +115,10 @@ fn select_building(mut current_building: ResMut<CurrentMachine>, keys: Res<Butto
     if let Some(n) = n {
         current_building.select_nth_machine(n);
     }
+}
+
+fn deselect_current_building(mut current_building: ResMut<CurrentMachine>) {
+    current_building.deselect();
 }
 
 fn cleanup(

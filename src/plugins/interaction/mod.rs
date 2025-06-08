@@ -43,3 +43,11 @@ pub fn can_interact_with_world(
 ) -> bool {
     *game_state == GameState::Game && *game_menu_state == GameMenuState::Hidden
 }
+
+/// True if the game is running and not in the pause menu
+pub fn game_not_paused(
+    game_state: Res<State<GameState>>,
+    game_menu_state: Res<State<GameMenuState>>,
+) -> bool {
+    *game_state == GameState::Game && *game_menu_state != GameMenuState::Pause
+}
