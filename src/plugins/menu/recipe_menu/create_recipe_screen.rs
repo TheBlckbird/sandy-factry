@@ -21,16 +21,16 @@ pub fn create_recipe_screen(
 ) {
     let mut recipe_children: Option<Box<dyn FnOnce(&mut ChildSpawner) + Send + Sync>> = None;
 
-    if selected_machine
+    if let Some(crafter) = selected_machine
         .machine_type
         .as_ref()
         .as_any()
         .downcast_ref::<Crafter>()
-        .is_some()
     {
         let recipes = crafter_recipes.clone();
+        let current_recipe = crafter.current_recipe.clone();
 
-        recipe_children = Some(Box::new(|parent: &mut ChildSpawner| {
+        recipe_children = Some(Box::new(move |parent: &mut ChildSpawner| {
             // Spawn the recipe buttons
             for recipe in recipes {
                 parent.spawn((
@@ -39,7 +39,18 @@ pub fn create_recipe_screen(
                         padding: UiRect::vertical(Val::Px(5.0)),
                         ..default()
                     },
-                    Text::new(format!("{}x {}", recipe.output_count, recipe.output_item)),
+                    Text::new(format!(
+                        "{}x {}{}",
+                        recipe.output_count,
+                        recipe.output_item,
+                        if let Some(ref current_recipe) = current_recipe
+                            && *current_recipe == recipe
+                        {
+                            " (current)"
+                        } else {
+                            ""
+                        }
+                    )),
                     TextColor(BLACK.into()),
                     Pickable {
                         should_block_lower: false,
@@ -50,16 +61,16 @@ pub fn create_recipe_screen(
                 ));
             }
         }));
-    } else if selected_machine
+    } else if let Some(furnace) = selected_machine
         .machine_type
         .as_ref()
         .as_any()
         .downcast_ref::<Furnace>()
-        .is_some()
     {
         let recipes = furnace_recipes.clone();
+        let current_recipe = furnace.current_recipe;
 
-        recipe_children = Some(Box::new(|parent: &mut ChildSpawner| {
+        recipe_children = Some(Box::new(move |parent: &mut ChildSpawner| {
             // Spawn the recipe buttons
             for recipe in recipes {
                 parent.spawn((
@@ -69,8 +80,16 @@ pub fn create_recipe_screen(
                         ..default()
                     },
                     Text::new(format!(
-                        "{}x {}",
-                        recipe.output_item.1, recipe.output_item.0,
+                        "{}x {}{}",
+                        recipe.output_item.1,
+                        recipe.output_item.0,
+                        if let Some(current_recipe) = current_recipe
+                            && current_recipe == recipe
+                        {
+                            " (current)"
+                        } else {
+                            ""
+                        }
                     )),
                     TextColor(BLACK.into()),
                     Pickable {
