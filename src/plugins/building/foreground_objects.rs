@@ -38,16 +38,22 @@ pub enum ForegroundObject {
     #[variant(inputs(North), outputs(East), texture = 11, machine = Belt, render = true)]
     BeltUpRight,
 
-    #[variant(inputs(North, West), outputs(South), texture = 12, machine = Crafter::new(Side::North, Side::West))]
-    Crafter,
+    #[variant(inputs(North), outputs(South), texture = 38, machine = Crafter::new())]
+    CrafterDown,
+    #[variant(inputs(East), outputs(West), texture = 39, machine = Crafter::new())]
+    CrafterLeft,
+    #[variant(inputs(South), outputs(North), texture = 40, machine = Crafter::new())]
+    CrafterUp,
+    #[variant(inputs(West), outputs(East), texture = 41, machine = Crafter::new())]
+    CrafterRight,
 
-    #[variant(inputs(North), outputs(South), texture = 34, machine = Miner::new())]
+    #[variant(outputs(South), texture = 34, machine = Miner::new())]
     MinerDown,
-    #[variant(inputs(East), outputs(West), texture = 35, machine = Miner::new())]
+    #[variant(outputs(West), texture = 35, machine = Miner::new())]
     MinerLeft,
-    #[variant(inputs(South), outputs(North), texture = 36, machine = Miner::new())]
+    #[variant(outputs(North), texture = 36, machine = Miner::new())]
     MinerUp,
-    #[variant(inputs(West), outputs(East), texture = 37, machine = Miner::new())]
+    #[variant(outputs(East), texture = 37, machine = Miner::new())]
     MinerRight,
 
     #[variant(inputs(North, West), outputs(South), texture = 14, machine = Combiner::new([Side::North, Side::West]), render = true)]
@@ -87,8 +93,22 @@ pub enum ForegroundObject {
     #[variant(inputs(North, East, South, West), texture = 13, machine = Void)]
     Void,
 
-    #[variant(inputs(North, West), outputs(South), texture = 38, machine = Furnace::new(Side::North, Side::West))]
-    Furnace,
+    #[variant(inputs(North, West), outputs(South), texture = 42, machine = Furnace::new(Side::North, Side::West))]
+    FurnaceUpLeft,
+    #[variant(inputs(East, North), outputs(West), texture = 43, machine = Furnace::new(Side::East, Side::North))]
+    FurnaceRightUp,
+    #[variant(inputs(South, East), outputs(North), texture = 44, machine = Furnace::new(Side::South, Side::East))]
+    FurnaceDownRight,
+    #[variant(inputs(West, South), outputs(East), texture = 45, machine = Furnace::new(Side::West, Side::South))]
+    FurnaceLeftDown,
+    #[variant(inputs(North, East), outputs(South), texture = 46, machine = Furnace::new(Side::North, Side::East))]
+    FurnaceUpRight,
+    #[variant(inputs(East, South), outputs(West), texture = 47, machine = Furnace::new(Side::East, Side::South))]
+    FurnaceRightDown,
+    #[variant(inputs(South, West), outputs(North), texture = 48, machine = Furnace::new(Side::South, Side::West))]
+    FurnaceDownLeft,
+    #[variant(inputs(West, North), outputs(East), texture = 49, machine = Furnace::new(Side::West, Side::North))]
+    FurnaceLeftUp,
 }
 
 impl ForegroundObject {
@@ -116,7 +136,15 @@ impl ForegroundObject {
                     Self::BeltUpRight,
                 ],
             ),
-            (Self::Crafter, vec![Self::Crafter]),
+            (
+                Self::CrafterDown,
+                vec![
+                    Self::CrafterDown,
+                    Self::CrafterLeft,
+                    Self::CrafterUp,
+                    Self::CrafterRight,
+                ],
+            ),
             (
                 Self::MinerDown,
                 vec![
@@ -126,7 +154,19 @@ impl ForegroundObject {
                     Self::MinerRight,
                 ],
             ),
-            (Self::Furnace, vec![Self::Furnace]),
+            (
+                Self::FurnaceUpLeft,
+                vec![
+                    Self::FurnaceUpLeft,
+                    Self::FurnaceRightUp,
+                    Self::FurnaceDownRight,
+                    Self::FurnaceLeftDown,
+                    Self::FurnaceUpRight,
+                    Self::FurnaceRightDown,
+                    Self::FurnaceDownLeft,
+                    Self::FurnaceLeftUp,
+                ],
+            ),
             (
                 Self::CombinerDownLeft,
                 vec![
