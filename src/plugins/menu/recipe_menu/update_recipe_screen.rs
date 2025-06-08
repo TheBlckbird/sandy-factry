@@ -43,8 +43,8 @@ pub fn update_recipe_screen(
                         ***recipe_detail_text = format!(
                             "{}\n\nIngredients:\n- {}x {}\nBurn Time: {} ticks",
                             furnace_recipe.output_item.0,
-                            furnace_recipe.ingredient.0,
                             furnace_recipe.ingredient.1,
+                            furnace_recipe.ingredient.0,
                             furnace_recipe.burn_time,
                         );
                     }
