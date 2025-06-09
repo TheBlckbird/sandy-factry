@@ -1,8 +1,12 @@
 use serde::{Deserialize, Serialize};
 
-use crate::plugins::world::MiddlegroundObject;
-
-use super::{MachineType, Side};
+use crate::{
+    content::{
+        items::Item,
+        machine_types::{InputItems, MachineType, OutputItems, Side},
+    },
+    plugins::world::MiddlegroundObject,
+};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Splitter {
@@ -23,8 +27,8 @@ impl Splitter {
 impl MachineType for Splitter {
     fn perform_action(
         &mut self,
-        input_items: &mut super::InputItems,
-        output_items: &mut super::OutputItems,
+        input_items: &mut InputItems,
+        output_items: &mut OutputItems,
         _middleground_object: Option<MiddlegroundObject>,
     ) {
         // Get current input side
@@ -54,10 +58,10 @@ impl MachineType for Splitter {
 
     fn can_accept(
         &self,
-        _item: &super::Item,
-        input_items: &super::InputItems,
-        output_items: &super::OutputItems,
-        _input_side: &super::Side,
+        _item: &Item,
+        input_items: &InputItems,
+        output_items: &OutputItems,
+        _input_side: &Side,
     ) -> bool {
         input_items.count() + output_items.count() < 1
     }

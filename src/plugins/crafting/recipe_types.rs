@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::machines::Item;
+use crate::content::items::Item;
 
 pub enum Recipe {
     Crafter(CrafterRecipe),

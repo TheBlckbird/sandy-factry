@@ -3,7 +3,7 @@ use bevy_ecs_tilemap::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    machines::{InputItems, MachineType, OutputItems},
+    content::machine_types::{InputItems, MachineType, OutputItems},
     plugins::{building::foreground_objects::ForegroundObject, world::Seed},
 };
 

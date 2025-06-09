@@ -5,7 +5,7 @@ use bevy_ecs_tilemap::tiles::{TilePos, TileTextureIndex};
 use petgraph::{algo::tarjan_scc, prelude::*};
 
 use crate::{
-    machines::Side,
+    content::machine_types::Side,
     plugins::world::{Middleground, MiddlegroundObject},
 };
 

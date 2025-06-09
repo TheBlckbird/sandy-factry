@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use dyn_clone::clone_box;
 
-use crate::machines::Machine;
+use crate::content::machine_types::Machine;
 
 use super::SimulationGraph;
 

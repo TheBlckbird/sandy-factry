@@ -2,9 +2,13 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::plugins::{crafting::recipe_types::FurnaceRecipe, world::MiddlegroundObject};
-
-use super::{InputItems, Item, MachineType, OutputItems, Side};
+use crate::{
+    content::{
+        items::Item,
+        machine_types::{InputItems, MachineType, OutputItems, Side},
+    },
+    plugins::{crafting::recipe_types::FurnaceRecipe, world::MiddlegroundObject},
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Furnace {

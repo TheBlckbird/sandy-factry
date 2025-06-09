@@ -195,10 +195,10 @@ pub fn impl_foreground_objects_macro(ast: &DeriveInput) -> TokenStream {
 
                     for side in input_sides {
                         sides.push(match side {
-                            Side::North => quote! {crate::machines::Side::North},
-                            Side::East => quote! {crate::machines::Side::East},
-                            Side::South => quote! {crate::machines::Side::South},
-                            Side::West => quote! {crate::machines::Side::West},
+                            Side::North => quote! {crate::content::machine_types::Side::North},
+                            Side::East => quote! {crate::content::machine_types::Side::East},
+                            Side::South => quote! {crate::content::machine_types::Side::South},
+                            Side::West => quote! {crate::content::machine_types::Side::West},
                         });
                     }
 
@@ -233,10 +233,10 @@ pub fn impl_foreground_objects_macro(ast: &DeriveInput) -> TokenStream {
 
                     for side in output_sides {
                         sides.push(match side {
-                            Side::North => quote! {crate::machines::Side::North},
-                            Side::East => quote! {crate::machines::Side::East},
-                            Side::South => quote! {crate::machines::Side::South},
-                            Side::West => quote! {crate::machines::Side::West},
+                            Side::North => quote! {crate::content::machine_types::Side::North},
+                            Side::East => quote! {crate::content::machine_types::Side::East},
+                            Side::South => quote! {crate::content::machine_types::Side::South},
+                            Side::West => quote! {crate::content::machine_types::Side::West},
                         });
                     }
 
@@ -423,10 +423,10 @@ pub fn impl_foreground_objects_macro(ast: &DeriveInput) -> TokenStream {
             }
         }
 
-        impl TryFrom<#name> for Box<dyn crate::machines::MachineType> {
+        impl TryFrom<#name> for Box<dyn crate::content::machine_types::MachineType> {
             type Error = &'static str;
 
-            fn try_from(value: #name) -> Result<Box<dyn crate::machines::MachineType>, Self::Error> {
+            fn try_from(value: #name) -> Result<Box<dyn crate::content::machine_types::MachineType>, Self::Error> {
                 #to_machine
             }
         }

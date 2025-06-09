@@ -3,7 +3,7 @@ use bevy_ecs_tilemap::prelude::*;
 use bevy_pkv::PkvStore;
 use save_game::save_game;
 
-use crate::{machines::Machine, plugins::world::Seed};
+use crate::{content::machine_types::Machine, plugins::world::Seed};
 
 use super::{
     GameMenuButtonAction, GameMenuScreen, GameMenuState, GameState, MENU_BACKGROUND, NORMAL_BUTTON,

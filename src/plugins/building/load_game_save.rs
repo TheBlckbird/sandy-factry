@@ -3,8 +3,8 @@ use bevy_ecs_tilemap::prelude::*;
 use dyn_clone::clone_box;
 
 use crate::{
+    content::machine_types::Machine,
     game_save_types::LoadedGameSave,
-    machines::Machine,
     plugins::building::{BuildEvent, BuildingInput, BuildingOutput, Foreground},
 };
 

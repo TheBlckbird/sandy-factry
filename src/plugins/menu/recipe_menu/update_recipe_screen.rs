@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 
 use crate::{
-    machines::{Machine, crafter::Crafter, furnace::Furnace},
+    content::{
+        machine_types::Machine,
+        machines::{crafter::Crafter, furnace::Furnace},
+    },
     plugins::{
         crafting::recipe_types::Recipe,
         interaction::SelectedMachine,

@@ -8,7 +8,7 @@ use petgraph::prelude::*;
 use simulate::simulate;
 
 use crate::{
-    machines::{Machine, Side},
+    content::machine_types::{Machine, Side},
     plugins::{interaction::game_not_paused, menu::GameState},
 };
 

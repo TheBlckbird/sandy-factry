@@ -1,6 +1,12 @@
 use serde::{Deserialize, Serialize};
 
-use super::{InputItems, Item, MachineType, OutputItems, Side};
+use crate::{
+    content::{
+        items::Item,
+        machine_types::{InputItems, MachineType, OutputItems, Side},
+    },
+    plugins::world::MiddlegroundObject,
+};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Combiner {
@@ -23,7 +29,7 @@ impl MachineType for Combiner {
         &mut self,
         input_items: &mut InputItems,
         output_items: &mut OutputItems,
-        _middleground_object: Option<crate::plugins::world::MiddlegroundObject>,
+        _middleground_object: Option<MiddlegroundObject>,
     ) {
         // Get current input side
         let current_input_side_index = match self.last_input_side_index {

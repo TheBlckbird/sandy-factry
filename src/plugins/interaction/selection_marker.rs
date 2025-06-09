@@ -3,7 +3,7 @@ use bevy_ecs_tilemap::prelude::*;
 
 use crate::{
     MouseCoordinates,
-    machines::Machine,
+    content::machine_types::Machine,
     plugins::{
         RenderLayer,
         interaction::{SelectedMachine, SelectionMarker},

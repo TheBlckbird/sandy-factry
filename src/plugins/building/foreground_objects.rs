@@ -1,6 +1,9 @@
-use crate::machines::{
-    Side, belt::Belt, combiner::Combiner, crafter::Crafter, furnace::Furnace, miner::Miner,
-    splitter::Splitter, void::Void,
+use crate::content::{
+    machine_types::Side,
+    machines::{
+        belt::Belt, combiner::Combiner, crafter::Crafter, furnace::Furnace, miner::Miner,
+        splitter::Splitter, void::Void,
+    },
 };
 
 use bevy::prelude::*;

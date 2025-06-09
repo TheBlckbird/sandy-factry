@@ -1,8 +1,12 @@
 use serde::{Deserialize, Serialize};
 
-use crate::plugins::world::MiddlegroundObject;
-
-use super::{InputItems, Item, MachineType, OutputItems, Side};
+use crate::{
+    content::{
+        items::Item,
+        machine_types::{InputItems, MachineType, OutputItems, Side},
+    },
+    plugins::world::MiddlegroundObject,
+};
 
 #[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
 pub struct Miner {

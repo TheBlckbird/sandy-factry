@@ -6,7 +6,7 @@ use dyn_clone::clone_box;
 use petgraph::Graph;
 use sandy_factry_helpers::graph::{add_edge_if_not_exists, get_or_create_node};
 
-use crate::{Direction, machines::Machine, plugins::world::MAP_SIZE};
+use crate::{Direction, content::machine_types::Machine, plugins::world::MAP_SIZE};
 
 use crate::plugins::building::{BuildEvent, BuildingInput, BuildingOutput};
 

@@ -5,8 +5,8 @@ use bevy_pkv::PkvStore;
 use dyn_clone::clone_box;
 
 use crate::{
+    content::machine_types::Machine,
     game_save_types::{GameSave, MachineTiles},
-    machines::Machine,
     plugins::{building::foreground_objects::ForegroundObject, world::Seed},
     save_keys::SaveKey,
 };

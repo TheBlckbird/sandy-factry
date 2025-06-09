@@ -19,8 +19,8 @@ use winit::window::Icon;
 
 use crate::plugins::interaction::MachineInteractionPlugin;
 
+mod content;
 mod game_save_types;
-mod machines;
 mod plugins;
 mod save_keys;
 

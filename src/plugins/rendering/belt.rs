@@ -5,7 +5,8 @@ use bevy_ecs_tilemap::prelude::*;
 use sandy_factry_helpers::tilemap::{TilemapSettings, generate_tilemap_layer, remove_tile};
 
 use crate::{
-    machines::{Item, Machine},
+    content::items::Item,
+    content::machine_types::Machine,
     plugins::{
         RenderLayer,
         building::{Foreground, foreground_objects::ForegroundObject},

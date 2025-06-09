@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use recipe_types::{CrafterRecipe, FurnaceRecipe};
 
-use crate::machines::Item;
+use crate::content::items::Item;
 
 use super::menu::GameState;
 

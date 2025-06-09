@@ -5,7 +5,10 @@ use bevy::{
 };
 
 use crate::{
-    machines::{Machine, crafter::Crafter, furnace::Furnace},
+    content::{
+        machine_types::Machine,
+        machines::{crafter::Crafter, furnace::Furnace},
+    },
     plugins::{
         crafting::{CrafterRecipes, FurnaceRecipes, recipe_types::Recipe},
         interaction::SelectedMachine,
