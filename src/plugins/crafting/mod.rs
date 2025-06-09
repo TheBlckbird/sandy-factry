@@ -37,8 +37,8 @@ fn startup(mut commands: Commands) {
     ]));
 
     commands.insert_resource(FurnaceRecipes(vec![
-        FurnaceRecipe::new((Item::RawCopper, 1), (Item::CopperIngot, 1), 10),
-        FurnaceRecipe::new((Item::RawIron, 1), (Item::IronIngot, 1), 10),
+        FurnaceRecipe::new((Item::CopperIngot, 1), (Item::RawCopper, 1), 10),
+        FurnaceRecipe::new((Item::IronIngot, 1), (Item::RawIron, 1), 10),
         FurnaceRecipe::new((Item::Steel, 1), (Item::IronPlate, 1), 50),
     ]));
 }

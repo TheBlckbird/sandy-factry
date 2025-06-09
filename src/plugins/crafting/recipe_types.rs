@@ -72,7 +72,7 @@ pub struct FurnaceRecipe {
 
 impl FurnaceRecipe {
     #[allow(unused)]
-    pub fn new(ingredient: (Item, u16), output_item: (Item, u16), burn_time: u8) -> Self {
+    pub fn new(output_item: (Item, u16), ingredient: (Item, u16), burn_time: u8) -> Self {
         Self {
             ingredient,
             output_item,
