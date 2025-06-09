@@ -15,14 +15,38 @@ pub enum Item {
     CopperIngot,
     #[strum(to_string = "Iron Ingot")]
     IronIngot,
-    #[strum(to_string = "Iron Plate")]
-    IronPlate,
-    #[strum(to_string = "Copper Plate")]
-    CopperPlate,
     #[strum(to_string = "Gear")]
     Gear,
     #[strum(to_string = "Steel")]
     Steel,
+    #[strum(to_string = "Wire")]
+    Wire,
+    #[strum(to_string = "Reinforced Steel")]
+    ReinforcedSteel,
+    #[strum(to_string = "Electrical Circuit")]
+    ElectricalCircuit,
+    #[strum(to_string = "Micro Processor")]
+    MicroProcessor,
+    #[strum(to_string = "Rotor Blade")]
+    RotorBlade,
+    #[strum(to_string = "Propeller")]
+    Propeller,
+    #[strum(to_string = "Big Propeller")]
+    BigPropeller,
+    #[strum(to_string = "Hull")]
+    Hull,
+    #[strum(to_string = "Motor")]
+    Motor,
+    #[strum(to_string = "Battery")]
+    Battery,
+    #[strum(to_string = "Control Module")]
+    ControlModule,
+    #[strum(to_string = "Helicopter Frame")]
+    HelicopterFrame,
+    #[strum(to_string = "Engine")]
+    Engine,
+    #[strum(to_string = "Helicopter")]
+    Helicopter,
 }
 
 impl From<Item> for TileTextureIndex {
@@ -33,10 +57,22 @@ impl From<Item> for TileTextureIndex {
             Item::RawIron => 2,
             Item::CopperIngot => 3,
             Item::IronIngot => 4,
-            Item::IronPlate => 4,
-            Item::CopperPlate => 4,
-            Item::Gear => 4,
-            Item::Steel => 4,
+            Item::Gear => 5,
+            Item::Steel => 6,
+            Item::Wire => 7,
+            Item::ReinforcedSteel => 8,
+            Item::ElectricalCircuit => 9,
+            Item::MicroProcessor => 10,
+            Item::RotorBlade => 11,
+            Item::Propeller => 12,
+            Item::BigPropeller => 13,
+            Item::Hull => 14,
+            Item::Motor => 15,
+            Item::Battery => 16,
+            Item::ControlModule => 17,
+            Item::HelicopterFrame => 18,
+            Item::Engine => 19,
+            Item::Helicopter => 20,
         })
     }
 }
