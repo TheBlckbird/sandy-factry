@@ -3,15 +3,27 @@ use bevy_pkv::{GetError, PkvStore};
 
 use crate::{
     game_save_types::{GameSave, LoadedGameSave},
+    plugins::menu::{
+        GameState, MAIN_TEXT_COLOR, MENU_BACKGROUND, MainMenuScreen, MainMenuState, NORMAL_BUTTON,
+        TEXT_COLOR,
+    },
     save_keys::SaveKey,
 };
 
-use super::{
-    GameState, MAIN_TEXT_COLOR, MENU_BACKGROUND, MainMenuButtonAction, MainMenuScreen,
-    NORMAL_BUTTON, TEXT_COLOR,
-};
+#[derive(Component)]
+pub enum MainMenuButtonAction {
+    Play,
+    Quit,
+    HowToPlay,
+}
 
-pub fn setup_menu(mut commands: Commands) {
+pub fn setup_main_menu(
+    mut commands: Commands,
+    mut main_menu_state: ResMut<NextState<MainMenuState>>,
+) {
+    // Reset `MainMenuState`
+    main_menu_state.set(MainMenuState::Menu);
+
     // Common style for all buttons on the screen
     let button_node = Node {
         width: Val::Px(300.0),
@@ -56,9 +68,10 @@ pub fn setup_menu(mut commands: Commands) {
                         ..default()
                     },
                 ),
-                // Display two buttons for each action available from the main menu:
+                // Display three buttons for each action available from the main menu:
                 // - play
                 // - quit
+                // - how to play
                 (
                     Button,
                     button_node.clone(),
@@ -72,23 +85,39 @@ pub fn setup_menu(mut commands: Commands) {
                 ),
                 (
                     Button,
-                    button_node,
+                    button_node.clone(),
+                    BackgroundColor(NORMAL_BUTTON),
+                    MainMenuButtonAction::HowToPlay,
+                    children![(
+                        Text::new("How to Play"),
+                        button_text_font.clone(),
+                        TextColor(TEXT_COLOR)
+                    )]
+                ),
+                (
+                    Button,
+                    button_node.clone(),
                     BackgroundColor(NORMAL_BUTTON),
                     MainMenuButtonAction::Quit,
-                    children![(Text::new("Quit"), button_text_font, TextColor(TEXT_COLOR),),]
+                    children![(
+                        Text::new("Quit"),
+                        button_text_font.clone(),
+                        TextColor(TEXT_COLOR),
+                    ),]
                 ),
             ]
         )],
     ));
 }
 
-pub fn update_menu(
+pub fn update_main_menu(
     interaction_query: Query<
         (&Interaction, &MainMenuButtonAction),
         (Changed<Interaction>, With<Button>),
     >,
     mut app_exit_events: EventWriter<AppExit>,
     mut game_state: ResMut<NextState<GameState>>,
+    mut main_menu_state: ResMut<NextState<MainMenuState>>,
     mut current_game_save: ResMut<LoadedGameSave>,
     pkv: Res<PkvStore>,
 ) {
@@ -112,6 +141,10 @@ pub fn update_menu(
                     };
 
                     game_state.set(GameState::Game);
+                    main_menu_state.set(MainMenuState::Hidden);
+                }
+                MainMenuButtonAction::HowToPlay => {
+                    main_menu_state.set(MainMenuState::HowToPlay);
                 }
             }
         }

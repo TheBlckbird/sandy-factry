@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::plugins::menu::MainMenuState;
+
 use super::{GameState, SplashScreen, SplashTimer};
 
 pub fn setup_splash_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -28,10 +30,12 @@ pub fn setup_splash_screen(mut commands: Commands, asset_server: Res<AssetServer
 
 pub fn countdown(
     mut game_state: ResMut<NextState<GameState>>,
+    mut main_menu_state: ResMut<NextState<MainMenuState>>,
     time: Res<Time>,
     mut timer: ResMut<SplashTimer>,
 ) {
     if timer.tick(time.delta()).finished() {
         game_state.set(GameState::MainMenu);
+        main_menu_state.set(MainMenuState::Menu);
     }
 }

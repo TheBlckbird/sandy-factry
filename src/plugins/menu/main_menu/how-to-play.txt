@@ -1,0 +1,15 @@
+The following is a very brief explanation of the controls:
+
+Use the number keys to select the buildings.
+They are relatively self-explanatory, but here is another list:
+
+- Belts
+- Splitters, split a belt into two
+- Combiners, combine two belts
+- Crafter, crafts items
+- Miner, mines resources
+- Furnace, smelts raw materials, needs coal inputted to the side
+
+The buildings can be rotated with R and F.
+
+The goal of the game is to produce a helicopter using the available resources. The recipes can be seen when opening clicking on a crafter or furnace
