@@ -1,12 +1,12 @@
 [package]
-name = "the-oil-company"
+name = "sandy-factry"
 version = "0.1.0"
 authors = ["Louis Weigel"]
 license = "MIT OR Apache-2.0"
-description = "A game about building a factory (for oil processing?)"
+description = "A game about building a factory?"
 readme = "Readme.md"
-homepage = "https://github.com/TheBlckbird/factory-builder-pi"
-repository = "https://github.com/TheBlckbird/factory-builder-pi"
+homepage = "https://github.com/TheBlckbird/sandy-factry"
+repository = "https://github.com/TheBlckbird/sandy-factry"
 keywords = ["gaming", "factory-builder"]
 categories = ["games"]
 edition = "2024"
