@@ -14,7 +14,7 @@ pub struct CrafterRecipe {
     pub ingredients: HashMap<Item, u16>,
     pub output_item: Item,
     pub output_count: u8,
-    pub crafting_time: u8,
+    pub crafting_time: u16,
 }
 
 impl CrafterRecipe {
@@ -23,7 +23,7 @@ impl CrafterRecipe {
         ingredients: HashMap<Item, u16>,
         output_item: Item,
         output_count: u8,
-        crafting_time: u8,
+        crafting_time: u16,
     ) -> Self {
         Self {
             ingredients,

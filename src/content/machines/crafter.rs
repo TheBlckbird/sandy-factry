@@ -16,7 +16,7 @@ pub struct Crafter {
 
     /// Crafting time left
     /// `None` if nothing is currently being crafting
-    crafting_time_left: Option<u8>,
+    crafting_time_left: Option<u16>,
 }
 
 impl Crafter {
