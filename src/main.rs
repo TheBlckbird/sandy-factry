@@ -30,6 +30,12 @@ pub struct MouseCoordinates {
     pub y: u32,
 }
 
+impl MouseCoordinates {
+    pub fn as_tile_pos(&self) -> TilePos {
+        TilePos::new(self.x, self.y)
+    }
+}
+
 #[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize, Deserialize)]
 pub enum Direction {
     North,

@@ -2,7 +2,8 @@ use bevy::prelude::*;
 
 use crate::MouseCoordinates;
 
-use super::CoordinatesText;
+#[derive(Component)]
+pub struct CoordinatesText;
 
 pub fn setup(mut commands: Commands) {
     // Spawn text for coordinates
