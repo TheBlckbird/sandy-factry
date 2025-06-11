@@ -80,7 +80,7 @@ pub enum ForegroundObject {
     SplitterDownRight,
     #[variant(inputs(East), outputs(West, South), texture = 27, machine = Splitter::new([Side::West, Side::South]), render = true)]
     SplitterLeftDown,
-    #[variant(inputs(South), outputs(North, East), texture = 28, machine = Splitter::new([Side::North, Side::East]), render = true)]
+    #[variant(inputs(South), outputs(North, West), texture = 28, machine = Splitter::new([Side::North, Side::West]), render = true)]
     SplitterUpLeft,
     #[variant(inputs(West), outputs(East, North), texture = 29, machine = Splitter::new([Side::East, Side::North]), render = true)]
     SplitterRightUp,
