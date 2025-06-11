@@ -1,4 +1,5 @@
 pub mod building;
+pub mod completion;
 pub mod crafting;
 pub mod debug_camera;
 pub mod hud;

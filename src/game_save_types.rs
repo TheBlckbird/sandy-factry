@@ -15,14 +15,21 @@ pub struct GameSave {
     pub machines: MachineTiles,
     pub seed: Seed,
     pub camera_translation: Vec3,
+    pub has_completed_game: bool,
 }
 
 impl GameSave {
-    pub fn new(machines: MachineTiles, seed: Seed, camera_translation: Vec3) -> Self {
+    pub fn new(
+        machines: MachineTiles,
+        seed: Seed,
+        camera_translation: Vec3,
+        has_completed_game: bool,
+    ) -> Self {
         Self {
             machines,
             seed,
             camera_translation,
+            has_completed_game,
         }
     }
 }

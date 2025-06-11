@@ -8,16 +8,16 @@ use crate::{
         completion::HasCompletedGame,
         menu::{
             GameState,
-            game_menus::{GameMenuState, pause_menu::PauseMenuButtonAction},
+            game_menus::{GameMenuState, completed_menu::CompletedMenuButtonAction},
         },
         world::Seed,
     },
     save_game::save_game,
 };
 
-pub fn update_game_menu(
+pub fn update_completed_menu(
     interaction_query: Query<
-        (&Interaction, &PauseMenuButtonAction),
+        (&Interaction, &CompletedMenuButtonAction),
         (Changed<Interaction>, With<Button>),
     >,
     mut app_exit_events: EventWriter<AppExit>,
@@ -29,34 +29,28 @@ pub fn update_game_menu(
     camera: Single<&Transform, With<Camera2d>>,
     has_completed_game: Res<HasCompletedGame>,
 ) {
-    let mut should_save_game = false;
-
     for (interaction, menu_button_action) in &interaction_query {
         if *interaction == Interaction::Pressed {
             match menu_button_action {
-                PauseMenuButtonAction::BackToGame => {
+                CompletedMenuButtonAction::ContinuePlaying => {
                     pause_menu_state.set(GameMenuState::Hidden);
                 }
-                PauseMenuButtonAction::BackToMainMenu => {
+                CompletedMenuButtonAction::BackToMainMenu => {
                     pause_menu_state.set(GameMenuState::Hidden);
                     game_state.set(GameState::MainMenu);
-                    should_save_game = true;
                 }
-                PauseMenuButtonAction::Quit => {
+                CompletedMenuButtonAction::Quit => {
                     app_exit_events.write(AppExit::Success);
-                    should_save_game = true;
                 }
             }
         }
     }
 
-    if should_save_game {
-        save_game(
-            &mut pkv,
-            &seed,
-            tile_query.iter().collect(),
-            camera.into_inner().translation,
-            **has_completed_game,
-        );
-    }
+    save_game(
+        &mut pkv,
+        &seed,
+        tile_query.iter().collect(),
+        camera.into_inner().translation,
+        **has_completed_game,
+    );
 }

@@ -16,6 +16,7 @@ pub fn save_game(
     seed: &Seed,
     machine_tiles: Vec<(&TilePos, &TileTextureIndex, &Machine)>,
     camera_translation: Vec3,
+    has_completed_game: bool,
 ) {
     let mut saved_tiles: MachineTiles = Vec::new();
 
@@ -31,7 +32,7 @@ pub fn save_game(
         ));
     }
 
-    let game_save = GameSave::new(saved_tiles, *seed, camera_translation);
+    let game_save = GameSave::new(saved_tiles, *seed, camera_translation, has_completed_game);
 
     pkv.set(SaveKey::GameSave, &game_save)
         .expect("An error occured while trying to save the game");

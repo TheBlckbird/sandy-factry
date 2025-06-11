@@ -12,7 +12,7 @@ pub fn show_game_menu(
             GameMenuState::Hidden => {
                 game_menu_state.set(GameMenuState::Pause);
             }
-            GameMenuState::Pause | GameMenuState::Recipe => {
+            _ => {
                 game_menu_state.set(GameMenuState::Hidden);
             }
         }

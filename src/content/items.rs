@@ -49,6 +49,12 @@ pub enum Item {
     Helicopter,
 }
 
+impl Item {
+    pub fn ends_game(&self) -> bool {
+        *self == Self::Helicopter
+    }
+}
+
 impl From<Item> for TileTextureIndex {
     fn from(value: Item) -> Self {
         TileTextureIndex(match value {

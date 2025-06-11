@@ -8,7 +8,6 @@ use crate::plugins::menu::{
     },
 };
 
-mod save_game;
 mod setup_menu;
 mod update_menu;
 
