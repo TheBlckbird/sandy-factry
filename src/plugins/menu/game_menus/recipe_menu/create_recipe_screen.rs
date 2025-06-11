@@ -12,7 +12,9 @@ use crate::{
     plugins::{
         crafting::{CrafterRecipes, FurnaceRecipes, recipe_types::Recipe},
         interaction::SelectedMachine,
-        menu::recipe_menu::{LINE_HEIGHT, RecipeButton, RecipeDetailText, RecipeScreen},
+        menu::game_menus::recipe_menu::{
+            LINE_HEIGHT, RecipeButton, RecipeDetailText, RecipeScreen,
+        },
     },
 };
 

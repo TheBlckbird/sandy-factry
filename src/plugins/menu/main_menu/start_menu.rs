@@ -4,8 +4,8 @@ use bevy_pkv::{GetError, PkvStore};
 use crate::{
     game_save_types::{GameSave, LoadedGameSave},
     plugins::menu::{
-        GameState, MAIN_TEXT_COLOR, MENU_BACKGROUND, MainMenuScreen, MainMenuState, NORMAL_BUTTON,
-        TEXT_COLOR,
+        GameState, MAIN_TEXT_COLOR, MENU_BACKGROUND, NORMAL_BUTTON, TEXT_COLOR,
+        main_menu::{MainMenuScreen, MainMenuState},
     },
     save_keys::SaveKey,
 };

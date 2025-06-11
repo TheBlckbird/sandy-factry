@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 
 use crate::plugins::menu::{
-    HowToPlayMenu, MAIN_TEXT_COLOR, MENU_BACKGROUND, MainMenuState, NORMAL_BUTTON, TEXT_COLOR,
+    MAIN_TEXT_COLOR, MENU_BACKGROUND, NORMAL_BUTTON, TEXT_COLOR,
+    main_menu::{HowToPlayMenu, MainMenuState},
 };
 
 #[derive(Component)]

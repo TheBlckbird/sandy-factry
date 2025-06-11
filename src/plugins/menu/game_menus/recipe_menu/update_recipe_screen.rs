@@ -8,7 +8,7 @@ use crate::{
     plugins::{
         crafting::recipe_types::Recipe,
         interaction::SelectedMachine,
-        menu::{
+        menu::game_menus::{
             GameMenuState,
             recipe_menu::{RecipeButton, RecipeDetailText},
         },

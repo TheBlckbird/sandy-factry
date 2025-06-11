@@ -3,21 +3,12 @@ use bevy::prelude::*;
 use crate::{
     game_save_types::LoadedGameSave,
     plugins::menu::{
-        main_menu::{
-            how_to_play::{setup_how_to_play_menu, update_how_to_play_menu},
-            start_menu::{setup_main_menu, update_main_menu},
-        },
-        recipe_menu::{
-            RecipeScreen, create_recipe_screen::create_recipe_screen,
-            deselect_machine::deselect_machine, update_recipe_screen::update_recipe_screen,
-            update_scroll_position,
-        },
+        game_menus::GameMenusPlugin, main_menu::MainMenuPlugin, splash_screen::SplashScreenPlugin,
     },
 };
 
+pub mod game_menus;
 mod main_menu;
-mod pause_menu;
-mod recipe_menu;
 mod splash_screen;
 
 const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
@@ -33,71 +24,9 @@ pub struct MenuPlugin;
 
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
-        app.init_state::<GameState>()
-            .init_state::<MainMenuState>()
-            .init_state::<GameMenuState>()
-            .init_resource::<LoadedGameSave>()
-            // Splash Screen
-            .add_systems(
-                OnEnter(GameState::Splash),
-                splash_screen::setup_splash_screen,
-            )
-            .add_systems(
-                Update,
-                splash_screen::countdown.run_if(in_state(GameState::Splash)),
-            )
-            .add_systems(OnExit(GameState::Splash), despawn_screen::<SplashScreen>)
-            // Main Menu
-            .add_systems(
-                OnEnter(GameState::MainMenu),
-                |mut main_menu_state: ResMut<NextState<MainMenuState>>| {
-                    main_menu_state.set(MainMenuState::Menu);
-                },
-            )
-            .add_systems(Update, button_system.run_if(in_state(GameState::MainMenu)))
-            .add_systems(OnEnter(MainMenuState::Menu), setup_main_menu)
-            .add_systems(
-                Update,
-                update_main_menu.run_if(in_state(MainMenuState::Menu)),
-            )
-            .add_systems(
-                OnExit(MainMenuState::Menu),
-                despawn_screen::<MainMenuScreen>,
-            )
-            .add_systems(OnEnter(MainMenuState::HowToPlay), setup_how_to_play_menu)
-            .add_systems(
-                Update,
-                update_how_to_play_menu.run_if(in_state(MainMenuState::HowToPlay)),
-            )
-            .add_systems(
-                OnExit(MainMenuState::HowToPlay),
-                despawn_screen::<HowToPlayMenu>,
-            )
-            // Game Menu
-            .add_systems(OnEnter(GameMenuState::Pause), pause_menu::setup_menu)
-            .add_systems(
-                Update,
-                (pause_menu::update_menu, button_system).run_if(in_state(GameMenuState::Pause)),
-            )
-            .add_systems(
-                OnExit(GameMenuState::Pause),
-                despawn_screen::<GameMenuScreen>,
-            )
-            .add_systems(
-                Update,
-                pause_menu::show_game_menu.run_if(in_state(GameState::Game)),
-            )
-            // Recipe Menu
-            .add_systems(OnEnter(GameMenuState::Recipe), create_recipe_screen)
-            .add_systems(
-                Update,
-                (update_recipe_screen, update_scroll_position)
-                    .run_if(in_state(GameMenuState::Recipe)),
-            )
-            .add_systems(
-                OnExit(GameMenuState::Recipe),
-                (despawn_screen::<RecipeScreen>, deselect_machine),
-            );
+        app.add_plugins((SplashScreenPlugin, MainMenuPlugin, GameMenusPlugin))
+            .init_state::<GameState>()
+            .init_resource::<LoadedGameSave>();
     }
 }
 
@@ -109,54 +38,17 @@ pub enum GameState {
     Game,
 }
 
-#[derive(States, Default, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum MainMenuState {
-    #[default]
-    Hidden,
-    Menu,
-    HowToPlay,
-}
-
-#[derive(States, Default, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum GameMenuState {
-    #[default]
-    Hidden,
-    Pause,
-    Recipe,
-}
-
-#[derive(Resource, Deref, DerefMut)]
-pub struct SplashTimer(Timer);
-
-#[derive(Component)]
-enum GameMenuButtonAction {
-    BackToGame,
-    BackToMainMenu,
-    Quit,
-}
-
-#[derive(Component)]
-struct MainMenuScreen;
-
-#[derive(Component)]
-struct HowToPlayMenu;
-
-#[derive(Component)]
-struct GameMenuScreen;
-
 #[derive(Component)]
 struct SelectedOption;
 
-#[derive(Component)]
-struct SplashScreen;
-
-// Generic system that takes a component as a parameter, and will despawn all entities with that component
+/// Generic system that takes a component as a parameter, and will despawn all entities with that component
 fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {
     for entity in &to_despawn {
         commands.entity(entity).despawn();
     }
 }
 
+/// System to update button hover states
 fn button_system(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, Option<&SelectedOption>),

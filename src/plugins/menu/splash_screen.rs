@@ -1,8 +1,24 @@
 use bevy::prelude::*;
 
-use crate::plugins::menu::MainMenuState;
+use crate::plugins::menu::{despawn_screen, main_menu::MainMenuState};
 
-use super::{GameState, SplashScreen, SplashTimer};
+use super::GameState;
+
+pub struct SplashScreenPlugin;
+
+impl Plugin for SplashScreenPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(OnEnter(GameState::Splash), setup_splash_screen)
+            .add_systems(Update, countdown.run_if(in_state(GameState::Splash)))
+            .add_systems(OnExit(GameState::Splash), despawn_screen::<SplashScreen>);
+    }
+}
+
+#[derive(Resource, Deref, DerefMut)]
+pub struct SplashTimer(Timer);
+
+#[derive(Component)]
+struct SplashScreen;
 
 pub fn setup_splash_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
     let icon = asset_server.load("app-icon.png");

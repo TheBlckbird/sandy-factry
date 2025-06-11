@@ -5,7 +5,7 @@ use crate::plugins::{
         despawn_selection_marker, hide_selection_marker, setup_selection_marker,
         update_selection_marker,
     },
-    menu::{GameMenuState, GameState},
+    menu::{GameState, game_menus::GameMenuState},
 };
 
 mod selection_marker;

@@ -7,11 +7,40 @@ use bevy::{
     prelude::*,
 };
 
-use crate::plugins::crafting::recipe_types::Recipe;
+use crate::plugins::{
+    crafting::recipe_types::Recipe,
+    menu::{
+        despawn_screen,
+        game_menus::{
+            GameMenuState,
+            recipe_menu::{
+                create_recipe_screen::create_recipe_screen, deselect_machine::deselect_machine,
+                update_recipe_screen::update_recipe_screen,
+            },
+        },
+    },
+};
 
 pub mod create_recipe_screen;
 pub mod deselect_machine;
 pub mod update_recipe_screen;
+
+pub struct RecipeMenuPlugin;
+
+impl Plugin for RecipeMenuPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(OnEnter(GameMenuState::Recipe), create_recipe_screen)
+            .add_systems(
+                Update,
+                (update_recipe_screen, update_scroll_position)
+                    .run_if(in_state(GameMenuState::Recipe)),
+            )
+            .add_systems(
+                OnExit(GameMenuState::Recipe),
+                (despawn_screen::<RecipeScreen>, deselect_machine),
+            );
+    }
+}
 
 #[derive(Component)]
 pub struct RecipeScreen;

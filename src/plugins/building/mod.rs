@@ -10,7 +10,7 @@ use crate::{
     plugins::{
         RenderLayer,
         interaction::can_interact_with_world,
-        menu::{GameMenuState, GameState},
+        menu::{GameState, game_menus::GameMenuState},
         world::{MAP_SIZE, MAP_TYPE, TILE_SIZE},
     },
 };

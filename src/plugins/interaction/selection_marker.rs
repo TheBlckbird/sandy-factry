@@ -7,7 +7,7 @@ use crate::{
     plugins::{
         RenderLayer,
         interaction::{SelectedMachine, SelectionMarker},
-        menu::GameMenuState,
+        menu::game_menus::GameMenuState,
         world::{MAP_SIZE, MAP_TYPE, TILE_SIZE},
     },
 };
