@@ -4,6 +4,8 @@ Sandy Fact'ry is a factory builder developed for a school project.
 
 ## Install
 
+(This is not yet available, you currently have to build from source)
+
 Go to the [latest release](https://github.com/TheBlckbird/sandy-factry/releases/latest) and download the respective file for your system.
 
 ### Building from source
