@@ -9,29 +9,23 @@ use crate::game_save_types::LoadedGameSave;
 
 use super::menu::GameState;
 
-// mod infinite;
 mod generation;
 
-// Constants for world generation
+// MARK: Constants
+// for world generation
 pub const MAP_SIZE: TilemapSize = TilemapSize { x: 64, y: 64 };
 pub const TILE_SIZE: TilemapTileSize = TilemapTileSize { x: 8.0, y: 8.0 };
 pub const MAP_TYPE: TilemapType = TilemapType::Square;
 
-#[derive(Resource, Clone, Copy, Serialize, Deserialize)]
-pub struct Seed(u32);
+// MARK: Plugin
+pub struct WorldPlugin;
 
-impl Seed {
-    /// Generates a new random seed
-    fn random() -> Self {
-        Self(rand::rng().random())
+impl Plugin for WorldPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(OnEnter(GameState::Game), (startup, generation).chain())
+            .add_systems(OnExit(GameState::Game), (cleanup_bevy_resources, cleanup));
     }
 }
-
-#[derive(Component, Clone, Copy)]
-pub struct Background;
-
-#[derive(Component, Clone, Copy)]
-pub struct Middleground;
 
 #[allow(unused)]
 #[derive(Default, Clone, Copy)]
@@ -53,6 +47,8 @@ impl From<BackgroundObject> for TileTextureIndex {
         TileTextureIndex(index)
     }
 }
+
+// MARK: Other
 
 #[derive(Debug, Clone, Copy)]
 pub enum MiddlegroundObject {
@@ -86,14 +82,27 @@ impl TryFrom<TileTextureIndex> for MiddlegroundObject {
     }
 }
 
-pub struct WorldPlugin;
+// MARK: Resources
 
-impl Plugin for WorldPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Game), (startup, generation).chain())
-            .add_systems(OnExit(GameState::Game), (cleanup_bevy_resources, cleanup));
+#[derive(Resource, Clone, Copy, Serialize, Deserialize)]
+pub struct Seed(u32);
+
+impl Seed {
+    /// Generates a new random seed
+    fn random() -> Self {
+        Self(rand::rng().random())
     }
 }
+
+// MARK: Components
+
+#[derive(Component, Clone, Copy)]
+pub struct Background;
+
+#[derive(Component, Clone, Copy)]
+pub struct Middleground;
+
+// MARK: Systems
 
 fn startup(mut commands: Commands, game_save: Res<LoadedGameSave>) {
     match &**game_save {
