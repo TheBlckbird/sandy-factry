@@ -19,24 +19,7 @@ pub mod foreground_objects;
 mod load_game_save;
 mod place_buildings;
 
-#[allow(unused)]
-#[derive(Event)]
-pub enum BuildEvent {
-    Placed(TilePos, foreground_objects::ForegroundObject),
-    Deleted(TilePos, foreground_objects::ForegroundObject),
-}
-
-#[derive(Component)]
-pub struct Foreground;
-
-#[derive(Component)]
-struct HoverBuilding;
-
-#[derive(Component, Serialize, Deserialize)]
-pub struct BuildingInput(pub Option<Vec<Direction>>);
-
-#[derive(Component)]
-pub struct BuildingOutput(pub Option<Vec<Direction>>);
+// MARK: Plugin
 
 pub struct BuildingPlugin;
 
@@ -53,7 +36,34 @@ impl Plugin for BuildingPlugin {
     }
 }
 
+// MARK: Events
+
+#[allow(unused)]
+#[derive(Event)]
+pub enum BuildEvent {
+    Placed(TilePos, foreground_objects::ForegroundObject),
+    Deleted(TilePos, foreground_objects::ForegroundObject),
+}
+
+// MARK: Components
+
+#[derive(Component)]
+pub struct Foreground;
+
+#[derive(Component)]
+struct HoverBuilding;
+
+#[derive(Component, Serialize, Deserialize)]
+pub struct BuildingInput(pub Option<Vec<Direction>>);
+
+#[derive(Component)]
+pub struct BuildingOutput(pub Option<Vec<Direction>>);
+
+// MARK: Systems
+
+/// Initialize everything for building
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    // Add resource
     commands.init_resource::<CurrentMachine>();
 
     let foreground_texture_handle: Handle<Image> = asset_server.load("foreground_tiles.png");
@@ -61,6 +71,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let foreground_tile_storage = TileStorage::empty(MAP_SIZE);
     let foreground_tilemap_entity = commands.spawn_empty().id();
 
+    // Spawn tilemap
     commands.entity(foreground_tilemap_entity).insert((
         TilemapBundle {
             grid_size: TILE_SIZE.into(),
@@ -77,6 +88,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 }
 
+/// Check for keyboard inputs to select or rotate buildings
 fn select_building(mut current_building: ResMut<CurrentMachine>, keys: Res<ButtonInput<KeyCode>>) {
     if keys.just_pressed(KeyCode::KeyX) {
         current_building.select_next_machine();
@@ -117,10 +129,12 @@ fn select_building(mut current_building: ResMut<CurrentMachine>, keys: Res<Butto
     }
 }
 
+/// Deselects the current building
 fn deselect_current_building(mut current_building: ResMut<CurrentMachine>) {
     current_building.deselect();
 }
 
+/// Remove everything building related, specifically the tilemap and resource
 fn cleanup(
     mut commands: Commands,
     foreground_tilemap: Single<Entity, (With<TileStorage>, With<Foreground>)>,

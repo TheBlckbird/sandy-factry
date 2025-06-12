@@ -12,6 +12,7 @@ use crate::{
     },
 };
 
+/// Show or hide the selection marker and update its position
 pub fn update_selection_marker(
     mut commands: Commands,
     cursor_position: Res<MouseCoordinates>,
@@ -62,11 +63,15 @@ pub fn update_selection_marker(
     }
 }
 
+/// System to hide the selection marker
+///
+/// This should be called when the player can't interact with the world,
+/// for example when a menu is openend
 pub fn hide_selection_marker(mut selection_marker: Single<&mut Visibility, With<SelectionMarker>>) {
     **selection_marker = Visibility::Hidden;
 }
 
-pub fn setup_selection_marker(asset_server: Res<AssetServer>, mut commands: Commands) {
+pub fn spawn_selection_marker(asset_server: Res<AssetServer>, mut commands: Commands) {
     commands.spawn((
         Sprite::from_image(asset_server.load("selection.png")),
         Transform::from_xyz(0., 0., RenderLayer::SelectionMarker.into()),

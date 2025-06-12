@@ -3,11 +3,12 @@ use bevy_ecs_tilemap::prelude::*;
 use noise::{NoiseFn, Simplex};
 use sandy_factry_helpers::tilemap::{TilemapSettings, generate_tilemap_layer};
 
-use crate::plugins::RenderLayer;
-
-use super::{
-    Background, BackgroundObject, MAP_SIZE, MAP_TYPE, Middleground, MiddlegroundObject, Seed,
-    TILE_SIZE,
+use crate::plugins::{
+    RenderLayer,
+    world::{
+        Background, BackgroundObject, MAP_SIZE, MAP_TYPE, Middleground, MiddlegroundObject, Seed,
+        TILE_SIZE,
+    },
 };
 
 /// Run the world generation
@@ -15,6 +16,7 @@ pub fn generation(mut commands: Commands, asset_server: Res<AssetServer>, seed: 
     let background_texture_handle = asset_server.load("background_tiles.png");
     let middleground_texture_handle = asset_server.load("middleground_tiles.png");
 
+    // Create the background tilemap full of sand
     generate_tilemap_layer(
         &mut commands,
         background_texture_handle,
@@ -24,6 +26,7 @@ pub fn generation(mut commands: Commands, asset_server: Res<AssetServer>, seed: 
         |_| Some((BackgroundObject::Sand.into(), Background)),
     );
 
+    // Generate the middlground tilemap for resources
     generate_tilemap_layer(
         &mut commands,
         middleground_texture_handle,

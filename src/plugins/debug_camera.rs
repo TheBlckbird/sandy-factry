@@ -94,6 +94,7 @@ fn zoom(
 
     projection.scale += zoom_add * time.delta_secs();
 
+    // Reset zoom when space is pressed
     if keys.just_pressed(KeyCode::Space) {
         projection.scale = 1.0;
     }

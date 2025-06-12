@@ -11,6 +11,7 @@ use crate::plugins::menu::{
 mod setup_menu;
 mod update_menu;
 
+// MARK: Plugin
 pub struct CompletedMenuPlugin;
 
 impl Plugin for CompletedMenuPlugin {
@@ -26,6 +27,8 @@ impl Plugin for CompletedMenuPlugin {
             );
     }
 }
+
+// MARK: Components
 
 #[derive(Component)]
 struct CompletedMenuScreen;

@@ -12,6 +12,7 @@ use crate::plugins::building::{BuildEvent, BuildingInput, BuildingOutput};
 
 use super::SimulationGraph;
 
+/// Build a graph from the world representation
 pub fn build_graph(
     mut _build_events: EventReader<BuildEvent>,
     tile_query: Query<(
@@ -85,11 +86,13 @@ pub fn build_graph(
             }
         };
 
+        // Add neighbors
         add_neighbor(neighbors.north, &mut next);
         add_neighbor(neighbors.east, &mut next);
         add_neighbor(neighbors.south, &mut next);
         add_neighbor(neighbors.west, &mut next);
 
+        // Connect inputs
         for input in tile.3.0.iter().flatten() {
             let neighbor_pos = match input {
                 Direction::North => neighbors.north,
@@ -121,6 +124,7 @@ pub fn build_graph(
             }
         }
 
+        // Connect outputs
         for output in tile.4.0.iter().flatten() {
             let neighbor_pos = match output {
                 Direction::North => neighbors.north,

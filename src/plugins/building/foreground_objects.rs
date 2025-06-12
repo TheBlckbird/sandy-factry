@@ -10,11 +10,9 @@ use bevy::prelude::*;
 use sandy_factry_macros::ForegroundObjects;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Serialize, Deserialize, ForegroundObjects)]
+/// All the possible machines with all the possible variants.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, ForegroundObjects)]
 pub enum ForegroundObject {
-    #[default]
-    #[variant(texture = -1, machine = Nothing)]
-    Nothing,
     #[variant(inputs(South), outputs(North), texture = 0, machine = Belt, render = true)]
     BeltUp,
     #[variant(inputs(North), outputs(South), texture = 1, machine = Belt, render = true)]
@@ -115,6 +113,8 @@ pub enum ForegroundObject {
 }
 
 impl ForegroundObject {
+    /// Groups the variants of the machines together, always defining
+    /// one variant that can be used as a thumbnail for a group
     fn get_groups() -> Vec<(Self, Vec<Self>)> {
         vec![
             (
@@ -137,37 +137,6 @@ impl ForegroundObject {
                     Self::BeltDownLeft,
                     Self::BeltLeftUp,
                     Self::BeltUpRight,
-                ],
-            ),
-            (
-                Self::CrafterDown,
-                vec![
-                    Self::CrafterDown,
-                    Self::CrafterLeft,
-                    Self::CrafterUp,
-                    Self::CrafterRight,
-                ],
-            ),
-            (
-                Self::MinerDown,
-                vec![
-                    Self::MinerDown,
-                    Self::MinerLeft,
-                    Self::MinerUp,
-                    Self::MinerRight,
-                ],
-            ),
-            (
-                Self::FurnaceUpLeft,
-                vec![
-                    Self::FurnaceUpLeft,
-                    Self::FurnaceRightUp,
-                    Self::FurnaceDownRight,
-                    Self::FurnaceLeftDown,
-                    Self::FurnaceUpRight,
-                    Self::FurnaceRightDown,
-                    Self::FurnaceDownLeft,
-                    Self::FurnaceLeftUp,
                 ],
             ),
             (
@@ -196,11 +165,46 @@ impl ForegroundObject {
                     Self::SplitterLeftUp,
                 ],
             ),
+            (
+                Self::MinerDown,
+                vec![
+                    Self::MinerDown,
+                    Self::MinerLeft,
+                    Self::MinerUp,
+                    Self::MinerRight,
+                ],
+            ),
+            (
+                Self::FurnaceUpLeft,
+                vec![
+                    Self::FurnaceUpLeft,
+                    Self::FurnaceRightUp,
+                    Self::FurnaceDownRight,
+                    Self::FurnaceLeftDown,
+                    Self::FurnaceUpRight,
+                    Self::FurnaceRightDown,
+                    Self::FurnaceDownLeft,
+                    Self::FurnaceLeftUp,
+                ],
+            ),
+            (
+                Self::CrafterDown,
+                vec![
+                    Self::CrafterDown,
+                    Self::CrafterLeft,
+                    Self::CrafterUp,
+                    Self::CrafterRight,
+                ],
+            ),
             (Self::Void, vec![Self::Void]),
         ]
     }
 }
 
+// MARK: Resources
+
+/// Holds information for the currently selected machine
+/// and all the possible machine variants
 #[derive(Resource, Clone)]
 pub struct CurrentMachine {
     all_machines: Vec<ForegroundObject>,
@@ -209,15 +213,18 @@ pub struct CurrentMachine {
 }
 
 impl CurrentMachine {
+    /// Get the currently selected [ForegroundObject]
     pub fn get_current_foreground_object(&self) -> Option<ForegroundObject> {
         Some(ForegroundObject::get_groups()[self.machine_index?].1[self.variant_index])
     }
 
+    /// Deselect the current machine.
     pub fn deselect(&mut self) {
         self.machine_index = None;
         self.variant_index = 0;
     }
 
+    /// Select the next machine.
     pub fn select_next_machine(&mut self) {
         match &self.machine_index {
             Some(machine_index) => {
@@ -235,6 +242,7 @@ impl CurrentMachine {
         self.variant_index = 0;
     }
 
+    /// Select the nth machine, resetting the variant to the first one.
     pub fn select_nth_machine(&mut self, mut n: usize) {
         n -= 1;
 
@@ -249,6 +257,7 @@ impl CurrentMachine {
         }
     }
 
+    /// Select the previous machine, resetting the variant to the first one.
     pub fn select_prev_machine(&mut self) {
         match self.machine_index {
             Some(machine_index) => {
@@ -264,6 +273,7 @@ impl CurrentMachine {
         self.variant_index = 0;
     }
 
+    /// Select the next variant of the current machine group.
     pub fn select_next_variant(&mut self) {
         if let Some(machine_index) = self.machine_index {
             self.variant_index += 1;
@@ -274,6 +284,7 @@ impl CurrentMachine {
         }
     }
 
+    /// Select the previous variant of the current machine group.
     pub fn select_prev_variant(&mut self) {
         if let Some(machine_index) = self.machine_index {
             if self.variant_index == 0 {

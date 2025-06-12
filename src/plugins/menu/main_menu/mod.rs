@@ -11,6 +11,7 @@ use crate::plugins::menu::{
 pub mod how_to_play;
 pub mod start_menu;
 
+// MARK: Plugin
 pub struct MainMenuPlugin;
 
 impl Plugin for MainMenuPlugin {
@@ -44,6 +45,8 @@ impl Plugin for MainMenuPlugin {
     }
 }
 
+// MARK: State
+
 #[derive(States, Default, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum MainMenuState {
     #[default]
@@ -51,6 +54,8 @@ pub enum MainMenuState {
     Menu,
     HowToPlay,
 }
+
+// MARK: Resources
 
 #[derive(Component)]
 struct MainMenuScreen;

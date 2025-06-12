@@ -5,6 +5,7 @@ use crate::{
     plugins::{completion::HasCompletedGame, menu::game_menus::GameMenuState},
 };
 
+/// Check whether the game has ended
 pub fn check_completion(
     item_tiles: Query<&Item>,
     mut game_menu_state: ResMut<NextState<GameMenuState>>,

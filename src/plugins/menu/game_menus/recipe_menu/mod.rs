@@ -25,6 +25,11 @@ pub mod create_recipe_screen;
 pub mod deselect_machine;
 pub mod update_recipe_screen;
 
+// MARK: Constants
+
+const LINE_HEIGHT: f32 = 21.0;
+
+// MARK: Plugin
 pub struct RecipeMenuPlugin;
 
 impl Plugin for RecipeMenuPlugin {
@@ -42,6 +47,8 @@ impl Plugin for RecipeMenuPlugin {
     }
 }
 
+// MARK: Components
+
 #[derive(Component)]
 pub struct RecipeScreen;
 
@@ -51,7 +58,7 @@ pub struct RecipeDetailText;
 #[derive(Component, Deref)]
 pub struct RecipeButton(Recipe);
 
-const LINE_HEIGHT: f32 = 21.0;
+// MARK: States
 
 /// Updates the scroll position of scrollable nodes in response to mouse input
 pub fn update_scroll_position(
