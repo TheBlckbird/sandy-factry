@@ -10,6 +10,7 @@ use crate::{
 #[derive(Resource, Deref, DerefMut, Default)]
 pub struct LoadedGameSave(Option<GameSave>);
 
+/// All the information saved to disk after closing the game are in this struct
 #[derive(Serialize, Deserialize)]
 pub struct GameSave {
     pub machines: MachineTiles,

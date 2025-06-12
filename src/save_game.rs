@@ -11,6 +11,7 @@ use crate::{
     save_keys::SaveKey,
 };
 
+/// Save the game and write it to disk
 pub fn save_game(
     pkv: &mut PkvStore,
     seed: &Seed,
