@@ -140,37 +140,6 @@ impl ForegroundObject {
                 ],
             ),
             (
-                Self::CrafterDown,
-                vec![
-                    Self::CrafterDown,
-                    Self::CrafterLeft,
-                    Self::CrafterUp,
-                    Self::CrafterRight,
-                ],
-            ),
-            (
-                Self::MinerDown,
-                vec![
-                    Self::MinerDown,
-                    Self::MinerLeft,
-                    Self::MinerUp,
-                    Self::MinerRight,
-                ],
-            ),
-            (
-                Self::FurnaceUpLeft,
-                vec![
-                    Self::FurnaceUpLeft,
-                    Self::FurnaceRightUp,
-                    Self::FurnaceDownRight,
-                    Self::FurnaceLeftDown,
-                    Self::FurnaceUpRight,
-                    Self::FurnaceRightDown,
-                    Self::FurnaceDownLeft,
-                    Self::FurnaceLeftUp,
-                ],
-            ),
-            (
                 Self::CombinerDownLeft,
                 vec![
                     Self::CombinerUpLeft,
@@ -196,10 +165,43 @@ impl ForegroundObject {
                     Self::SplitterLeftUp,
                 ],
             ),
+            (
+                Self::MinerDown,
+                vec![
+                    Self::MinerDown,
+                    Self::MinerLeft,
+                    Self::MinerUp,
+                    Self::MinerRight,
+                ],
+            ),
+            (
+                Self::FurnaceUpLeft,
+                vec![
+                    Self::FurnaceUpLeft,
+                    Self::FurnaceRightUp,
+                    Self::FurnaceDownRight,
+                    Self::FurnaceLeftDown,
+                    Self::FurnaceUpRight,
+                    Self::FurnaceRightDown,
+                    Self::FurnaceDownLeft,
+                    Self::FurnaceLeftUp,
+                ],
+            ),
+            (
+                Self::CrafterDown,
+                vec![
+                    Self::CrafterDown,
+                    Self::CrafterLeft,
+                    Self::CrafterUp,
+                    Self::CrafterRight,
+                ],
+            ),
             (Self::Void, vec![Self::Void]),
         ]
     }
 }
+
+// MARK: Resources
 
 #[derive(Resource, Clone)]
 pub struct CurrentMachine {

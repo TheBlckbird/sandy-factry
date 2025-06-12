@@ -10,6 +10,7 @@ use super::{
     foreground_objects::CurrentMachine,
 };
 
+/// Place buildings and add hover
 pub fn place_buildings(
     mut commands: Commands,
     camera_q: Single<(&Camera, &GlobalTransform)>,
@@ -35,6 +36,8 @@ pub fn place_buildings(
     current_machine: Res<CurrentMachine>,
     mut event_writer: EventWriter<BuildEvent>,
 ) {
+    // Extract all queried components
+
     let (camera, camera_transform) = camera_q.into_inner();
     let window = window_q.into_inner();
 
@@ -62,6 +65,7 @@ pub fn place_buildings(
 
     let mut is_other_tile_at_mouse = false;
 
+    // Remove hover building
     for (tile_entity, tile_pos, hover, _) in tile_query.iter() {
         if *tile_pos == mouse_tile_pos && hover.is_none() {
             is_other_tile_at_mouse = true;
@@ -71,7 +75,7 @@ pub fn place_buildings(
     }
 
     if buttons.pressed(MouseButton::Right) {
-        // erasing mode
+        // MARK: erasing mode
 
         for (tile_entity, tile_pos, hover, texture_index) in tile_query.iter() {
             if *tile_pos == mouse_tile_pos && hover.is_none() {
@@ -85,20 +89,23 @@ pub fn place_buildings(
         return;
     }
 
+    // Return if no machine is selected
     let Some(foreground_object) = current_machine.get_current_foreground_object() else {
         return;
     };
 
-    let Ok(tile_texture_index) = foreground_object.try_into() else {
-        return;
-    };
+    let tile_texture_index = foreground_object
+        .try_into()
+        .unwrap_or_else(|_| panic!("This machine shouldn't be selectable: {foreground_object:?}"));
 
+    // Don't try to build if there is already a building at the mouse's position
     if is_other_tile_at_mouse {
         return;
     }
 
     if buttons.pressed(MouseButton::Left) {
-        // building mode
+        // MARK: building mode
+        // Place the current building
 
         let new_tile_entity = commands
             .spawn((
@@ -130,7 +137,8 @@ pub fn place_buildings(
         commands.entity(tilemap_entity).add_child(new_tile_entity);
         tile_storage.set(&mouse_tile_pos, new_tile_entity);
     } else {
-        // hover mode
+        // MARK: hover mode
+        // Add the hover building
 
         let new_tile_entity = commands
             .spawn((

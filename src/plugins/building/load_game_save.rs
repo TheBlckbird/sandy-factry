@@ -8,6 +8,7 @@ use crate::{
     plugins::building::{BuildEvent, BuildingInput, BuildingOutput, Foreground},
 };
 
+/// Load the saved game into a resource
 pub fn load_game_save(
     mut commands: Commands,
     game_save: Res<LoadedGameSave>,
