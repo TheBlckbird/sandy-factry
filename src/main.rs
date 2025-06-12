@@ -111,6 +111,9 @@ fn main() -> AppExit {
         .run()
 }
 
+/// Set the window icon on windows and X11
+///
+/// MacOS and Wayland get the icons from the desktop entry
 #[allow(unused)]
 fn set_window_icon(windows: NonSend<WinitWindows>) {
     let (icon_rgba, icon_width, icon_height) = {
@@ -140,6 +143,7 @@ fn startup(mut commands: Commands) {
     ));
 }
 
+/// Update the resource holding the mouse coordinates
 fn update_mouse_coords(
     mut mouse_coordinates: ResMut<MouseCoordinates>,
     camera_q: Single<(&Camera, &GlobalTransform)>,
