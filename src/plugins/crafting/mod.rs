@@ -3,26 +3,27 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use recipe_types::{CrafterRecipe, FurnaceRecipe};
 
-use crate::content::items::Item;
-
-use super::menu::GameState;
+use crate::{content::items::Item, plugins::menu::GameState};
 
 pub mod recipe_types;
+
+// MARK: Plugin
+pub struct CraftingPlugin;
+
+impl Plugin for CraftingPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(OnEnter(GameState::Game), add_recipes)
+            .add_systems(OnExit(GameState::Game), cleanup);
+    }
+}
+
+// MARk: Resources
 
 #[derive(Debug, Resource, Default, Deref, DerefMut)]
 pub struct CrafterRecipes(Vec<CrafterRecipe>);
 
 #[derive(Debug, Resource, Default, Deref, DerefMut)]
 pub struct FurnaceRecipes(Vec<FurnaceRecipe>);
-
-pub struct CraftingPlugin;
-
-impl Plugin for CraftingPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Game), startup)
-            .add_systems(OnExit(GameState::Game), cleanup);
-    }
-}
 
 macro_rules! furnace_recipe {
     (out: $output:expr; in: $input:expr; time: $time:expr) => {
@@ -84,7 +85,10 @@ macro_rules! crafter_recipe {
     };
 }
 
-fn startup(mut commands: Commands) {
+// MARK: Systems
+
+/// Add all recipes
+fn add_recipes(mut commands: Commands) {
     commands.insert_resource(CrafterRecipes(vec![
         // Basic Components
         crafter_recipe!(out: Item::Gear; in: Item::IronIngot, 2; time: 5),
@@ -121,6 +125,7 @@ fn startup(mut commands: Commands) {
     ]));
 }
 
+/// Remove all recipes
 fn cleanup(mut commands: Commands) {
     commands.remove_resource::<CrafterRecipes>();
     commands.remove_resource::<FurnaceRecipes>();
