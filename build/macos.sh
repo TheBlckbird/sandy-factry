@@ -4,8 +4,8 @@ cd "$(dirname "$0")"
 
 TEMP_DIR="../temp"
 OUT_DIR="../out"
-APP_NAME="The Oil Company"
-RUST_CRATE_NAME="the-oil-company"
+APP_NAME="Sandy Fact'ry"
+RUST_CRATE_NAME="sandy-factry"
 APP_ICON="./icon1024.png"
 
 mkdir "${TEMP_DIR}"
