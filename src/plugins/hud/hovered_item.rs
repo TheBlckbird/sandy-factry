@@ -3,8 +3,12 @@ use bevy_ecs_tilemap::prelude::*;
 
 use crate::{MouseCoordinates, content::items::Item};
 
+// MARK: Components
+
 #[derive(Component)]
 pub struct HoveredItemText;
+
+// MARK: Systems
 
 pub fn setup(mut commands: Commands) {
     // Spawn text for the hovered items
@@ -21,6 +25,7 @@ pub fn setup(mut commands: Commands) {
     ));
 }
 
+/// Update the hovered items text
 pub fn update_hovered_item_text(
     mut hovered_item_text: Single<&mut Text, With<HoveredItemText>>,
     mouse_coords: Res<MouseCoordinates>,

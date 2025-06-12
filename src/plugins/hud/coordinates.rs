@@ -20,6 +20,7 @@ pub fn setup(mut commands: Commands) {
     ));
 }
 
+/// Update the coordinates text
 pub fn update_coordinates(
     mut coordinates_text: Single<&mut Text, With<CoordinatesText>>,
     mouse_coords: Res<MouseCoordinates>,
