@@ -11,6 +11,7 @@ use crate::plugins::menu::{
 mod setup_menu;
 mod update_menu;
 
+// MARK: Plugin
 pub struct PauseMenuPlugin;
 
 impl Plugin for PauseMenuPlugin {
@@ -26,6 +27,8 @@ impl Plugin for PauseMenuPlugin {
             );
     }
 }
+
+// MARK: Components
 
 #[derive(Component)]
 enum PauseMenuButtonAction {

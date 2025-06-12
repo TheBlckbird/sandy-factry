@@ -11,6 +11,8 @@ pub mod game_menus;
 mod main_menu;
 mod splash_screen;
 
+// MARK: Constants
+
 const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
 const HOVERED_BUTTON: Color = Color::srgb(0.25, 0.25, 0.25);
 const HOVERED_PRESSED_BUTTON: Color = Color::srgb(0.25, 0.65, 0.25);
@@ -20,6 +22,7 @@ const MAIN_TEXT_COLOR: Color = Color::srgb(0.1, 0.1, 0.1);
 const TEXT_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 const MENU_BACKGROUND: Color = Color::hsl(15.0, 0.31, 0.5);
 
+// MARK: Plugin
 pub struct MenuPlugin;
 
 impl Plugin for MenuPlugin {
@@ -30,6 +33,8 @@ impl Plugin for MenuPlugin {
     }
 }
 
+// MARK: State
+
 #[derive(States, Default, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum GameState {
     #[default]
@@ -38,8 +43,12 @@ pub enum GameState {
     Game,
 }
 
+// MARK: Components
+
 #[derive(Component)]
 struct SelectedOption;
+
+// MARK: Systems
 
 /// Generic system that takes a component as a parameter, and will despawn all entities with that component
 fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {

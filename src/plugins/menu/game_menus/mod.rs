@@ -13,15 +13,7 @@ mod pause_menu;
 mod recipe_menu;
 mod show_game_menu;
 
-#[derive(States, Default, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum GameMenuState {
-    #[default]
-    Hidden,
-    Pause,
-    Recipe,
-    Completed,
-}
-
+// MARK: Plugin
 pub struct GameMenusPlugin;
 
 impl Plugin for GameMenusPlugin {
@@ -30,4 +22,15 @@ impl Plugin for GameMenusPlugin {
             .init_state::<GameMenuState>()
             .add_systems(Update, show_game_menu.run_if(in_state(GameState::Game)));
     }
+}
+
+// MARK: State
+
+#[derive(States, Default, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum GameMenuState {
+    #[default]
+    Hidden,
+    Pause,
+    Recipe,
+    Completed,
 }
