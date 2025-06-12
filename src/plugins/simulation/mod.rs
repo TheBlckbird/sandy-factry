@@ -16,6 +16,8 @@ mod build_graph;
 mod graph_to_world;
 mod simulate;
 
+// MARK: Plugin
+
 pub struct SimulationPlugin;
 
 impl Plugin for SimulationPlugin {
@@ -37,9 +39,13 @@ impl Plugin for SimulationPlugin {
     }
 }
 
+// MARK: Schedule
+
 /// A schedule that runs on every simulation tick (10 times per second)
 #[derive(ScheduleLabel, Hash, Debug, PartialEq, Eq, Clone, Copy)]
 pub struct SimulationUpdate;
+
+// MARK: Resources
 
 #[derive(Resource, Default)]
 struct SimulationGraph(Graph<(Machine, TilePos), Side>);
@@ -75,6 +81,8 @@ impl DerefMut for SimulationTimer {
     }
 }
 
+// MARK: Systems
+
 fn setup(mut commands: Commands) {
     commands.init_resource::<SimulationGraph>();
 }
@@ -83,6 +91,7 @@ fn cleanup(mut commands: Commands) {
     commands.remove_resource::<SimulationGraph>();
 }
 
+/// Tick the [SimulationUpdate] schedule every tenth of a second
 fn tick_simulation_update(
     mut commands: Commands,
     mut simulation_timer: ResMut<SimulationTimer>,
