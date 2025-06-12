@@ -8,7 +8,9 @@ mod belt;
 #[derive(Component, Clone, Copy)]
 pub struct ItemLayer;
 
+// MARK: Plugin
 pub struct RenderingPlugin;
+
 impl Plugin for RenderingPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::Game), setup_item_tilemap)

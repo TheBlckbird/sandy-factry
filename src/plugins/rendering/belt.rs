@@ -5,16 +5,14 @@ use bevy_ecs_tilemap::prelude::*;
 use sandy_factry_helpers::tilemap::{TilemapSettings, generate_tilemap_layer, remove_tile};
 
 use crate::{
-    content::items::Item,
-    content::machine_types::Machine,
+    content::{items::Item, machine_types::Machine},
     plugins::{
         RenderLayer,
         building::{Foreground, foreground_objects::ForegroundObject},
+        rendering::ItemLayer,
         world::{MAP_SIZE, MAP_TYPE, TILE_SIZE},
     },
 };
-
-use super::ItemLayer;
 
 pub fn setup_item_tilemap(mut commands: Commands, asset_server: Res<AssetServer>) {
     let texture_handle = asset_server.load("item_tiles.png");
@@ -30,6 +28,7 @@ pub fn setup_item_tilemap(mut commands: Commands, asset_server: Res<AssetServer>
     );
 }
 
+/// Renders the items on the tilemap when they're on a belt or something similar
 pub fn update_item_tilemap(
     mut commands: Commands,
     tilemap_q: Single<(Entity, &mut TileStorage), With<ItemLayer>>,
