@@ -4,8 +4,5 @@
 out
 temp
 
-# This is used for environment specific settings
-.cargo/config.toml
-
 # Files generated when an ICE (internal compiler error) occurs
 rustc-ice-*
