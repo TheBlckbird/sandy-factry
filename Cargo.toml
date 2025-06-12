@@ -19,8 +19,8 @@ image = "0.25"
 noise = "0.9"
 rand = "0.9"
 winit = "0.30"
-sandy_factry_helpers = { path = "./crates/sandy_factry_helpers" }
-sandy_factry_macros = { path = "./crates/sandy_factry_macros" }
+sandy-factry-helpers = { path = "./crates/sandy-factry-helpers" }
+sandy-factry-macros = { path = "./crates/sandy-factry-macros" }
 itertools.workspace = true
 bevy_pkv = "0.13.0"
 serde.workspace = true

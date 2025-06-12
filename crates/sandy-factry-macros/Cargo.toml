@@ -1,5 +1,5 @@
 [package]
-name = "sandy_factry_macros"
+name = "sandy-factry-macros"
 version = "0.1.0"
 edition = "2024"
 
