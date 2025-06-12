@@ -74,7 +74,7 @@ pub fn place_buildings(
         // erasing mode
 
         for (tile_entity, tile_pos, hover, texture_index) in tile_query.iter() {
-            if *tile_pos == mouse_tile_pos || hover.is_some() {
+            if *tile_pos == mouse_tile_pos && hover.is_none() {
                 commands.entity(tile_entity).despawn();
                 tile_storage.remove(&mouse_tile_pos);
 
