@@ -124,7 +124,7 @@ rustflags = [
     "-Zthreads=0",
 ]
 
-[target.x86_64-pc-windows-msvc]
+[target.x86_64-pc-windows-gnu]
 # LLD linker
 #
 # You may need to install it:
@@ -133,7 +133,9 @@ rustflags = [
 # cargo install -f cargo-binutils
 # rustup component add llvm-tools
 # ```
-linker = "rust-lld.exe"
+linker = "x86_64-w64-mingw32-gcc"
+ar = "x86_64-w64-mingw32-gcc-ar"
+
 rustdocflags = ["-Clinker=rust-lld.exe"]
 rustflags = [
     # Nightly

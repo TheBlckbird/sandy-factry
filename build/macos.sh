@@ -24,7 +24,8 @@ sips -z 512 512 "${APP_ICON}" --out "${TEMP_DIR}/AppIcon.iconset/icon_512x512.pn
 cp "${APP_ICON}" "${TEMP_DIR}/AppIcon.iconset/icon_512x512@2x.png"
 iconutil -c icns "${TEMP_DIR}/AppIcon.iconset"
 
-rm -rf "${OUT_DIR}/${APP_NAME}.app"
+rm "${OUT_DIR}/${APP_NAME}.dmg"
+rm "${OUT_DIR}/${APP_NAME}.app"
 
 # create the folder structure
 mkdir -p "${OUT_DIR}/${APP_NAME}.app/Contents/MacOS"
@@ -42,3 +43,15 @@ cargo build --release --target aarch64-apple-darwin # build for Apple Silicon
 lipo "../target/x86_64-apple-darwin/release/${RUST_CRATE_NAME}" \
      "../target/aarch64-apple-darwin/release/${RUST_CRATE_NAME}" \
      -create -output "${OUT_DIR}/${APP_NAME}.app/Contents/MacOS/${RUST_CRATE_NAME}"
+
+create-dmg \
+     --volname "Sandy Fact'ry Installer" \
+     --window-pos 200 120 \
+     --window-size 500 300 \
+     --icon-size 100 \
+     --icon "${APP_NAME}.app" 100 100 \
+     --app-drop-link 300 100 \
+     "${OUT_DIR}/${APP_NAME}.dmg" \
+     "${OUT_DIR}/${APP_NAME}.app"
+
+rm -rf "${OUT_DIR}/${APP_NAME}.app"

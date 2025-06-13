@@ -6,17 +6,17 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>The Oil Company — A Factory Builder</string>
+	<string>Sandy Fact'ry — A Factory Builder</string>
 	<key>CFBundleExecutable</key>
-	<string>the-oil-company</string>
+	<string>sandy-factry</string>
 	<key>CFBundleIconFile</key>
 	<string>AppIcon.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.louisweigel.theoilcompany</string>
+	<string>com.louisweigel.sandyfactry</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>The Oil Company</string>
+	<string>Sandy Fact'ry</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
