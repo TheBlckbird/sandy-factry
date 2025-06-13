@@ -43,27 +43,33 @@ impl MachineType for Crafter {
             None => return,
         };
 
-        let mut unset_crafting_time = false;
+        // let mut unset_crafting_time = false;
 
         // Check whether something is currently being crafted
         match self.crafting_time_left.as_mut() {
-            Some(crafting_time_left) => {
-                if *crafting_time_left == 0 {
-                    // Crafting finished
-                    // Append the crafted item to `output_items`
-                    for _ in 0..current_recipe.output_count {
-                        output_items
-                            .exactly_one_mut()
-                            .push_back(current_recipe.output_item);
-                    }
+            Some(0) => {
+                // Crafting finished
+                // Append the crafted item to `output_items`
 
-                    unset_crafting_time = true;
-                } else {
-                    // Crafting not finished,
-                    *crafting_time_left -= 1;
+                for _ in 0..current_recipe.output_count {
+                    output_items
+                        .exactly_one_mut()
+                        .push_back(current_recipe.output_item);
                 }
+
+                self.crafting_time_left = None;
             }
+
+            Some(crafting_time_left) => {
+                *crafting_time_left -= 1;
+            }
+
             None => {
+                // Only try to craft something, if there are no items already crafted
+                if !output_items.is_empty() {
+                    return;
+                }
+
                 let mut items = HashMap::new();
                 let items_input = input_items.exactly_one_mut();
 
@@ -93,10 +99,6 @@ impl MachineType for Crafter {
 
                 self.crafting_time_left = Some(current_recipe.crafting_time);
             }
-        }
-
-        if unset_crafting_time {
-            self.crafting_time_left = None;
         }
     }
 

@@ -77,28 +77,27 @@ impl MachineType for Furnace {
             None => return,
         };
 
-        let mut unset_crafting_time = false;
-
         // Check whether something is currently being smelting
         match self.crafting_time_left.as_mut() {
-            Some(crafting_time_left) => {
-                if *crafting_time_left == 0 {
-                    // Smelting finished
-                    // Append the smelted item to `output_items`
-                    for _ in 0..current_recipe.output_item.1 {
-                        output_items
-                            .exactly_one_mut()
-                            .push_back(current_recipe.output_item.0);
-                    }
-
-                    unset_crafting_time = true;
-                } else {
-                    // Smelting not finished,
-                    *crafting_time_left -= 1;
+            Some(0) => {
+                // Smelting finished
+                // Append the smelted item to `output_items`
+                for _ in 0..current_recipe.output_item.1 {
+                    output_items
+                        .exactly_one_mut()
+                        .push_back(current_recipe.output_item.0);
                 }
+
+                self.crafting_time_left = None;
             }
+
+            Some(crafting_time_left) => {
+                *crafting_time_left -= 1;
+            }
+
             None => {
-                if self.burn_time >= Self::SMELTING_BURN_TIME {
+                // Only try to craft something, if there are no items already crafted and enough burn time is left
+                if self.burn_time >= Self::SMELTING_BURN_TIME && output_items.is_empty() {
                     let mut items = HashMap::new();
                     let items_input = input_items
                         .get_side_mut(&self.input_side)
@@ -132,10 +131,6 @@ impl MachineType for Furnace {
                     self.crafting_time_left = Some(current_recipe.burn_time);
                 }
             }
-        }
-
-        if unset_crafting_time {
-            self.crafting_time_left = None;
         }
     }
 
