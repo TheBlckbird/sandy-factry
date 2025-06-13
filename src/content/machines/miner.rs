@@ -36,7 +36,7 @@ impl MachineType for Miner {
             && let Some(middleground_object) = middleground_object
         {
             match &mut self.mining_time {
-                Some(0) | None => {
+                Some(0) => {
                     let item = match middleground_object {
                         MiddlegroundObject::Coal => Item::Coal,
                         MiddlegroundObject::Copper => Item::RawCopper,
@@ -46,11 +46,18 @@ impl MachineType for Miner {
                     // Append the resource under the miner
                     output_items.exactly_one_mut().push_back(item);
 
-                    self.mining_time = Some(Self::MINING_TIME);
+                    self.mining_time = None;
                 }
+                // Reduce the mining timer by one if it is set
                 Some(mining_time) => {
                     *mining_time -= 1;
                 }
+                // If there are no other items in the output, reset the timer
+                None if output_items.is_empty() => {
+                    self.mining_time = Some(Self::MINING_TIME);
+                }
+                // else do nothing and try again next time
+                None => {}
             }
         }
     }
