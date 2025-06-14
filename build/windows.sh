@@ -7,6 +7,8 @@ OUT_DIR="../out"
 APP_NAME="Sandy Fact'ry"
 RUST_CRATE_NAME="sandy-factry"
 
+rm -rf "${TEMP_DIR}"
+
 mkdir "${TEMP_DIR}"
 mkdir "${OUT_DIR}"
 
@@ -21,3 +23,5 @@ cp "../target/x86_64-pc-windows-gnu/release/${RUST_CRATE_NAME}.exe" "${TEMP_DIR}
 
 cd "${TEMP_DIR}"
 zip -r "${OUT_DIR}/windows.zip" "windows/"
+
+rm -rf "${TEMP_DIR}"

@@ -8,6 +8,8 @@ APP_NAME="Sandy Fact'ry"
 RUST_CRATE_NAME="sandy-factry"
 APP_ICON="./icon1024.png"
 
+rm -rf "${TEMP_DIR}"
+
 mkdir "${TEMP_DIR}"
 mkdir "${OUT_DIR}"
 
@@ -25,24 +27,23 @@ cp "${APP_ICON}" "${TEMP_DIR}/AppIcon.iconset/icon_512x512@2x.png"
 iconutil -c icns "${TEMP_DIR}/AppIcon.iconset"
 
 rm "${OUT_DIR}/${APP_NAME}.dmg"
-rm "${OUT_DIR}/${APP_NAME}.app"
 
 # create the folder structure
-mkdir -p "${OUT_DIR}/${APP_NAME}.app/Contents/MacOS"
-mkdir -p "${OUT_DIR}/${APP_NAME}.app/Contents/Resources"
+mkdir -p "${TEMP_DIR}/${APP_NAME}.app/Contents/MacOS"
+mkdir -p "${TEMP_DIR}/${APP_NAME}.app/Contents/Resources"
 # copy Info.plist
-cp macos/Info.plist "${OUT_DIR}/${APP_NAME}.app/Contents/Info.plist"
+cp macos/Info.plist "${TEMP_DIR}/${APP_NAME}.app/Contents/Info.plist"
 # copy the icon (assuming you already have it in Apple ICNS format)
-cp "${TEMP_DIR}/AppIcon.icns" "${OUT_DIR}/${APP_NAME}.app/Contents/Resources/AppIcon.icns"
+cp "${TEMP_DIR}/AppIcon.icns" "${TEMP_DIR}/${APP_NAME}.app/Contents/Resources/AppIcon.icns"
 # copy your Bevy game assets
-cp -a ../assets "${OUT_DIR}/${APP_NAME}.app/Contents/MacOS/"
+cp -a ../assets "${TEMP_DIR}/${APP_NAME}.app/Contents/MacOS/"
 # compile the executables for each architecture
 cargo build --release --target x86_64-apple-darwin  # build for Intel
 cargo build --release --target aarch64-apple-darwin # build for Apple Silicon
 # combine the executables into a single file and put it in the bundle
 lipo "../target/x86_64-apple-darwin/release/${RUST_CRATE_NAME}" \
      "../target/aarch64-apple-darwin/release/${RUST_CRATE_NAME}" \
-     -create -output "${OUT_DIR}/${APP_NAME}.app/Contents/MacOS/${RUST_CRATE_NAME}"
+     -create -output "${TEMP_DIR}/${APP_NAME}.app/Contents/MacOS/${RUST_CRATE_NAME}"
 
 create-dmg \
      --volname "Sandy Fact'ry Installer" \
@@ -52,6 +53,6 @@ create-dmg \
      --icon "${APP_NAME}.app" 100 100 \
      --app-drop-link 300 100 \
      "${OUT_DIR}/${APP_NAME}.dmg" \
-     "${OUT_DIR}/${APP_NAME}.app"
+     "${TEMP_DIR}/${APP_NAME}.app"
 
-rm -rf "${OUT_DIR}/${APP_NAME}.app"
+rm -rf "${TEMP_DIR}"
