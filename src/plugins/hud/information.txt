@@ -1,0 +1,9 @@
+1 - Belt
+2 - Curve
+3 - Combiner
+4 - Splitter
+5 - Miner
+6 - Furnace
+7 - Crafter
+8 - Void
+Q - Deselect Building

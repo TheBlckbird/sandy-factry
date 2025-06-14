@@ -7,6 +7,7 @@ use crate::plugins::{
 
 mod coordinates;
 mod hovered_item;
+mod information;
 
 // MARK: Plugin
 pub struct HudPlugin;
@@ -15,7 +16,7 @@ impl Plugin for HudPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             OnEnter(GameState::Game),
-            (coordinates::setup, hovered_item::setup),
+            (coordinates::setup, hovered_item::setup, information::setup),
         )
         .add_systems(
             Update,
@@ -23,7 +24,11 @@ impl Plugin for HudPlugin {
         )
         .add_systems(
             OnExit(GameState::Game),
-            (coordinates::cleanup, hovered_item::cleanup),
+            (
+                coordinates::cleanup,
+                hovered_item::cleanup,
+                information::cleanup,
+            ),
         );
     }
 }
