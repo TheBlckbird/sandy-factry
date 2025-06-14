@@ -81,12 +81,12 @@ fn zoom(
         match event.unit {
             MouseScrollUnit::Pixel => {
                 if projection.scale >= 0.1 {
-                    zoom_add += event.y * 0.1;
+                    zoom_add -= event.y * 0.1;
                 }
             }
             MouseScrollUnit::Line => {
                 if projection.scale >= 0.1 {
-                    zoom_add += event.y * 5.0;
+                    zoom_add -= event.y * 5.0;
                 }
             }
         }
