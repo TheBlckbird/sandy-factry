@@ -47,6 +47,8 @@ pub enum Item {
     Engine,
     #[strum(to_string = "Helicopter")]
     Helicopter,
+    #[strum(to_string = "Paper Rock")]
+    PaperRock,
 }
 
 impl Item {
@@ -79,6 +81,7 @@ impl From<Item> for TileTextureIndex {
             Item::HelicopterFrame => 18,
             Item::Engine => 19,
             Item::Helicopter => 20,
+            Item::PaperRock => 21,
         })
     }
 }
