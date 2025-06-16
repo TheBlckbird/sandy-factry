@@ -38,13 +38,16 @@ pub fn update_recipe_screen(
                         }
 
                         ***recipe_detail_text = format!(
-                            "{}\n\nIngredients:\n{ingredients_list}\nCrafting Time: {} ticks",
-                            crafter_recipe.output_item, crafter_recipe.crafting_time,
+                            "{}x {}\n\nIngredients:\n{ingredients_list}\nCrafting Time: {} ticks",
+                            crafter_recipe.output_count,
+                            crafter_recipe.output_item,
+                            crafter_recipe.crafting_time,
                         );
                     }
                     Recipe::Furnace(furnace_recipe) => {
                         ***recipe_detail_text = format!(
-                            "{}\n\nIngredients:\n- {}x {}\nBurn Time: {} ticks",
+                            "{}x {}\n\nIngredients:\n- {}x {}\nBurn Time: {} ticks",
+                            furnace_recipe.output_item.1,
                             furnace_recipe.output_item.0,
                             furnace_recipe.ingredient.1,
                             furnace_recipe.ingredient.0,

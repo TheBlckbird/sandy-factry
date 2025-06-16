@@ -45,8 +45,7 @@ pub fn create_recipe_screen(
                         ..default()
                     },
                     Text::new(format!(
-                        "{}x {}{}",
-                        recipe.output_count,
+                        "{}{}",
                         recipe.output_item,
                         if let Some(ref current_recipe) = current_recipe
                             && *current_recipe == recipe
@@ -85,8 +84,7 @@ pub fn create_recipe_screen(
                         ..default()
                     },
                     Text::new(format!(
-                        "{}x {}{}",
-                        recipe.output_item.1,
+                        "{}{}",
                         recipe.output_item.0,
                         if let Some(current_recipe) = current_recipe
                             && current_recipe == recipe
