@@ -143,14 +143,14 @@ impl MachineType for Furnace {
     ) -> bool {
         if *input_side == self.input_side {
             input_items
-                .get_side(&self.input_side)
+                .get_side(input_side)
                 .expect("This side should exist")
                 .len()
                 < 50
         } else if *input_side == self.coal_input_side {
             *item == Item::Coal
                 && input_items
-                    .get_side(&self.input_side)
+                    .get_side(input_side)
                     .expect("This side should exist")
                     .len()
                     < 50
