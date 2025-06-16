@@ -16,7 +16,7 @@ pub struct Crafter {
 
     /// Crafting time left
     /// `None` if nothing is currently being crafting
-    crafting_time_left: Option<u16>,
+    crafting_time_left: Option<(u16, (Item, u8))>,
 }
 
 impl Crafter {
@@ -47,20 +47,18 @@ impl MachineType for Crafter {
 
         // Check whether something is currently being crafted
         match self.crafting_time_left.as_mut() {
-            Some(0) => {
+            Some((0, (output_item, output_count))) => {
                 // Crafting finished
                 // Append the crafted item to `output_items`
 
-                for _ in 0..current_recipe.output_count {
-                    output_items
-                        .exactly_one_mut()
-                        .push_back(current_recipe.output_item);
+                for _ in 0..*output_count {
+                    output_items.exactly_one_mut().push_back(*output_item);
                 }
 
                 self.crafting_time_left = None;
             }
 
-            Some(crafting_time_left) => {
+            Some((crafting_time_left, _)) => {
                 *crafting_time_left -= 1;
             }
 
@@ -97,7 +95,10 @@ impl MachineType for Crafter {
                     }
                 }
 
-                self.crafting_time_left = Some(current_recipe.crafting_time);
+                self.crafting_time_left = Some((
+                    current_recipe.crafting_time,
+                    (current_recipe.output_item, current_recipe.output_count),
+                ));
             }
         }
     }
