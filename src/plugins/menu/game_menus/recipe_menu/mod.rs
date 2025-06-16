@@ -27,7 +27,7 @@ pub mod update_recipe_screen;
 
 // MARK: Constants
 
-const LINE_HEIGHT: f32 = 21.0;
+const LINE_HEIGHT: f32 = 28.0;
 
 // MARK: Plugin
 pub struct RecipeMenuPlugin;
