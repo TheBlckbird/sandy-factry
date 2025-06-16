@@ -122,7 +122,7 @@ impl MachineType for Furnace {
                     self.burn_time -= Self::SMELTING_BURN_TIME;
 
                     // Transfer the `rest_items` back into `items_input`
-                    for (item, count) in rest_items.into_iter() {
+                    for (item, count) in rest_items {
                         for _ in 0..count {
                             items_input.push_back(item);
                         }
@@ -142,9 +142,18 @@ impl MachineType for Furnace {
         input_side: &Side,
     ) -> bool {
         if *input_side == self.input_side {
-            true
+            input_items
+                .get_side(&self.input_side)
+                .expect("This side should exist")
+                .len()
+                < 50
         } else if *input_side == self.coal_input_side {
-            *item == Item::Coal && input_items.count() < 50
+            *item == Item::Coal
+                && input_items
+                    .get_side(&self.input_side)
+                    .expect("This side should exist")
+                    .len()
+                    < 50
         } else {
             unreachable!()
         }

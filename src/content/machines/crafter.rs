@@ -105,11 +105,11 @@ impl MachineType for Crafter {
     fn can_accept(
         &self,
         _item: &Item,
-        _input_items: &InputItems,
+        input_items: &InputItems,
         _output_items: &OutputItems,
         _input_side: &Side,
     ) -> bool {
-        true
+        input_items.count() < 50
     }
 
     fn is_selectable(&self) -> bool {
