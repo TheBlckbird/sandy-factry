@@ -21,6 +21,12 @@ Note that building this for the first time may take up to ten minutes, although 
 
 Also, the `target` directory may become quite big (multiple GBs), because of the incremental compiles. You can safely delete it after you're done, but you will need to recompile everything again the next time.
 
+## Documention
+
+I had to write a documentation for the school project. It goes more in depth into the simulation algorithm, but is currently only available in German:
+
+[Dokumentation.pdf](https://github.com/user-attachments/files/20745087/Dokumentation.pdf)
+
 ## License
 
 This project is dual licensed under [MIT](/LICENSE-MIT) and [Apache-2.0](/LICENSE-APACHE).
