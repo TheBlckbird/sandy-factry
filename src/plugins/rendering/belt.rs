@@ -37,13 +37,6 @@ pub fn update_item_tilemap(
 ) {
     let (tilemap_entity, mut tile_storage) = tilemap_q.into_inner();
 
-    // Track the items currently in world;
-    let mut current_items_state = HashMap::new();
-
-    for (item_tile_entity, item_tile_pos) in item_tiles {
-        current_items_state.insert(*item_tile_pos, item_tile_entity);
-    }
-
     // List all tiles that need to have an item rendered
     let mut desired_items_state = HashMap::new();
 
@@ -71,10 +64,10 @@ pub fn update_item_tilemap(
         });
 
     // Check which tiles already have a rendered item and check if it's supposed to persist to the next frame
-    for (tile_pos, entity) in current_items_state.iter() {
+    for (entity, tile_pos) in item_tiles.iter() {
         if !desired_items_state.contains_key(tile_pos) {
-            remove_tile(&mut commands, &mut tile_storage, *entity, tile_pos);
-
+            remove_tile(&mut commands, &mut tile_storage, entity, tile_pos);
+        } else {
             // Remove the tile from desired items state, because it doesn't need to be rendered anymore
             desired_items_state.remove(tile_pos);
         }
