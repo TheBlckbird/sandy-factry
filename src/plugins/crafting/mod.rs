@@ -110,11 +110,12 @@ fn add_recipes(mut commands: Commands) {
         crafter_recipe!(out: Item::ControlModule; in: (Item::MicroProcessor, 2), (Item::Motor, 1); time: 200),
         crafter_recipe!(out: Item::HelicopterFrame; in: (Item::Hull, 3), (Item::Gear, 4); time: 200),
         crafter_recipe!(out: Item::Helicopter; in:
-            Item::HelicopterFrame,
-            Item::Engine,
-            Item::Propeller,
-            Item::BigPropeller,
-            Item::ControlModule;
+            (Item::HelicopterFrame, 1),
+            (Item::Engine, 1),
+            (Item::Propeller, 1),
+            (Item::BigPropeller, 1),
+            (Item::ControlModule, 1),
+            (Item::Battery, 2);
         time: 600),
     ]));
 
