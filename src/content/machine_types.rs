@@ -220,6 +220,21 @@ impl ItemsSet {
         count
     }
 
+    /// Returns the amount of this specific item in all fields together
+    pub fn count_item(&self, counted_item: &Item) -> usize {
+        let directions = [&self.north, &self.east, &self.south, &self.west];
+        let mut count = 0;
+
+        for direction in directions.iter().flat_map(|&direction| direction) {
+            count += direction
+                .iter()
+                .filter(|&item| item == counted_item)
+                .count();
+        }
+
+        count
+    }
+
     /// Checks whether there are any items in any of the fields.
     pub fn is_empty(&self) -> bool {
         self.count() == 0
