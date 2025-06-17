@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     content::{
-        items::Item,
+        items::ItemType,
         machine_types::{InputItems, MachineType, OutputItems, Side},
     },
     plugins::{crafting::recipe_types::CrafterRecipe, world::MiddlegroundObject},
@@ -16,7 +16,7 @@ pub struct Crafter {
 
     /// Crafting time left
     /// `None` if nothing is currently being crafting
-    crafting_time_left: Option<(u16, (Item, u8))>,
+    crafting_time_left: Option<(u16, (ItemType, u8))>,
 }
 
 impl Crafter {
@@ -52,7 +52,9 @@ impl MachineType for Crafter {
                 // Append the crafted item to `output_items`
 
                 for _ in 0..*output_count {
-                    output_items.exactly_one_mut().push_back(*output_item);
+                    output_items
+                        .exactly_one_mut()
+                        .push_back((*output_item).into());
                 }
 
                 self.crafting_time_left = None;
@@ -74,7 +76,7 @@ impl MachineType for Crafter {
                 // Convert the queue into a HashMap of all the items and their count
                 for item in items_input.iter() {
                     items
-                        .entry(*item)
+                        .entry(**item)
                         .and_modify(|count| *count += 1)
                         .or_insert(1);
                 }
@@ -91,7 +93,7 @@ impl MachineType for Crafter {
                 // Transfer the `rest_items` back into `items_input`
                 for (item, count) in rest_items.into_iter() {
                     for _ in 0..count {
-                        items_input.push_back(item);
+                        items_input.push_back(item.into());
                     }
                 }
 
@@ -105,7 +107,7 @@ impl MachineType for Crafter {
 
     fn can_accept(
         &self,
-        item: &Item,
+        item: &ItemType,
         input_items: &InputItems,
         _output_items: &OutputItems,
         _input_side: &Side,

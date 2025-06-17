@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     content::{
-        items::Item,
+        items::ItemType,
         machine_types::{InputItems, MachineType, OutputItems, Side},
     },
     plugins::{crafting::recipe_types::FurnaceRecipe, world::MiddlegroundObject},
@@ -19,7 +19,7 @@ pub struct Furnace {
 
     /// Crafting time left
     /// `None` if nothing is currently being crafting
-    crafting_time_left: Option<(u8, (Item, u16))>,
+    crafting_time_left: Option<(u8, (ItemType, u16))>,
 
     /// The side where items are inputted
     input_side: Side,
@@ -83,7 +83,9 @@ impl MachineType for Furnace {
                 // Smelting finished
                 // Append the smelted item to `output_items`
                 for _ in 0..*output_count {
-                    output_items.exactly_one_mut().push_back(*output_item);
+                    output_items
+                        .exactly_one_mut()
+                        .push_back((*output_item).into());
                 }
 
                 self.crafting_time_left = None;
@@ -104,7 +106,7 @@ impl MachineType for Furnace {
                     // Convert the queue into a HashMap of all the items and their count
                     for item in items_input.iter() {
                         items
-                            .entry(*item)
+                            .entry(**item)
                             .and_modify(|count| *count += 1)
                             .or_insert(1);
                     }
@@ -122,7 +124,7 @@ impl MachineType for Furnace {
                     // Transfer the `rest_items` back into `items_input`
                     for (item, count) in rest_items {
                         for _ in 0..count {
-                            items_input.push_back(item);
+                            items_input.push_back(item.into());
                         }
                     }
 
@@ -135,7 +137,7 @@ impl MachineType for Furnace {
 
     fn can_accept(
         &self,
-        item: &Item,
+        item: &ItemType,
         input_items: &InputItems,
         _output_items: &OutputItems,
         input_side: &Side,
@@ -145,11 +147,11 @@ impl MachineType for Furnace {
                 .get_side(input_side)
                 .expect("This side should exist")
                 .iter()
-                .filter(|&side_item| side_item == item)
+                .filter(|&side_item| **side_item == *item)
                 .count()
                 < 50
         } else if *input_side == self.coal_input_side {
-            *item == Item::Coal
+            *item == ItemType::Coal
                 && input_items
                     .get_side(input_side)
                     .expect("This side should exist")

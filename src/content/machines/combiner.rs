@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     content::{
-        items::Item,
+        items::ItemType,
         machine_types::{InputItems, MachineType, OutputItems, Side},
     },
     plugins::world::MiddlegroundObject,
@@ -58,7 +58,7 @@ impl MachineType for Combiner {
 
     fn can_accept(
         &self,
-        _item: &Item,
+        _item: &ItemType,
         input_items: &InputItems,
         output_items: &OutputItems,
         input_side: &Side,
@@ -75,5 +75,9 @@ impl MachineType for Combiner {
         };
 
         input_side == &self.input_sides[input_side_index]
+    }
+
+    fn tick_after_first(&self) -> bool {
+        true
     }
 }

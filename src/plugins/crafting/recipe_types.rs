@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::content::items::Item;
+use crate::content::items::ItemType;
 
 pub enum Recipe {
     Crafter(CrafterRecipe),
@@ -11,8 +11,8 @@ pub enum Recipe {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct CrafterRecipe {
-    pub ingredients: HashMap<Item, u16>,
-    pub output_item: Item,
+    pub ingredients: HashMap<ItemType, u16>,
+    pub output_item: ItemType,
     pub output_count: u8,
     pub crafting_time: u16,
 }
@@ -20,8 +20,8 @@ pub struct CrafterRecipe {
 impl CrafterRecipe {
     #[allow(unused)]
     pub fn new(
-        ingredients: HashMap<Item, u16>,
-        output_item: Item,
+        ingredients: HashMap<ItemType, u16>,
+        output_item: ItemType,
         output_count: u8,
         crafting_time: u16,
     ) -> Self {
@@ -37,8 +37,8 @@ impl CrafterRecipe {
     /// Returns `None` if there weren't enough ingredients in the provided input and `Some<HashMap<Item, u16>>` otherwise
     pub fn try_crafting(
         &self,
-        external_ingredients: &HashMap<Item, u16>,
-    ) -> Option<HashMap<Item, u16>> {
+        external_ingredients: &HashMap<ItemType, u16>,
+    ) -> Option<HashMap<ItemType, u16>> {
         let mut remaining_ingredients = external_ingredients.clone();
 
         // Check for each ingredient if it exists in the provided ingredients
@@ -65,14 +65,14 @@ impl CrafterRecipe {
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 pub struct FurnaceRecipe {
-    pub ingredient: (Item, u16),
-    pub output_item: (Item, u16),
+    pub ingredient: (ItemType, u16),
+    pub output_item: (ItemType, u16),
     pub burn_time: u8,
 }
 
 impl FurnaceRecipe {
     #[allow(unused)]
-    pub fn new(output_item: (Item, u16), ingredient: (Item, u16), burn_time: u8) -> Self {
+    pub fn new(output_item: (ItemType, u16), ingredient: (ItemType, u16), burn_time: u8) -> Self {
         Self {
             ingredient,
             output_item,
@@ -82,8 +82,8 @@ impl FurnaceRecipe {
 
     pub fn try_crafting(
         &self,
-        external_ingredients: &HashMap<Item, u16>,
-    ) -> Option<HashMap<Item, u16>> {
+        external_ingredients: &HashMap<ItemType, u16>,
+    ) -> Option<HashMap<ItemType, u16>> {
         let mut remaining_ingredients = external_ingredients.clone();
 
         // Check for each ingredient if it exists in the provided ingredients

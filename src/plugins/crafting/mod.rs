@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use recipe_types::{CrafterRecipe, FurnaceRecipe};
 
-use crate::{content::items::Item, plugins::menu::GameState};
+use crate::{content::items::ItemType, plugins::menu::GameState};
 
 pub mod recipe_types;
 
@@ -91,38 +91,38 @@ macro_rules! crafter_recipe {
 fn add_recipes(mut commands: Commands) {
     commands.insert_resource(CrafterRecipes(vec![
         // Basic Components
-        crafter_recipe!(out: Item::Gear; in: Item::IronIngot, 2; time: 5),
-        crafter_recipe!(out: Item::Wire, 2; in: Item::CopperIngot; time: 5),
-        crafter_recipe!(out: Item::ReinforcedSteel; in: (Item::IronIngot, 1), (Item::Steel, 2); time: 50),
+        crafter_recipe!(out: ItemType::Gear; in: ItemType::IronIngot, 2; time: 5),
+        crafter_recipe!(out: ItemType::Wire, 2; in: ItemType::CopperIngot; time: 5),
+        crafter_recipe!(out: ItemType::ReinforcedSteel; in: (ItemType::IronIngot, 1), (ItemType::Steel, 2); time: 50),
 
         // Advanced Components
-        crafter_recipe!(out: Item::ElectricalCircuit; in: (Item::Wire, 3), (Item::CopperIngot, 1); time: 50),
-        crafter_recipe!(out: Item::MicroProcessor; in: (Item::ElectricalCircuit, 2), (Item::IronIngot, 1); time: 75),
-        crafter_recipe!(out: Item::Motor; in: (Item::Steel, 2), (Item::Gear, 3); time: 100),
-        crafter_recipe!(out: Item::Battery; in: (Item::CopperIngot, 2), (Item::Coal, 1); time: 50),
-        crafter_recipe!(out: Item::Engine; in: (Item::Motor, 2), (Item::Gear, 2); time: 100),
+        crafter_recipe!(out: ItemType::ElectricalCircuit; in: (ItemType::Wire, 3), (ItemType::CopperIngot, 1); time: 50),
+        crafter_recipe!(out: ItemType::MicroProcessor; in: (ItemType::ElectricalCircuit, 2), (ItemType::IronIngot, 1); time: 75),
+        crafter_recipe!(out: ItemType::Motor; in: (ItemType::Steel, 2), (ItemType::Gear, 3); time: 100),
+        crafter_recipe!(out: ItemType::Battery; in: (ItemType::CopperIngot, 2), (ItemType::Coal, 1); time: 50),
+        crafter_recipe!(out: ItemType::Engine; in: (ItemType::Motor, 2), (ItemType::Gear, 2); time: 100),
         
         // Helicopter Components
-        crafter_recipe!(out: Item::RotorBlade; in: Item::Steel, 3; time: 50),
-        crafter_recipe!(out: Item::Propeller; in: Item::RotorBlade, 4; time: 75),
-        crafter_recipe!(out: Item::BigPropeller; in: (Item::RotorBlade, 4), (Item::Gear, 2); time: 100),
-        crafter_recipe!(out: Item::Hull; in: (Item::ReinforcedSteel, 2), (Item::Steel, 2); time: 100),
-        crafter_recipe!(out: Item::ControlModule; in: (Item::MicroProcessor, 2), (Item::Motor, 1); time: 200),
-        crafter_recipe!(out: Item::HelicopterFrame; in: (Item::Hull, 3), (Item::Gear, 4); time: 200),
-        crafter_recipe!(out: Item::Helicopter; in:
-            (Item::HelicopterFrame, 1),
-            (Item::Engine, 1),
-            (Item::Propeller, 1),
-            (Item::BigPropeller, 1),
-            (Item::ControlModule, 1),
-            (Item::Battery, 2);
+        crafter_recipe!(out: ItemType::RotorBlade; in: ItemType::Steel, 3; time: 50),
+        crafter_recipe!(out: ItemType::Propeller; in: ItemType::RotorBlade, 4; time: 75),
+        crafter_recipe!(out: ItemType::BigPropeller; in: (ItemType::RotorBlade, 4), (ItemType::Gear, 2); time: 100),
+        crafter_recipe!(out: ItemType::Hull; in: (ItemType::ReinforcedSteel, 2), (ItemType::Steel, 2); time: 100),
+        crafter_recipe!(out: ItemType::ControlModule; in: (ItemType::MicroProcessor, 2), (ItemType::Motor, 1); time: 200),
+        crafter_recipe!(out: ItemType::HelicopterFrame; in: (ItemType::Hull, 3), (ItemType::Gear, 4); time: 200),
+        crafter_recipe!(out: ItemType::Helicopter; in:
+            (ItemType::HelicopterFrame, 1),
+            (ItemType::Engine, 1),
+            (ItemType::Propeller, 1),
+            (ItemType::BigPropeller, 1),
+            (ItemType::ControlModule, 1),
+            (ItemType::Battery, 2);
         time: 600),
     ]));
 
     commands.insert_resource(FurnaceRecipes(vec![
-        furnace_recipe!(out: Item::CopperIngot; in: Item::RawCopper; time: 7),
-        furnace_recipe!(out: Item::IronIngot; in: Item::RawIron; time: 7),
-        furnace_recipe!(out: Item::Steel; in: Item::IronIngot, 2; time: 25),
+        furnace_recipe!(out: ItemType::CopperIngot; in: ItemType::RawCopper; time: 7),
+        furnace_recipe!(out: ItemType::IronIngot; in: ItemType::RawIron; time: 7),
+        furnace_recipe!(out: ItemType::Steel; in: ItemType::IronIngot, 2; time: 25),
     ]));
 }
 

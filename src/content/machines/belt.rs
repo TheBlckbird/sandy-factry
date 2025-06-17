@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     content::{
-        items::Item,
+        items::ItemType,
         machine_types::{InputItems, MachineType, OutputItems, Side},
     },
     plugins::world::MiddlegroundObject,
@@ -28,11 +28,15 @@ impl MachineType for Belt {
 
     fn can_accept(
         &self,
-        _item: &Item,
+        _item: &ItemType,
         input_items: &InputItems,
         output_items: &OutputItems,
         _input_side: &Side,
     ) -> bool {
         (input_items.exactly_one().len() + output_items.exactly_one().len()) == 0
+    }
+
+    fn tick_after_first(&self) -> bool {
+        true
     }
 }

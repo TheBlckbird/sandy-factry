@@ -80,7 +80,7 @@ pub fn update_item_tilemap(
                 TileBundle {
                     position: *tile_pos,
                     tilemap_id: TilemapId(tilemap_entity),
-                    texture_index: (*item).into(),
+                    texture_index: (**item).into(),
                     ..Default::default()
                 },
                 *item,
