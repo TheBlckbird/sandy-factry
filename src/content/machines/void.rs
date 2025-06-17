@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     content::{
-        items::Item,
+        items::ItemType,
         machine_types::{InputItems, MachineType, OutputItems, Side},
     },
     plugins::world::MiddlegroundObject,
@@ -24,7 +24,7 @@ impl MachineType for Void {
 
     fn can_accept(
         &self,
-        _item: &Item,
+        _item: &ItemType,
         _input_items: &InputItems,
         _output_items: &OutputItems,
         _input_side: &Side,

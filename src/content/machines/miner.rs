@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     content::{
-        items::Item,
+        items::ItemType,
         machine_types::{InputItems, MachineType, OutputItems, Side},
     },
     plugins::world::MiddlegroundObject,
@@ -38,13 +38,13 @@ impl MachineType for Miner {
             match &mut self.mining_time {
                 Some(0) => {
                     let item = match middleground_object {
-                        MiddlegroundObject::Coal => Item::Coal,
-                        MiddlegroundObject::Copper => Item::RawCopper,
-                        MiddlegroundObject::Iron => Item::RawIron,
+                        MiddlegroundObject::Coal => ItemType::Coal,
+                        MiddlegroundObject::Copper => ItemType::RawCopper,
+                        MiddlegroundObject::Iron => ItemType::RawIron,
                     };
 
                     // Append the resource under the miner
-                    output_items.exactly_one_mut().push_back(item);
+                    output_items.exactly_one_mut().push_back(item.into());
 
                     self.mining_time = None;
                 }
@@ -64,7 +64,7 @@ impl MachineType for Miner {
 
     fn can_accept(
         &self,
-        _item: &Item,
+        _item: &ItemType,
         _input_items: &InputItems,
         _output_items: &OutputItems,
         _input_side: &Side,

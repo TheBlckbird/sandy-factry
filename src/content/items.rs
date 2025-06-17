@@ -3,8 +3,12 @@ use bevy_ecs_tilemap::prelude::*;
 use serde::{Deserialize, Serialize};
 use strum_macros::Display;
 
-#[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize, Deserialize, Display)]
-pub enum Item {
+// TODO: Fix items skipping one in loops
+// - add flag to item if it has already moved
+// - check before moving
+
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize, Deserialize, Display)]
+pub enum ItemType {
     #[strum(to_string = "Coal")]
     Coal,
     #[strum(to_string = "Raw Copper")]
@@ -49,36 +53,52 @@ pub enum Item {
     Helicopter,
 }
 
-impl Item {
+impl ItemType {
     pub fn ends_game(&self) -> bool {
         *self == Self::Helicopter
     }
 }
 
-impl From<Item> for TileTextureIndex {
-    fn from(value: Item) -> Self {
+impl From<ItemType> for TileTextureIndex {
+    fn from(value: ItemType) -> Self {
         TileTextureIndex(match value {
-            Item::Coal => 0,
-            Item::RawCopper => 1,
-            Item::RawIron => 2,
-            Item::CopperIngot => 3,
-            Item::IronIngot => 4,
-            Item::Gear => 5,
-            Item::Steel => 6,
-            Item::Wire => 7,
-            Item::ReinforcedSteel => 8,
-            Item::ElectricalCircuit => 9,
-            Item::MicroProcessor => 10,
-            Item::RotorBlade => 11,
-            Item::Propeller => 12,
-            Item::BigPropeller => 13,
-            Item::Hull => 14,
-            Item::Motor => 15,
-            Item::Battery => 16,
-            Item::ControlModule => 17,
-            Item::HelicopterFrame => 18,
-            Item::Engine => 19,
-            Item::Helicopter => 20,
+            ItemType::Coal => 0,
+            ItemType::RawCopper => 1,
+            ItemType::RawIron => 2,
+            ItemType::CopperIngot => 3,
+            ItemType::IronIngot => 4,
+            ItemType::Gear => 5,
+            ItemType::Steel => 6,
+            ItemType::Wire => 7,
+            ItemType::ReinforcedSteel => 8,
+            ItemType::ElectricalCircuit => 9,
+            ItemType::MicroProcessor => 10,
+            ItemType::RotorBlade => 11,
+            ItemType::Propeller => 12,
+            ItemType::BigPropeller => 13,
+            ItemType::Hull => 14,
+            ItemType::Motor => 15,
+            ItemType::Battery => 16,
+            ItemType::ControlModule => 17,
+            ItemType::HelicopterFrame => 18,
+            ItemType::Engine => 19,
+            ItemType::Helicopter => 20,
         })
+    }
+}
+
+#[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize, Deserialize, Deref)]
+pub struct Item {
+    pub has_moved: bool,
+    #[deref]
+    pub item_type: ItemType,
+}
+
+impl From<ItemType> for Item {
+    fn from(value: ItemType) -> Self {
+        Self {
+            has_moved: false,
+            item_type: value,
+        }
     }
 }

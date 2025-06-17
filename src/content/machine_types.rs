@@ -6,7 +6,11 @@ use serde::{Deserialize, Serialize};
 
 use std::{collections::VecDeque, fmt::Debug};
 
-use crate::{Direction, content::items::Item, plugins::world::MiddlegroundObject};
+use crate::{
+    Direction,
+    content::items::{Item, ItemType},
+    plugins::world::MiddlegroundObject,
+};
 
 // MARK: Machine
 #[derive(Debug, Component, Serialize, Deserialize)]
@@ -106,7 +110,7 @@ pub trait MachineType: Debug + Send + Sync + AsAny + DynClone {
     /// `input_side` is the side the item's tried to be inputted to.
     fn can_accept(
         &self,
-        item: &Item,
+        item: &ItemType,
         input_items: &InputItems,
         output_items: &OutputItems,
         input_side: &Side,
@@ -117,6 +121,13 @@ pub trait MachineType: Debug + Send + Sync + AsAny + DynClone {
     /// This currently only defines whether the selection marker is shown or not,
     /// all the other logic is handled in other places.
     fn is_selectable(&self) -> bool {
+        false
+    }
+
+    /// Whether this can be ticked multiple times a tick
+    ///
+    /// Should usually only be set to true on belts
+    fn tick_after_first(&self) -> bool {
         false
     }
 }
@@ -221,14 +232,14 @@ impl ItemsSet {
     }
 
     /// Returns the amount of this specific item in all fields together
-    pub fn count_item(&self, counted_item: &Item) -> usize {
+    pub fn count_item(&self, counted_item: &ItemType) -> usize {
         let directions = [&self.north, &self.east, &self.south, &self.west];
         let mut count = 0;
 
         for direction in directions.iter().flat_map(|&direction| direction) {
             count += direction
                 .iter()
-                .filter(|&item| item == counted_item)
+                .filter(|&item| **item == *counted_item)
                 .count();
         }
 
@@ -240,7 +251,7 @@ impl ItemsSet {
         self.count() == 0
     }
 
-    /// Gets all items as a queue.
+    /// Gets a reference to all items as a queue.
     ///
     /// Returns a Queue with north being at the beginning, then east, south and west.
     pub fn all(&self) -> VecDeque<&Item> {
@@ -249,6 +260,23 @@ impl ItemsSet {
         sides
             .iter()
             .flat_map(|side| side.iter().flat_map(|items| items.iter()))
+            .collect()
+    }
+
+    /// Gets a mutable reference all items as a queue.
+    ///
+    /// Returns a Queue with north being at the beginning, then east, south and west.
+    pub fn all_mut(&mut self) -> VecDeque<&mut Item> {
+        let sides = [
+            &mut self.north,
+            &mut self.east,
+            &mut self.south,
+            &mut self.west,
+        ];
+
+        sides
+            .into_iter()
+            .flat_map(|side| side.iter_mut().flat_map(|items| items.iter_mut()))
             .collect()
     }
 }
