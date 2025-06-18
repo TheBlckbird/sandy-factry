@@ -271,3 +271,8 @@ impl From<Option<Vec<Direction>>> for ItemsSet {
         output
     }
 }
+
+pub enum TunnelType {
+    Input,
+    Output,
+}
