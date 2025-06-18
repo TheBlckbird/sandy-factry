@@ -53,10 +53,10 @@ pub struct Foreground;
 #[derive(Component)]
 struct HoverBuilding;
 
-#[derive(Component, Serialize, Deserialize)]
+#[derive(Component, Serialize, Deserialize, Deref, DerefMut)]
 pub struct BuildingInput(pub Option<Vec<Direction>>);
 
-#[derive(Component)]
+#[derive(Component, Deref, DerefMut)]
 pub struct BuildingOutput(pub Option<Vec<Direction>>);
 
 // MARK: Systems
@@ -122,6 +122,8 @@ fn select_building(mut current_building: ResMut<CurrentMachine>, keys: Res<Butto
         n = Some(8);
     } else if keys.just_pressed(KeyCode::Digit9) {
         n = Some(9);
+    } else if keys.just_pressed(KeyCode::Digit0) {
+        n = Some(10);
     }
 
     if let Some(n) = n {

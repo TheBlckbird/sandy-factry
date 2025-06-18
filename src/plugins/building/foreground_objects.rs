@@ -110,6 +110,24 @@ pub enum ForegroundObject {
     FurnaceDownLeft,
     #[variant(inputs(West, North), outputs(East), texture = 49, machine = Furnace::new(Side::West, Side::North))]
     FurnaceLeftUp,
+
+    #[variant(inputs(North), outputs(South), texture = 50, machine = Belt, render = true, tunnel = Input)]
+    TunnelInDown,
+    #[variant(inputs(East), outputs(West), texture = 51, machine = Belt, render = true, tunnel = Input)]
+    TunnelInLeft,
+    #[variant(inputs(South), outputs(North), texture = 52, machine = Belt, render = true, tunnel = Input)]
+    TunnelInUp,
+    #[variant(inputs(West), outputs(East), texture = 53, machine = Belt, render = true, tunnel = Input)]
+    TunnelInRight,
+
+    #[variant(inputs(North), outputs(South), texture = 54, machine = Belt, render = true, tunnel = Output)]
+    TunnelOutDown,
+    #[variant(inputs(East), outputs(West), texture = 55, machine = Belt, render = true, tunnel = Output)]
+    TunnelOutLeft,
+    #[variant(inputs(South), outputs(North), texture = 56, machine = Belt, render = true, tunnel = Output)]
+    TunnelOutUp,
+    #[variant(inputs(West), outputs(East), texture = 57, machine = Belt, render = true, tunnel = Output)]
+    TunnelOutRight,
 }
 
 impl ForegroundObject {
@@ -194,6 +212,24 @@ impl ForegroundObject {
                     Self::CrafterLeft,
                     Self::CrafterUp,
                     Self::CrafterRight,
+                ],
+            ),
+            (
+                Self::TunnelInUp,
+                vec![
+                    Self::TunnelInDown,
+                    Self::TunnelInLeft,
+                    Self::TunnelInUp,
+                    Self::TunnelInRight,
+                ],
+            ),
+            (
+                Self::TunnelOutUp,
+                vec![
+                    Self::TunnelOutDown,
+                    Self::TunnelOutLeft,
+                    Self::TunnelOutUp,
+                    Self::TunnelOutRight,
                 ],
             ),
             (Self::Void, vec![Self::Void]),
