@@ -3,16 +3,24 @@ use std::collections::VecDeque;
 use bevy::prelude::*;
 use bevy_ecs_tilemap::{helpers::square_grid::neighbors::Neighbors, prelude::*};
 use dyn_clone::clone_box;
+use itertools::Itertools;
 use petgraph::Graph;
 use sandy_factry_helpers::graph::{add_edge_if_not_exists, get_or_create_node};
 
-use crate::content::machine_types::{Side, TunnelType};
-use crate::plugins::building::foreground_objects::ForegroundObject;
-use crate::{Direction, content::machine_types::Machine, plugins::world::MAP_SIZE};
-
-use crate::plugins::building::{BuildEvent, BuildingInput, BuildingOutput};
+use crate::{
+    Direction,
+    content::machine_types::{Machine, TunnelType},
+    plugins::{
+        building::{
+            BuildEvent, BuildingInput, BuildingOutput, foreground_objects::ForegroundObject,
+        },
+        world::MAP_SIZE,
+    },
+};
 
 use super::SimulationGraph;
+
+const MAXIMUM_TUNNEL_DISTANCE: u8 = 5;
 
 /// Build a graph from the world representation
 pub fn build_graph(
@@ -70,6 +78,9 @@ pub fn build_graph(
                     "This tile should exist in the world because we got it from the world earlier.",
                 );
 
+        let tile_foreground_object = ForegroundObject::from(tile_texture_index);
+        let output_sides = tile_foreground_object.get_output_sides();
+
         let building = Machine::new(
             clone_box(&*tile_machine.machine_type),
             tile_machine.input_items.clone(),
@@ -97,7 +108,7 @@ pub fn build_graph(
 
         let mut connect_inputs = false;
         let mut connect_outputs = false;
-        let tunnel_type = ForegroundObject::from(tile_texture_index).tunnel_type();
+        let tunnel_type = tile_foreground_object.tunnel_type();
 
         match tunnel_type {
             Some(TunnelType::Input) => connect_inputs = true,
@@ -198,40 +209,69 @@ pub fn build_graph(
             }
         }
 
+        // Check if the current tile is a tunnel input
         if let Some(TunnelType::Input) = tunnel_type {
-            let searched_tile_pos = TilePos::new(current_tile_pos.x, current_tile_pos.y + 4); // [TODO] make this dynamic
+            // Get the output side of this tunnel
+            let output_side = output_sides
+                .as_ref()
+                .expect("All tunnels should have an output")
+                .iter()
+                .exactly_one()
+                .expect("This is Some, it definitely has a side inside");
 
-            if let Some((_, tile_pos, &tile_texture_index, building_input, _, machine)) =
-                tile_query.iter().find(
-                    |&(_, &tile_pos, &tile_texture_index, building_input, _, machine)| {
+            // convert the TilePos to a UVec2 for easier calculation
+            let tile_pos_vec = UVec2::from(current_tile_pos);
+
+            // Try all the different possible tunnel distances
+            // This starts at one to avoid confusion when placing two tunnels right after each other
+            for i in 1..=MAXIMUM_TUNNEL_DISTANCE {
+                let searched_tile_pos = tile_pos_vec
+                    .saturating_add_signed(output_side.as_ivec2() * i as i32)
+                    .into();
+
+                // Search through all other tiles to check if a matching tunnel output exists at the location searched for
+                if let Some((_, tile_pos, _, building_input, _, machine)) = tile_query.iter().find(
+                    |&(_, &tile_pos, &tile_texture_index, building_input, _, _)| {
                         tile_pos == searched_tile_pos
-                            && *building_input.as_ref().unwrap().first().unwrap() == Side::South
+                            && *building_input
+                                .as_ref()
+                                .expect("All tunnels should have an input")
+                                .iter()
+                                .exactly_one()
+                                .expect("This is Some, it definitely has a side inside")
+                                == output_side.get_opposite()
                             && matches!(
                                 ForegroundObject::from(tile_texture_index).tunnel_type(),
                                 Some(TunnelType::Output)
                             )
                     },
-                )
-            {
-                // then connect
-                let machine = Machine::new(
-                    clone_box(&*machine.machine_type),
-                    machine.input_items.clone(),
-                    machine.output_items.clone(),
-                );
-                let new_node_index = get_or_create_node(&mut factory_graph, (machine, tile_pos));
-                add_edge_if_not_exists(
-                    &mut factory_graph,
-                    current_node_index,
-                    new_node_index,
-                    *building_input.as_ref().unwrap().first().unwrap(),
-                );
+                ) {
+                    // If found, connect the two
+                    let machine = Machine::new(
+                        clone_box(&*machine.machine_type),
+                        machine.input_items.clone(),
+                        machine.output_items.clone(),
+                    );
+                    let new_node_index =
+                        get_or_create_node(&mut factory_graph, (machine, tile_pos));
+                    add_edge_if_not_exists(
+                        &mut factory_graph,
+                        current_node_index,
+                        new_node_index,
+                        *building_input
+                            .as_ref()
+                            .expect("All tunnels should have an input")
+                            .iter()
+                            .exactly_one()
+                            .expect("This is Some, it definitely has a side inside"),
+                    );
+
+                    // Stop searching for more tunnel outputs after finding the nearest
+                    break;
+                }
             }
         }
     }
-
-    // Tunnel Belts:
-    // check for corresponding output or input and connect (in the start only for five tiles)
 
     **simulation_graph = factory_graph;
 }
