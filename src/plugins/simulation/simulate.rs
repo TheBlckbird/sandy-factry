@@ -26,14 +26,16 @@ pub fn simulate(
 
     // Do this until everything that can be moved is moved
     while made_progress {
+        // Thas variable tracks whether anything has changed in this iteration
         made_progress = false;
-
-        let mut scc = Vec::new();
 
         // Get all the SCCs (Strongly Connected Components) using Tarjan's algorithm
         // This function also performs a topological sort on the result
+        let tarjan_sccs = tarjan_scc(&**simulation_graph);
+        let mut scc = Vec::new();
+
         // Then split them again at combiners
-        for component in tarjan_scc(&**simulation_graph) {
+        for component in &tarjan_sccs {
             let mut splits = Vec::new();
 
             for (index, node_index) in component.iter().enumerate() {
@@ -54,11 +56,11 @@ pub fn simulate(
             let mut previous = 0;
 
             for split_index in splits {
-                scc.push(component[previous..split_index].to_vec());
+                scc.push(&component[previous..split_index]);
                 previous = split_index;
             }
 
-            scc.push(component[previous..].to_vec());
+            scc.push(&component[previous..]);
         }
 
         let mut visited = HashSet::new();
