@@ -245,19 +245,21 @@ impl ForegroundObject {
 pub struct CurrentMachine {
     all_machines: Vec<ForegroundObject>,
     machine_index: Option<usize>,
-    variant_index: usize,
+    variant_indices: Vec<usize>,
 }
 
 impl CurrentMachine {
     /// Get the currently selected [ForegroundObject]
     pub fn get_current_foreground_object(&self) -> Option<ForegroundObject> {
-        Some(ForegroundObject::get_groups()[self.machine_index?].1[self.variant_index])
+        Some(
+            ForegroundObject::get_groups()[self.machine_index?].1
+                [self.variant_indices[self.machine_index?]],
+        )
     }
 
     /// Deselect the current machine.
     pub fn deselect(&mut self) {
         self.machine_index = None;
-        self.variant_index = 0;
     }
 
     /// Select the next machine.
@@ -274,8 +276,6 @@ impl CurrentMachine {
             }
             None => self.machine_index = Some(0),
         }
-
-        self.variant_index = 0;
     }
 
     /// Select the nth machine, resetting the variant to the first one.
@@ -287,7 +287,6 @@ impl CurrentMachine {
                 Some(machine_index) if machine_index == n => {}
                 _ => {
                     self.machine_index = Some(n);
-                    self.variant_index = 0;
                 }
             }
         }
@@ -305,17 +304,17 @@ impl CurrentMachine {
             }
             None => self.machine_index = Some(0),
         }
-
-        self.variant_index = 0;
     }
 
     /// Select the next variant of the current machine group.
     pub fn select_next_variant(&mut self) {
         if let Some(machine_index) = self.machine_index {
-            self.variant_index += 1;
+            self.variant_indices[machine_index] += 1;
 
-            if self.variant_index == ForegroundObject::get_groups()[machine_index].1.len() {
-                self.variant_index = 0;
+            if self.variant_indices[machine_index]
+                == ForegroundObject::get_groups()[machine_index].1.len()
+            {
+                self.variant_indices[machine_index] = 0;
             }
         }
     }
@@ -323,10 +322,11 @@ impl CurrentMachine {
     /// Select the previous variant of the current machine group.
     pub fn select_prev_variant(&mut self) {
         if let Some(machine_index) = self.machine_index {
-            if self.variant_index == 0 {
-                self.variant_index = ForegroundObject::get_groups()[machine_index].1.len() - 1;
+            if self.variant_indices[machine_index] == 0 {
+                self.variant_indices[machine_index] =
+                    ForegroundObject::get_groups()[machine_index].1.len() - 1;
             } else {
-                self.variant_index -= 1;
+                self.variant_indices[machine_index] -= 1;
             }
         }
     }
@@ -340,7 +340,7 @@ impl Default for CurrentMachine {
                 .map(|(machine_icon, _)| *machine_icon)
                 .collect(),
             machine_index: None,
-            variant_index: 0,
+            variant_indices: vec![0; ForegroundObject::get_groups().len()],
         }
     }
 }
