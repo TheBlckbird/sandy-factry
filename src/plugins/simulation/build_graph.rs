@@ -232,7 +232,10 @@ pub fn build_graph(
                 // Search through all other tiles to check if a matching tunnel output exists at the location searched for
                 if let Some((_, tile_pos, _, building_input, _, machine)) = tile_query.iter().find(
                     |&(_, &tile_pos, &tile_texture_index, building_input, _, _)| {
-                        tile_pos == searched_tile_pos
+                        matches!(
+                            ForegroundObject::from(tile_texture_index).tunnel_type(),
+                            Some(TunnelType::Output)
+                        ) && tile_pos == searched_tile_pos
                             && *building_input
                                 .as_ref()
                                 .expect("All tunnels should have an input")
@@ -240,10 +243,6 @@ pub fn build_graph(
                                 .exactly_one()
                                 .expect("This is Some, it definitely has a side inside")
                                 == output_side.get_opposite()
-                            && matches!(
-                                ForegroundObject::from(tile_texture_index).tunnel_type(),
-                                Some(TunnelType::Output)
-                            )
                     },
                 ) {
                     // If found, connect the two
