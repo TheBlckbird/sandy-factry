@@ -136,7 +136,7 @@ pub fn update_main_menu(
                         Ok(game_save) => Some(game_save),
                         Err(GetError::NotFound) => None,
                         _ => panic!(
-                            "An Error occured while trying to load the save state\nTry tdo delete the save file (/Users/username/Library/Application Support/louisweigel.sandy-factry/bevy_pkv.redb) on MacOS.\nThis WILL delete all your save data!"
+                            "An Error occured while trying to load the save state\nTry to delete the save file (/Users/username/Library/Application Support/louisweigel.sandy-factry/bevy_pkv.redb) on MacOS.\nThis WILL delete all your save data!"
                         ),
                     };
 
