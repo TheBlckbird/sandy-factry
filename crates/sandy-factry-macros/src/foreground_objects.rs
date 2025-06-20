@@ -11,6 +11,12 @@ enum Side {
 }
 
 #[derive(Debug)]
+enum TunnelType {
+    Input,
+    Output,
+}
+
+#[derive(Debug)]
 struct Variant {
     name: Ident,
     inputs: Option<Vec<Side>>,
@@ -18,6 +24,7 @@ struct Variant {
     texture: LitInt,
     should_render: bool,
     machine: Expr,
+    tunnel_type: Option<TunnelType>,
 }
 
 impl Variant {
@@ -28,6 +35,7 @@ impl Variant {
         texture: LitInt,
         should_render: bool,
         machine: Expr,
+        tunnel_type: Option<TunnelType>,
     ) -> Self {
         Self {
             name,
@@ -36,6 +44,7 @@ impl Variant {
             texture,
             should_render,
             machine,
+            tunnel_type,
         }
     }
 }
@@ -77,6 +86,7 @@ pub fn impl_foreground_objects_macro(ast: &DeriveInput) -> TokenStream {
                 let mut texture_index = None;
                 let mut machine: Option<Expr> = None;
                 let mut should_render = false;
+                let mut tunnel_type = None;
 
                 let parsing_result = attr.parse_nested_meta(|meta| {
                     if meta.path.is_ident("texture") {
@@ -91,6 +101,21 @@ pub fn impl_foreground_objects_macro(ast: &DeriveInput) -> TokenStream {
                         should_render = should_render_value.value();
 
                         Ok(())
+                    } else if meta.path.is_ident("tunnel") {
+                        let value = meta.value()?;
+                        let tunnel_value: Ident = value.parse()?;
+
+                        match tunnel_value.to_string().as_str() {
+                            "Input" => {
+                                tunnel_type = Some(TunnelType::Input);
+                                Ok(())
+                            }
+                            "Output" => {
+                                tunnel_type = Some(TunnelType::Output);
+                                Ok(())
+                            }
+                            _ => Err(meta.error("unsupported tunnel type")),
+                        }
                     } else if meta.path.is_ident("inputs") {
                         meta.parse_nested_meta(|nested_meta| {
                             if nested_meta.path.is_ident("North") {
@@ -173,6 +198,7 @@ pub fn impl_foreground_objects_macro(ast: &DeriveInput) -> TokenStream {
                     texture_index,
                     should_render,
                     machine.clone(),
+                    tunnel_type,
                 ));
             }
             None => {
@@ -268,6 +294,36 @@ pub fn impl_foreground_objects_macro(ast: &DeriveInput) -> TokenStream {
 
             matches.push(quote! {
                 Self::#variant_name => #should_render,
+            });
+        }
+
+        quote! {
+            match self {
+                #(#matches)*
+            }
+        }
+    };
+
+    let tunnel_type = {
+        let mut matches = Vec::new();
+
+        for variant in &variants {
+            let tunnel_type = match &variant.tunnel_type {
+                Some(tunnel_type) => match tunnel_type {
+                    TunnelType::Input => {
+                        quote! {Some(crate::content::machine_types::TunnelType::Input)}
+                    }
+                    TunnelType::Output => {
+                        quote! {Some(crate::content::machine_types::TunnelType::Output)}
+                    }
+                },
+                None => quote! {None},
+            };
+
+            let variant_name = &variant.name;
+
+            matches.push(quote! {
+                Self::#variant_name => #tunnel_type,
             });
         }
 
@@ -412,6 +468,10 @@ pub fn impl_foreground_objects_macro(ast: &DeriveInput) -> TokenStream {
 
             pub fn should_render_item(&self) -> bool {
                 #should_render
+            }
+
+            pub fn tunnel_type(&self) -> Option<crate::content::machine_types::TunnelType> {
+                #tunnel_type
             }
 
             pub fn select_next(&mut self) {

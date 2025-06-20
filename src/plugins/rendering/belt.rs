@@ -33,7 +33,7 @@ pub fn update_item_tilemap(
     mut commands: Commands,
     tilemap_q: Single<(Entity, &mut TileStorage), With<ItemLayer>>,
     foreground_tiles: Query<(&TilePos, &TileTextureIndex, &Machine), With<Foreground>>,
-    item_tiles: Query<(Entity, &TilePos), With<Item>>,
+    item_tiles: Query<(Entity, &TilePos, &Item)>,
 ) {
     let (tilemap_entity, mut tile_storage) = tilemap_q.into_inner();
 
@@ -64,12 +64,12 @@ pub fn update_item_tilemap(
         });
 
     // Check which tiles already have a rendered item and check if it's supposed to persist to the next frame
-    for (entity, tile_pos) in item_tiles.iter() {
-        if !desired_items_state.contains_key(tile_pos) {
-            remove_tile(&mut commands, &mut tile_storage, entity, tile_pos);
-        } else {
-            // Remove the tile from desired items state, because it doesn't need to be rendered anymore
-            desired_items_state.remove(tile_pos);
+    for (entity, tile_pos, item) in item_tiles.iter() {
+        match desired_items_state.get(tile_pos) {
+            Some(desired_item) if item.item_type == desired_item.item_type => {
+                desired_items_state.remove(tile_pos);
+            }
+            _ => remove_tile(&mut commands, &mut tile_storage, entity, tile_pos),
         }
     }
 

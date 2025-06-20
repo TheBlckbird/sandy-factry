@@ -110,12 +110,30 @@ pub enum ForegroundObject {
     FurnaceDownLeft,
     #[variant(inputs(West, North), outputs(East), texture = 49, machine = Furnace::new(Side::West, Side::North))]
     FurnaceLeftUp,
+
+    #[variant(inputs(North), outputs(South), texture = 50, machine = Belt, render = true, tunnel = Input)]
+    TunnelInDown,
+    #[variant(inputs(East), outputs(West), texture = 51, machine = Belt, render = true, tunnel = Input)]
+    TunnelInLeft,
+    #[variant(inputs(South), outputs(North), texture = 52, machine = Belt, render = true, tunnel = Input)]
+    TunnelInUp,
+    #[variant(inputs(West), outputs(East), texture = 53, machine = Belt, render = true, tunnel = Input)]
+    TunnelInRight,
+
+    #[variant(inputs(North), outputs(South), texture = 54, machine = Belt, render = true, tunnel = Output)]
+    TunnelOutDown,
+    #[variant(inputs(East), outputs(West), texture = 55, machine = Belt, render = true, tunnel = Output)]
+    TunnelOutLeft,
+    #[variant(inputs(South), outputs(North), texture = 56, machine = Belt, render = true, tunnel = Output)]
+    TunnelOutUp,
+    #[variant(inputs(West), outputs(East), texture = 57, machine = Belt, render = true, tunnel = Output)]
+    TunnelOutRight,
 }
 
 impl ForegroundObject {
     /// Groups the variants of the machines together, always defining
     /// one variant that can be used as a thumbnail for a group
-    fn get_groups() -> Vec<(Self, Vec<Self>)> {
+    fn get_groups() -> Vec<(Self, Vec<Self>, bool)> {
         vec![
             (
                 Self::BeltUp,
@@ -125,6 +143,7 @@ impl ForegroundObject {
                     Self::BeltUp,
                     Self::BeltRight,
                 ],
+                true,
             ),
             (
                 Self::BeltDownRight,
@@ -138,6 +157,7 @@ impl ForegroundObject {
                     Self::BeltLeftUp,
                     Self::BeltUpRight,
                 ],
+                false,
             ),
             (
                 Self::CombinerDownLeft,
@@ -151,6 +171,7 @@ impl ForegroundObject {
                     Self::CombinerUpRight,
                     Self::CombinerRightDown,
                 ],
+                false,
             ),
             (
                 Self::SplitterDownLeft,
@@ -164,6 +185,7 @@ impl ForegroundObject {
                     Self::SplitterUpRight,
                     Self::SplitterLeftUp,
                 ],
+                false,
             ),
             (
                 Self::MinerDown,
@@ -173,6 +195,7 @@ impl ForegroundObject {
                     Self::MinerUp,
                     Self::MinerRight,
                 ],
+                true,
             ),
             (
                 Self::FurnaceUpLeft,
@@ -186,6 +209,7 @@ impl ForegroundObject {
                     Self::FurnaceDownLeft,
                     Self::FurnaceLeftUp,
                 ],
+                false,
             ),
             (
                 Self::CrafterDown,
@@ -195,8 +219,29 @@ impl ForegroundObject {
                     Self::CrafterUp,
                     Self::CrafterRight,
                 ],
+                true,
             ),
-            (Self::Void, vec![Self::Void]),
+            (
+                Self::TunnelInUp,
+                vec![
+                    Self::TunnelInDown,
+                    Self::TunnelInLeft,
+                    Self::TunnelInUp,
+                    Self::TunnelInRight,
+                ],
+                true,
+            ),
+            (
+                Self::TunnelOutUp,
+                vec![
+                    Self::TunnelOutDown,
+                    Self::TunnelOutLeft,
+                    Self::TunnelOutUp,
+                    Self::TunnelOutRight,
+                ],
+                true,
+            ),
+            (Self::Void, vec![Self::Void], false),
         ]
     }
 }
@@ -209,19 +254,27 @@ impl ForegroundObject {
 pub struct CurrentMachine {
     all_machines: Vec<ForegroundObject>,
     machine_index: Option<usize>,
-    variant_index: usize,
+    variant_indices: Vec<usize>,
+    standard_rotatable_variant_index: usize,
 }
 
 impl CurrentMachine {
+    const STANDARD_ROTATION_LENGTH: usize = 4;
+
     /// Get the currently selected [ForegroundObject]
     pub fn get_current_foreground_object(&self) -> Option<ForegroundObject> {
-        Some(ForegroundObject::get_groups()[self.machine_index?].1[self.variant_index])
+        let variant_index = if self.is_standard_rotatable(self.machine_index?) {
+            self.standard_rotatable_variant_index
+        } else {
+            self.variant_indices[self.machine_index?]
+        };
+
+        Some(ForegroundObject::get_groups()[self.machine_index?].1[variant_index])
     }
 
     /// Deselect the current machine.
     pub fn deselect(&mut self) {
         self.machine_index = None;
-        self.variant_index = 0;
     }
 
     /// Select the next machine.
@@ -238,8 +291,6 @@ impl CurrentMachine {
             }
             None => self.machine_index = Some(0),
         }
-
-        self.variant_index = 0;
     }
 
     /// Select the nth machine, resetting the variant to the first one.
@@ -251,7 +302,6 @@ impl CurrentMachine {
                 Some(machine_index) if machine_index == n => {}
                 _ => {
                     self.machine_index = Some(n);
-                    self.variant_index = 0;
                 }
             }
         }
@@ -269,17 +319,23 @@ impl CurrentMachine {
             }
             None => self.machine_index = Some(0),
         }
-
-        self.variant_index = 0;
     }
 
     /// Select the next variant of the current machine group.
     pub fn select_next_variant(&mut self) {
         if let Some(machine_index) = self.machine_index {
-            self.variant_index += 1;
-
-            if self.variant_index == ForegroundObject::get_groups()[machine_index].1.len() {
-                self.variant_index = 0;
+            if self.is_standard_rotatable(machine_index) {
+                if self.standard_rotatable_variant_index == Self::STANDARD_ROTATION_LENGTH - 1 {
+                    self.standard_rotatable_variant_index = 0;
+                } else {
+                    self.standard_rotatable_variant_index += 1;
+                }
+            } else if self.variant_indices[machine_index]
+                == ForegroundObject::get_groups()[machine_index].1.len() - 1
+            {
+                self.variant_indices[machine_index] = 0;
+            } else {
+                self.variant_indices[machine_index] += 1;
             }
         }
     }
@@ -287,12 +343,24 @@ impl CurrentMachine {
     /// Select the previous variant of the current machine group.
     pub fn select_prev_variant(&mut self) {
         if let Some(machine_index) = self.machine_index {
-            if self.variant_index == 0 {
-                self.variant_index = ForegroundObject::get_groups()[machine_index].1.len() - 1;
+            if self.is_standard_rotatable(machine_index) {
+                if self.standard_rotatable_variant_index == 0 {
+                    self.standard_rotatable_variant_index = Self::STANDARD_ROTATION_LENGTH - 1;
+                } else {
+                    self.standard_rotatable_variant_index -= 1;
+                }
+            }
+            if self.variant_indices[machine_index] == 0 {
+                self.variant_indices[machine_index] =
+                    ForegroundObject::get_groups()[machine_index].1.len() - 1;
             } else {
-                self.variant_index -= 1;
+                self.variant_indices[machine_index] -= 1;
             }
         }
+    }
+
+    fn is_standard_rotatable(&self, machine_index: usize) -> bool {
+        ForegroundObject::get_groups()[machine_index].2
     }
 }
 
@@ -301,10 +369,11 @@ impl Default for CurrentMachine {
         Self {
             all_machines: ForegroundObject::get_groups()
                 .iter()
-                .map(|(machine_icon, _)| *machine_icon)
+                .map(|(machine_icon, _, _)| *machine_icon)
                 .collect(),
             machine_index: None,
-            variant_index: 0,
+            variant_indices: vec![0; ForegroundObject::get_groups().len()],
+            standard_rotatable_variant_index: 0,
         }
     }
 }

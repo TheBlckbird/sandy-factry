@@ -87,7 +87,8 @@ impl From<ItemType> for TileTextureIndex {
     }
 }
 
-#[derive(Component, Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize, Deserialize, Deref)]
+/// The Item struct stores the item type and whether the item has been moved this tick
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Deref)]
 pub struct Item {
     pub has_moved: bool,
     #[deref]
