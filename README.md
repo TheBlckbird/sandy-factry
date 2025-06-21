@@ -15,17 +15,19 @@ There are multiple options to build this project:
 -   `./build/macos.sh`: Compiles and bundles the project for MacOS. This may take some time, because it needs to build it twice to create a build that runs on both Apple Silicon and the old Intel processors.
 -   `./build/windows.sh`: Compiles and bundles the project for Windows. This creates a zip archive with the executable and the assets folder.
 
-The output for the two build scripts can be found in the `out` directory.
+The output for the two build scripts can be found in the `/out` directory.
 
 Note that building this for the first time may take up to ten minutes, although it's usually around five. This is due to the whole game engine needing to be compiled. All the compiles after that will be faster, because it only needs to recompile what's changed.
 
-Also, the `target` directory may become quite big (multiple GBs), because of the incremental compiles. You can safely delete it after you're done, but you will need to recompile everything again the next time.
+Also, the `/target` directory may become quite big (multiple GBs), because of the incremental compiles. You can safely delete it after you're done, but you will need to recompile everything again the next time.
 
 ## Documention
 
 I had to write a documentation for the school project. It goes more in depth into the simulation algorithm, but is currently only available in German:
 
 [Dokumentation.pdf](https://github.com/user-attachments/files/20745087/Dokumentation.pdf)
+
+But be aware that it is already outdated.
 
 ## License
 
