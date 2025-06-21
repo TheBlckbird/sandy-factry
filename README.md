@@ -27,7 +27,7 @@ I had to write a documentation for the school project. It goes more in depth int
 
 [Dokumentation.pdf](https://github.com/user-attachments/files/20745087/Dokumentation.pdf)
 
-But be aware that it is already outdated.
+But be aware that the description of the algorithm is already outdated.
 
 ## License
 
