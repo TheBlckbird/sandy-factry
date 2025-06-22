@@ -5,7 +5,7 @@ use bevy_ecs_tilemap::tiles::{TilePos, TileTextureIndex};
 use petgraph::{algo::tarjan_scc, prelude::*};
 
 use crate::{
-    content::machine_types::Side,
+    content::machine_types::{OutputItems, Side},
     plugins::world::{Middleground, MiddlegroundObject},
 };
 
@@ -82,9 +82,12 @@ pub fn simulate(
                         }
                     }
 
+                    let mut preferred_output_sides = None;
+                    let mut all_output_sides = Vec::with_capacity(next_machine_indices_len);
+
                     // Go through all machines the current machine could try to push to
                     for (i, (next_machine_index, input_side)) in
-                        next_machine_indices.into_iter().enumerate()
+                        next_machine_indices.iter().enumerate()
                     {
                         // The output side of the connected machine is the opposite of the current machine's input side
                         let output_side = input_side.get_opposite();
@@ -92,7 +95,7 @@ pub fn simulate(
                         // Retrieve the nodes of the current and connected machine
                         // This can't be done earlier, because of the borrow checker
                         let ((machine, machine_tile_pos), (next_machine, _)) =
-                            simulation_graph.index_twice_mut(node_index, next_machine_index);
+                            simulation_graph.index_twice_mut(node_index, *next_machine_index);
 
                         // Check whether this is the first time this loop is being run
                         // If this check wasn't made, the machine's action would be performed multiple times per frame
@@ -108,41 +111,114 @@ pub fn simulate(
                             ));
                         }
 
-                        // Get the output items of the side being currently checked
-                        let output_items = machine
-                            .output_items
-                            .get_side_mut(&output_side)
-                            .unwrap_or_else(|| {
-                                panic!("The side {output_side:?} should exist on this machine")
-                            });
-
-                        // Get the frontmost output item, if it exists
-                        let Some(item) = output_items.front() else {
+                        let Some(mut output_items) = machine.output_items.as_mut() else {
                             continue;
                         };
 
-                        // If the connected machine can accept the item and it hasn't already been moved,
-                        // push it to the correct input side
-                        if next_machine.machine_type.can_accept(
-                            item,
-                            &next_machine.input_items,
-                            &next_machine.output_items,
-                            &input_side,
-                        ) && !item.has_moved
-                        {
-                            let mut item = output_items
-                                .pop_front()
-                                .expect("There should be an item in `output_items`");
+                        match &mut output_items {
+                            OutputItems::SingleSide(items) => {
+                                // Get the frontmost output item, if it exists
+                                let Some(item) = items.front() else {
+                                    continue;
+                                };
 
-                            // Mark that the item has already moved this frame
-                            item.has_moved = true;
-                            made_progress = true;
+                                // If the connected machine can accept the item and it hasn't already been moved,
+                                // push it to the correct input side
+                                if next_machine.machine_type.can_accept(
+                                    item,
+                                    &next_machine.input_items,
+                                    next_machine.output_items.as_ref(),
+                                    input_side,
+                                ) && !item.has_moved
+                                {
+                                    let mut item = items
+                                        .pop_front()
+                                        .expect("There should be an item in `output_items`");
 
-                            next_machine
-                                .input_items
-                                .get_side_mut(&input_side)
-                                .expect("The input side should be set; it's connected in the graph")
-                                .push_back(item);
+                                    // Mark that the item has already moved this frame
+                                    item.has_moved = true;
+                                    made_progress = true;
+
+                                    next_machine
+                                        .input_items
+                                        .get_side_mut(input_side)
+                                        .expect("The input side should be set; it's connected in the graph")
+                                        .push_back(item);
+                                }
+                            }
+                            OutputItems::MultipleSides(preferred_items_side) => {
+                                let preferred_output_sides = preferred_output_sides
+                                    .get_or_insert(preferred_items_side.preferred_sides.clone());
+
+                                all_output_sides.push(output_side);
+
+                                // if this is the first time, set the preferred_output_sides variable one scope out
+                                // check if the item can be moved
+                                //   if not, remove the side from preferred_output_sides
+
+                                let Some(item) = preferred_items_side.items.front() else {
+                                    continue;
+                                };
+
+                                if !next_machine.machine_type.can_accept(
+                                    item,
+                                    &next_machine.input_items,
+                                    next_machine.output_items.as_ref(),
+                                    input_side,
+                                ) || item.has_moved
+                                {
+                                    let current_side_index = preferred_output_sides
+                                        .iter()
+                                        .position(|&side| side == output_side)
+                                        .unwrap();
+
+                                    preferred_output_sides.remove(current_side_index);
+                                }
+                            }
+                        }
+                    }
+
+                    if let Some(mut preferred_output_sides) = preferred_output_sides {
+                        // Remove all sides that aren't in all_output_side
+                        preferred_output_sides.retain(|side| all_output_sides.contains(side));
+
+                        if let Some(&wanted_output_side) = preferred_output_sides.first() {
+                            info!("{wanted_output_side:?}");
+                            // move the item to the appropriate machine
+                            // this is the machine on the side, that comes first in preferred_output_sides
+
+                            for (next_machine_index, input_side) in next_machine_indices.iter() {
+                                // The output side of the connected machine is the opposite of the current machine's input side
+                                let output_side = input_side.get_opposite();
+
+                                if output_side != wanted_output_side {
+                                    continue;
+                                }
+
+                                // Retrieve the nodes of the current and connected machine
+                                // This can't be done earlier, because of the borrow checker
+                                let ((machine, _), (next_machine, _)) = simulation_graph
+                                    .index_twice_mut(node_index, *next_machine_index);
+
+                                let Some(output_items) = machine.output_items.as_mut() else {
+                                    continue;
+                                };
+
+                                let Some(mut item) =
+                                    output_items.unwrap_multiple_sides_mut().items.pop_front()
+                                else {
+                                    continue;
+                                };
+
+                                item.has_moved = true;
+                                made_progress = true;
+
+                                next_machine
+                                    .input_items
+                                    .get_side_mut(input_side)
+                                    .unwrap()
+                                    .push_back(item);
+                            }
                         }
                     }
                 } else {
@@ -180,8 +256,10 @@ pub fn simulate(
             item.has_moved = false;
         }
 
-        for item in simulation_graph[machine_index].0.output_items.all_mut() {
-            item.has_moved = false;
+        if let Some(output_items) = simulation_graph[machine_index].0.output_items.as_mut() {
+            for item in output_items.get_items_mut() {
+                item.has_moved = false;
+            }
         }
     }
 }

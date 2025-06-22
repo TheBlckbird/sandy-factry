@@ -3,7 +3,9 @@ use serde::{Deserialize, Serialize};
 use crate::{
     content::{
         items::ItemType,
-        machine_types::{InputItems, MachineType, OutputItems, Side},
+        machine_types::{
+            InputItems, MachineType, OutputItems, Side, UnwrapOutputItems, UnwrapOutputItemsMut,
+        },
     },
     plugins::world::MiddlegroundObject,
 };
@@ -28,7 +30,7 @@ impl MachineType for Combiner {
     fn perform_action(
         &mut self,
         input_items: &mut InputItems,
-        output_items: &mut OutputItems,
+        mut output_items: Option<&mut OutputItems>,
         _middleground_object: Option<MiddlegroundObject>,
     ) {
         // Get current input side
@@ -41,7 +43,7 @@ impl MachineType for Combiner {
         let current_input_side = self.input_sides[current_input_side_index];
 
         // Check if there are any items on the combiner
-        if output_items.exactly_one().is_empty()
+        if output_items.unwrap_single_side().is_empty()
             && let Some(input_item) = input_items
                 .get_side_mut(&current_input_side)
                 .as_mut()
@@ -50,7 +52,7 @@ impl MachineType for Combiner {
                 })
                 .pop_front()
         {
-            output_items.exactly_one_mut().push_back(input_item);
+            output_items.unwrap_single_side_mut().push_back(input_item);
         }
 
         self.last_input_side_index = current_input_side_index;
@@ -60,11 +62,16 @@ impl MachineType for Combiner {
         &self,
         _item: &ItemType,
         input_items: &InputItems,
-        output_items: &OutputItems,
+        output_items: Option<&OutputItems>,
         input_side: &Side,
     ) -> bool {
         // Only one item is allowed in the combiner
-        if input_items.count() + output_items.count() > 0 {
+        if input_items.count()
+            + output_items
+                .expect("Combiner should have output items")
+                .len()
+            > 0
+        {
             return false;
         }
 

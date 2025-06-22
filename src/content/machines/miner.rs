@@ -3,7 +3,9 @@ use serde::{Deserialize, Serialize};
 use crate::{
     content::{
         items::ItemType,
-        machine_types::{InputItems, MachineType, OutputItems, Side},
+        machine_types::{
+            InputItems, MachineType, OutputItems, Side, UnwrapOutputItems, UnwrapOutputItemsMut,
+        },
     },
     plugins::world::MiddlegroundObject,
 };
@@ -27,12 +29,12 @@ impl MachineType for Miner {
     fn perform_action(
         &mut self,
         _input_items: &mut InputItems,
-        output_items: &mut OutputItems,
+        mut output_items: Option<&mut OutputItems>,
         middleground_object: Option<MiddlegroundObject>,
     ) {
         // Mining
 
-        if output_items.exactly_one().len() < 50
+        if output_items.unwrap_single_side().len() < 50
             && let Some(middleground_object) = middleground_object
         {
             match &mut self.mining_time {
@@ -44,7 +46,7 @@ impl MachineType for Miner {
                     };
 
                     // Append the resource under the miner
-                    output_items.exactly_one_mut().push_back(item.into());
+                    output_items.unwrap_single_side_mut().push_back(item.into());
 
                     self.mining_time = None;
                 }
@@ -53,7 +55,7 @@ impl MachineType for Miner {
                     *mining_time -= 1;
                 }
                 // If there are no other items in the output, reset the timer
-                None if output_items.is_empty() => {
+                None if output_items.unwrap_single_side().is_empty() => {
                     self.mining_time = Some(Self::MINING_TIME);
                 }
                 // else do nothing and try again next time
@@ -66,7 +68,7 @@ impl MachineType for Miner {
         &self,
         _item: &ItemType,
         _input_items: &InputItems,
-        _output_items: &OutputItems,
+        _output_items: Option<&OutputItems>,
         _input_side: &Side,
     ) -> bool {
         unreachable!()

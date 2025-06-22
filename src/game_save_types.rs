@@ -40,5 +40,5 @@ pub type MachineTiles = Vec<(
     ForegroundObject,
     Box<dyn MachineType>,
     InputItems,
-    OutputItems,
+    Option<OutputItems>,
 )>;

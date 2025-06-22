@@ -3,7 +3,9 @@ use serde::{Deserialize, Serialize};
 use crate::{
     content::{
         items::ItemType,
-        machine_types::{InputItems, MachineType, OutputItems, Side},
+        machine_types::{
+            InputItems, MachineType, OutputItems, Side, UnwrapOutputItems, UnwrapOutputItemsMut,
+        },
     },
     plugins::world::MiddlegroundObject,
 };
@@ -16,13 +18,13 @@ impl MachineType for Belt {
     fn perform_action(
         &mut self,
         input_items: &mut InputItems,
-        output_items: &mut OutputItems,
+        mut output_items: Option<&mut OutputItems>,
         _middleground_object: Option<MiddlegroundObject>,
     ) {
-        if output_items.exactly_one().is_empty()
+        if output_items.unwrap_single_side().is_empty()
             && let Some(input_item) = input_items.exactly_one_mut().pop_front()
         {
-            output_items.exactly_one_mut().push_back(input_item);
+            output_items.unwrap_single_side_mut().push_back(input_item);
         }
     }
 
@@ -30,10 +32,10 @@ impl MachineType for Belt {
         &self,
         _item: &ItemType,
         input_items: &InputItems,
-        output_items: &OutputItems,
+        output_items: Option<&OutputItems>,
         _input_side: &Side,
     ) -> bool {
-        (input_items.exactly_one().len() + output_items.exactly_one().len()) == 0
+        (input_items.exactly_one().len() + output_items.unwrap_single_side().len()) == 0
     }
 
     fn tick_after_first(&self) -> bool {

@@ -17,14 +17,14 @@ use crate::{
 pub struct Machine {
     pub machine_type: Box<dyn MachineType>,
     pub input_items: InputItems,
-    pub output_items: OutputItems,
+    pub output_items: Option<OutputItems>,
 }
 
 impl Machine {
     pub fn new(
         machine_type: Box<dyn MachineType>,
         input_items: InputItems,
-        output_items: OutputItems,
+        output_items: Option<OutputItems>,
     ) -> Self {
         Self {
             machine_type,
@@ -36,7 +36,7 @@ impl Machine {
     pub fn perform_action(&mut self, middleground_object: Option<MiddlegroundObject>) {
         self.machine_type.perform_action(
             &mut self.input_items,
-            &mut self.output_items,
+            self.output_items.as_mut(),
             middleground_object,
         );
     }
@@ -56,7 +56,7 @@ impl Machine {
 ///     fn perform_action(
 ///         &mut self,
 ///         input_items: &mut InputItems,
-///         output_items: &mut OutputItems,
+///         output_items: Option<&mut OutputItems>,
 ///         middleground_object: Option<MiddlegroundObject>,
 ///     ) {
 ///         todo!()
@@ -66,7 +66,7 @@ impl Machine {
 ///        &self,
 ///        item: &Item,
 ///        input_items: &InputItems,
-///        output_items: &OutputItems,
+///        output_items: Option<&OutputItems>,
 ///        input_side: &Side,
 ///    ) -> bool {
 ///        todo!()
@@ -93,7 +93,7 @@ pub trait MachineType: Debug + Send + Sync + AsAny + DynClone {
     fn perform_action(
         &mut self,
         input_items: &mut InputItems,
-        output_items: &mut OutputItems,
+        output_items: Option<&mut OutputItems>,
         middleground_object: Option<MiddlegroundObject>,
     );
 
@@ -112,7 +112,7 @@ pub trait MachineType: Debug + Send + Sync + AsAny + DynClone {
         &self,
         item: &ItemType,
         input_items: &InputItems,
-        output_items: &OutputItems,
+        output_items: Option<&OutputItems>,
         input_side: &Side,
     ) -> bool;
 
@@ -137,7 +137,6 @@ pub type Side = Direction;
 // MARK: ItemsSet
 
 pub type InputItems = ItemsSet;
-pub type OutputItems = ItemsSet;
 pub type ItemsSetPart = Option<VecDeque<Item>>;
 
 /// Datastructure containing a queue of items for up to all four directions
@@ -299,6 +298,173 @@ impl From<Option<Vec<Direction>>> for ItemsSet {
         output
     }
 }
+
+// MARK: OutputItems
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum OutputItems {
+    SingleSide(VecDeque<Item>),
+    MultipleSides(PreferredItemsSide),
+}
+
+impl OutputItems {
+    pub fn new_single_side() -> Self {
+        Self::SingleSide(VecDeque::new())
+    }
+
+    pub fn new_multiple_sides() -> Self {
+        Self::MultipleSides(PreferredItemsSide::new())
+    }
+
+    pub fn unwrap_single_side(&self) -> &VecDeque<Item> {
+        let Self::SingleSide(items) = self else {
+            panic!("Expected `OutputItems` to be `SingleSide`");
+        };
+
+        items
+    }
+
+    pub fn unwrap_single_side_mut(&mut self) -> &mut VecDeque<Item> {
+        let Self::SingleSide(items) = self else {
+            panic!("Expected `OutputItems` to be `SingleSide`");
+        };
+
+        items
+    }
+
+    pub fn unwrap_multiple_sides(&self) -> &PreferredItemsSide {
+        let Self::MultipleSides(items) = self else {
+            panic!("Expected `OutputItems` to be `MultipleSides`");
+        };
+
+        items
+    }
+
+    pub fn unwrap_multiple_sides_mut(&mut self) -> &mut PreferredItemsSide {
+        let Self::MultipleSides(items) = self else {
+            panic!("Expected `OutputItems` to be `MultipleSides`");
+        };
+
+        items
+    }
+
+    pub fn len(&self) -> usize {
+        match self {
+            Self::SingleSide(items) => items.len(),
+            Self::MultipleSides(preferred_items_side) => preferred_items_side.len(),
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    pub fn get_items(&self) -> &VecDeque<Item> {
+        match self {
+            OutputItems::SingleSide(items) => items,
+            OutputItems::MultipleSides(preferred_items_side) => &preferred_items_side.items,
+        }
+    }
+
+    pub fn get_items_mut(&mut self) -> &mut VecDeque<Item> {
+        match self {
+            OutputItems::SingleSide(items) => items,
+            OutputItems::MultipleSides(preferred_items_side) => &mut preferred_items_side.items,
+        }
+    }
+}
+
+impl TryFrom<Option<Vec<Side>>> for OutputItems {
+    type Error = ();
+
+    fn try_from(value: Option<Vec<Side>>) -> Result<Self, Self::Error> {
+        match value.ok_or(())?.len() {
+            0 => Err(()),
+            1 => Ok(Self::new_single_side()),
+            _ => Ok(Self::new_multiple_sides()),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PreferredItemsSide {
+    pub items: VecDeque<Item>,
+    /// The preferred side, the output item should go to.
+    ///
+    /// Goes from most preferred at index 0 to least preferred side at the end.
+    ///
+    /// The item stays in the machine, if all sides are occupied.
+    pub preferred_sides: Vec<Side>,
+}
+
+impl PreferredItemsSide {
+    pub fn new() -> Self {
+        Self {
+            items: VecDeque::new(),
+            preferred_sides: Vec::new(),
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        self.items.len()
+    }
+
+    pub fn push_side(&mut self, side: Side) {
+        self.preferred_sides.push(side)
+    }
+}
+
+pub trait UnwrapOutputItems {
+    fn unwrap_single_side(&self) -> &VecDeque<Item>;
+    fn unwrap_multiple_sides(&self) -> &PreferredItemsSide;
+}
+
+pub trait UnwrapOutputItemsMut {
+    fn unwrap_single_side_mut(&mut self) -> &mut VecDeque<Item>;
+    fn unwrap_multiple_sides_mut(&mut self) -> &mut PreferredItemsSide;
+}
+
+impl UnwrapOutputItems for Option<&OutputItems> {
+    fn unwrap_single_side(&self) -> &VecDeque<Item> {
+        self.expect("Option<OutputItems> should be Some")
+            .unwrap_single_side()
+    }
+
+    fn unwrap_multiple_sides(&self) -> &PreferredItemsSide {
+        self.expect("Option<OutputItems> should be Some")
+            .unwrap_multiple_sides()
+    }
+}
+
+impl UnwrapOutputItemsMut for Option<&mut OutputItems> {
+    fn unwrap_single_side_mut(&mut self) -> &mut VecDeque<Item> {
+        self.as_deref_mut()
+            .expect("Option<OutputItems> should be Some")
+            .unwrap_single_side_mut()
+    }
+
+    fn unwrap_multiple_sides_mut(&mut self) -> &mut PreferredItemsSide {
+        self.as_deref_mut()
+            .expect("Option<OutputItems> should be Some")
+            .unwrap_multiple_sides_mut()
+    }
+}
+
+impl UnwrapOutputItems for Option<&mut OutputItems> {
+    fn unwrap_single_side(&self) -> &VecDeque<Item> {
+        self.as_deref()
+            .expect("Option<OutputItems> should be Some")
+            .unwrap_single_side()
+    }
+
+    fn unwrap_multiple_sides(&self) -> &PreferredItemsSide {
+        self.as_deref()
+            .expect("Option<OutputItems> should be Some")
+            .unwrap_multiple_sides()
+    }
+}
+
+// MARK: TunnelType
 
 pub enum TunnelType {
     Input,
