@@ -82,7 +82,7 @@ pub fn simulate(
                         }
                     }
 
-                    let mut preferred_output_sides = None;
+                    let mut possible_preferred_output_sides = None;
                     let mut all_output_sides = Vec::with_capacity(next_machine_indices_len);
 
                     // Go through all machines the current machine could try to push to
@@ -147,19 +147,19 @@ pub fn simulate(
                                 }
                             }
                             OutputItems::MultipleSides(preferred_items_side) => {
-                                let preferred_output_sides = preferred_output_sides
+                                // if this is the first time, set the preferred_output_sides variable one scope out
+                                let preferred_output_sides = possible_preferred_output_sides
                                     .get_or_insert(preferred_items_side.preferred_sides.clone());
 
+                                // Mark this side as available
                                 all_output_sides.push(output_side);
 
-                                // if this is the first time, set the preferred_output_sides variable one scope out
-                                // check if the item can be moved
-                                //   if not, remove the side from preferred_output_sides
-
+                                // Check if there is an item that could possibly be moved
                                 let Some(item) = preferred_items_side.items.front() else {
                                     continue;
                                 };
 
+                                // Check if the item can't be moved
                                 if !next_machine.machine_type.can_accept(
                                     item,
                                     &next_machine.input_items,
@@ -167,59 +167,62 @@ pub fn simulate(
                                     input_side,
                                 ) || item.has_moved
                                 {
-                                    let current_side_index = preferred_output_sides
-                                        .iter()
-                                        .position(|&side| side == output_side)
-                                        .unwrap();
-
-                                    preferred_output_sides.remove(current_side_index);
+                                    // Remove the side from the possible output sides
+                                    preferred_output_sides.retain(|&side| side != output_side);
                                 }
                             }
                         }
                     }
 
-                    if let Some(mut preferred_output_sides) = preferred_output_sides {
-                        // Remove all sides that aren't in all_output_side
-                        preferred_output_sides.retain(|side| all_output_sides.contains(side));
+                    let Some(mut preferred_output_sides) = possible_preferred_output_sides else {
+                        continue;
+                    };
 
-                        if let Some(&wanted_output_side) = preferred_output_sides.first() {
-                            info!("{wanted_output_side:?}");
-                            // move the item to the appropriate machine
-                            // this is the machine on the side, that comes first in preferred_output_sides
+                    // Remove all sides that aren't in all_output_side
+                    preferred_output_sides.retain(|side| all_output_sides.contains(side));
 
-                            for (next_machine_index, input_side) in next_machine_indices.iter() {
-                                // The output side of the connected machine is the opposite of the current machine's input side
-                                let output_side = input_side.get_opposite();
+                    let Some(&wanted_output_side) = preferred_output_sides.first() else {
+                        continue;
+                    };
 
-                                if output_side != wanted_output_side {
-                                    continue;
-                                }
+                    // move the item to the appropriate machine
+                    // this is the machine on the side, that comes first in preferred_output_sides
+                    for (next_machine_index, input_side) in next_machine_indices.iter() {
+                        // The output side of the connected machine is the opposite of the current machine's input side
+                        let output_side = input_side.get_opposite();
 
-                                // Retrieve the nodes of the current and connected machine
-                                // This can't be done earlier, because of the borrow checker
-                                let ((machine, _), (next_machine, _)) = simulation_graph
-                                    .index_twice_mut(node_index, *next_machine_index);
-
-                                let Some(output_items) = machine.output_items.as_mut() else {
-                                    continue;
-                                };
-
-                                let Some(mut item) =
-                                    output_items.unwrap_multiple_sides_mut().items.pop_front()
-                                else {
-                                    continue;
-                                };
-
-                                item.has_moved = true;
-                                made_progress = true;
-
-                                next_machine
-                                    .input_items
-                                    .get_side_mut(input_side)
-                                    .unwrap()
-                                    .push_back(item);
-                            }
+                        if output_side != wanted_output_side {
+                            continue;
                         }
+
+                        // Retrieve the nodes of the current and connected machine
+                        // This can't be done earlier, because of the borrow checker
+                        let ((machine, _), (next_machine, _)) =
+                            simulation_graph.index_twice_mut(node_index, *next_machine_index);
+
+                        let Some(output_items) = machine.output_items.as_mut() else {
+                            continue;
+                        };
+
+                        // Get the item
+                        let Some(mut item) =
+                            output_items.unwrap_multiple_sides_mut().items.pop_front()
+                        else {
+                            continue;
+                        };
+
+                        // Mark the item as moved and that progress was made
+                        item.has_moved = true;
+                        made_progress = true;
+
+                        // Move the item into the next machine
+                        next_machine
+                            .input_items
+                            .get_side_mut(input_side)
+                            .unwrap_or_else(|| {
+                                panic!("This machine should've this input_side: {input_side:?}")
+                            })
+                            .push_back(item);
                     }
                 } else {
                     // ... because if not, all the additional steps for trying to push items can be skipped
