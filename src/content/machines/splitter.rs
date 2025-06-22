@@ -32,8 +32,6 @@ impl MachineType for Splitter {
         mut output_items: Option<&mut OutputItems>,
         _middleground_object: Option<MiddlegroundObject>,
     ) {
-        info!("{output_items:?}");
-
         // Get current input side
         let current_output_side_index = match self.last_output_side_index {
             0 => 1,
