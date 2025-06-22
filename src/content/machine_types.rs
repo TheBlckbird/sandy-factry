@@ -414,11 +414,19 @@ impl PreferredItemsSide {
     }
 }
 
+impl Default for PreferredItemsSide {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+#[allow(unused)]
 pub trait UnwrapOutputItems {
     fn unwrap_single_side(&self) -> &VecDeque<Item>;
     fn unwrap_multiple_sides(&self) -> &PreferredItemsSide;
 }
 
+#[allow(unused)]
 pub trait UnwrapOutputItemsMut {
     fn unwrap_single_side_mut(&mut self) -> &mut VecDeque<Item>;
     fn unwrap_multiple_sides_mut(&mut self) -> &mut PreferredItemsSide;
