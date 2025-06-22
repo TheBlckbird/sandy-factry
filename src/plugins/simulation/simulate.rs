@@ -5,10 +5,7 @@ use bevy_ecs_tilemap::tiles::{TilePos, TileTextureIndex};
 use petgraph::{algo::tarjan_scc, prelude::*};
 
 use crate::{
-    content::{
-        machine_types::{OutputItems, Side},
-        machines::combiner::Combiner,
-    },
+    content::machine_types::{OutputItems, Side},
     plugins::world::{Middleground, MiddlegroundObject},
 };
 
@@ -25,46 +22,15 @@ pub fn simulate(
     }
 
     let mut made_progress = true;
-    let mut is_first_time_ticking = true;
+    let mut first_time_ticking = true;
 
     // Do this until everything that can be moved is moved
     while made_progress {
-        // Thas variable tracks whether anything has changed in this iteration
         made_progress = false;
 
         // Get all the SCCs (Strongly Connected Components) using Tarjan's algorithm
         // This function also performs a topological sort on the result
-        let tarjan_sccs = tarjan_scc(&**simulation_graph);
-        let mut scc = Vec::new();
-
-        // Then split them again at combiners
-        for component in &tarjan_sccs {
-            let mut splits = Vec::new();
-
-            for (index, node_index) in component.iter().enumerate() {
-                let (machine, _) = &simulation_graph[*node_index];
-
-                if machine
-                    .machine_type
-                    .as_ref()
-                    .as_any()
-                    .downcast_ref::<Combiner>()
-                    .is_some()
-                    && index != 0
-                {
-                    splits.push(index - 1);
-                }
-            }
-
-            let mut previous = 0;
-
-            for split_index in splits {
-                scc.push(&component[previous..split_index]);
-                previous = split_index;
-            }
-
-            scc.push(&component[previous..]);
-        }
+        let scc = tarjan_scc(&**simulation_graph);
 
         let mut visited = HashSet::new();
         let mut times_machines_hit: HashMap<NodeIndex, u32> = HashMap::new();
@@ -139,12 +105,10 @@ pub fn simulate(
                             visited.insert(node_index);
 
                             // Perform the machine's action
-                            if machine.machine_type.tick_after_first() || is_first_time_ticking {
-                                machine.perform_action(get_middleground_object(
-                                    &tile_query,
-                                    machine_tile_pos,
-                                ));
-                            }
+                            machine.perform_action(get_middleground_object(
+                                &tile_query,
+                                machine_tile_pos,
+                            ));
                         }
 
                         let Some(mut output_items) = machine.output_items.as_mut() else {
@@ -276,7 +240,7 @@ pub fn simulate(
                     visited.insert(node_index);
                     let (machine, machine_tile_pos) = &mut simulation_graph[node_index];
 
-                    if machine.machine_type.tick_after_first() || is_first_time_ticking {
+                    if machine.machine_type.tick_after_first() || first_time_ticking {
                         // Perform the machine's action
                         machine
                             .perform_action(get_middleground_object(&tile_query, machine_tile_pos));
@@ -285,7 +249,7 @@ pub fn simulate(
             }
         }
 
-        is_first_time_ticking = false;
+        first_time_ticking = false;
     }
 
     // reset the has_moved flag
