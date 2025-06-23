@@ -47,66 +47,77 @@ pub fn setup_main_menu(
             ..default()
         },
         MainMenuScreen,
-        children![(
-            Node {
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
-                ..default()
-            },
-            BackgroundColor(MENU_BACKGROUND),
-            children![
-                // Display the game name
-                (
-                    Text::new("Sandy Fact'ry"),
-                    TextFont {
-                        font_size: 67.0,
-                        ..default()
-                    },
-                    TextColor(MAIN_TEXT_COLOR),
-                    Node {
-                        margin: UiRect::all(Val::Px(50.0)),
-                        ..default()
-                    },
-                ),
-                // Display three buttons for each action available from the main menu:
-                // - play
-                // - quit
-                // - how to play
-                (
-                    Button,
-                    button_node.clone(),
-                    BackgroundColor(NORMAL_BUTTON),
-                    MainMenuButtonAction::Play,
-                    children![(
-                        Text::new("Play"),
-                        button_text_font.clone(),
-                        TextColor(TEXT_COLOR),
-                    ),]
-                ),
-                (
-                    Button,
-                    button_node.clone(),
-                    BackgroundColor(NORMAL_BUTTON),
-                    MainMenuButtonAction::HowToPlay,
-                    children![(
-                        Text::new("How to Play"),
-                        button_text_font.clone(),
-                        TextColor(TEXT_COLOR)
-                    )]
-                ),
-                (
-                    Button,
-                    button_node.clone(),
-                    BackgroundColor(NORMAL_BUTTON),
-                    MainMenuButtonAction::Quit,
-                    children![(
-                        Text::new("Quit"),
-                        button_text_font.clone(),
-                        TextColor(TEXT_COLOR),
-                    ),]
-                ),
-            ]
-        )],
+        children![
+            (
+                Node {
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                BackgroundColor(MENU_BACKGROUND),
+                children![
+                    // Display the game name
+                    (
+                        Text::new("Sandy Fact'ry"),
+                        TextFont {
+                            font_size: 67.0,
+                            ..default()
+                        },
+                        TextColor(MAIN_TEXT_COLOR),
+                        Node {
+                            margin: UiRect::all(Val::Px(50.0)),
+                            ..default()
+                        },
+                    ),
+                    // Display three buttons for each action available from the main menu:
+                    // - play
+                    // - quit
+                    // - how to play
+                    (
+                        Button,
+                        button_node.clone(),
+                        BackgroundColor(NORMAL_BUTTON),
+                        MainMenuButtonAction::Play,
+                        children![(
+                            Text::new("Play"),
+                            button_text_font.clone(),
+                            TextColor(TEXT_COLOR),
+                        ),]
+                    ),
+                    (
+                        Button,
+                        button_node.clone(),
+                        BackgroundColor(NORMAL_BUTTON),
+                        MainMenuButtonAction::HowToPlay,
+                        children![(
+                            Text::new("How to Play"),
+                            button_text_font.clone(),
+                            TextColor(TEXT_COLOR)
+                        )]
+                    ),
+                    (
+                        Button,
+                        button_node.clone(),
+                        BackgroundColor(NORMAL_BUTTON),
+                        MainMenuButtonAction::Quit,
+                        children![(
+                            Text::new("Quit"),
+                            button_text_font.clone(),
+                            TextColor(TEXT_COLOR),
+                        ),]
+                    ),
+                ]
+            ),
+            (
+                Node {
+                    position_type: PositionType::Absolute,
+                    right: Val::Px(5.0),
+                    bottom: Val::Px(5.0),
+                    ..default()
+                },
+                Text::new(format!("v{}", env!("CARGO_PKG_VERSION")))
+            )
+        ],
     ));
 }
 

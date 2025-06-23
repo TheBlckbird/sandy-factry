@@ -55,7 +55,7 @@ pub enum MainMenuState {
     HowToPlay,
 }
 
-// MARK: Resources
+// MARK: Components
 
 #[derive(Component)]
 struct MainMenuScreen;
