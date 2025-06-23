@@ -8,7 +8,10 @@ use crate::{
         completion::HasCompletedGame,
         menu::{
             GameState,
-            game_menus::{GameMenuState, pause_menu::PauseMenuButtonAction},
+            game_menus::{
+                GameMenuState,
+                pause_menu::{PauseMenuButtonAction, SaveButtonText},
+            },
         },
         world::Seed,
     },
@@ -28,6 +31,7 @@ pub fn update_game_menu(
     tile_query: Query<(&TilePos, &TileTextureIndex, &Machine)>,
     camera: Single<&Transform, With<Camera2d>>,
     has_completed_game: Res<HasCompletedGame>,
+    mut save_button_text: Single<&mut Text, With<SaveButtonText>>,
 ) {
     let mut should_save_game = false;
 
@@ -41,6 +45,10 @@ pub fn update_game_menu(
                     pause_menu_state.set(GameMenuState::Hidden);
                     game_state.set(GameState::MainMenu);
                     should_save_game = true;
+                }
+                PauseMenuButtonAction::Save => {
+                    should_save_game = true;
+                    ***save_button_text = "Saved!".into();
                 }
                 PauseMenuButtonAction::Quit => {
                     app_exit_events.write(AppExit::Success);
