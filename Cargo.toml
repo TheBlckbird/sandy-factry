@@ -1,6 +1,6 @@
 [package]
 name = "sandy-factry"
-version = "0.1.2"
+version = "0.2.0"
 authors = ["Louis Weigel"]
 license = "MIT OR Apache-2.0"
 description = "A game about building a factory?"
