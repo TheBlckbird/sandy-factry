@@ -1,8 +1,8 @@
 use crate::content::{
     machine_types::Side,
     machines::{
-        belt::Belt, combiner::Combiner, crafter::Crafter, furnace::Furnace, miner::Miner,
-        splitter::Splitter, void::Void,
+        belt::Belt, chest::Chest, combiner::Combiner, crafter::Crafter, furnace::Furnace,
+        miner::Miner, splitter::Splitter,
     },
 };
 
@@ -91,8 +91,8 @@ pub enum ForegroundObject {
     #[variant(inputs(West), outputs(East, South), texture = 33, machine = Splitter::new([Side::East, Side::South]), render = true)]
     SplitterRightDown,
 
-    #[variant(inputs(North, East, South, West), texture = 13, machine = Void)]
-    Void,
+    #[variant(inputs(North, East, South, West), outputs(North, East, South, West), texture = 13, machine = Chest::new())]
+    Chest,
 
     #[variant(inputs(North, West), outputs(South), texture = 42, machine = Furnace::new(Side::North, Side::West))]
     FurnaceUpLeft,
@@ -241,7 +241,7 @@ impl ForegroundObject {
                 ],
                 true,
             ),
-            (Self::Void, vec![Self::Void], false),
+            (Self::Chest, vec![Self::Chest], false),
         ]
     }
 }
