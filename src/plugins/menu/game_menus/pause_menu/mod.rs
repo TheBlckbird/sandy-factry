@@ -34,8 +34,12 @@ impl Plugin for PauseMenuPlugin {
 enum PauseMenuButtonAction {
     BackToGame,
     BackToMainMenu,
+    Save,
     Quit,
 }
 
 #[derive(Component)]
 struct GameMenuScreen;
+
+#[derive(Component)]
+struct SaveButtonText;
