@@ -12,6 +12,8 @@ They are relatively self-explanatory, but here is another list:
 - Crafter, crafts items
 - Miner, mines resources
 - Furnace, smelts raw materials, needs coal inputted to the side
+- Tunnels, can transport items under other belts
+- Buffer Chests, buffers items and outputs them to the buildings around it
 
 The buildings can be rotated with R and F.
 

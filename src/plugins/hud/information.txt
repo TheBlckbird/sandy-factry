@@ -5,5 +5,7 @@
 5 - Miner
 6 - Furnace
 7 - Crafter
-8 - Void
+8 - Tunnel Input
+9 - Tunnel Output
+0 - Buffer Chest
 Q - Deselect Building
