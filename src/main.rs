@@ -1,4 +1,5 @@
 #![feature(if_let_guard)] // [TODO] This can probably be removed in a few days
+#![windows_subsystem = "windows"]
 
 use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
 use bevy_ecs_tilemap::prelude::*;
