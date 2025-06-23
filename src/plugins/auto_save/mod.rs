@@ -47,7 +47,7 @@ fn setup(mut commands: Commands) {
     )));
 
     commands.insert_resource(SaveIndicatorTimer(Timer::from_seconds(
-        5.0,
+        3.0,
         TimerMode::Once,
     )));
 }
