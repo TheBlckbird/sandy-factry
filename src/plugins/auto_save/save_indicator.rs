@@ -12,7 +12,7 @@ pub fn setup_save_indicator(mut commands: Commands) {
         },
         TextLayout::new_with_justify(JustifyText::Center),
         Visibility::Hidden,
-        Text::new("Saving"),
+        Text::new("Saving..."),
         SaveIndicator,
     ));
 }

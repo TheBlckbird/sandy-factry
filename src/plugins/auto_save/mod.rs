@@ -42,12 +42,12 @@ struct SaveIndicator;
 
 fn setup(mut commands: Commands) {
     commands.insert_resource(AutoSaveTimer(Timer::from_seconds(
-        120.0,
+        10.0,
         TimerMode::Repeating,
     )));
 
     commands.insert_resource(SaveIndicatorTimer(Timer::from_seconds(
-        3.0,
+        2.0,
         TimerMode::Once,
     )));
 }
