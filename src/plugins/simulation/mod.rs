@@ -47,39 +47,11 @@ pub struct SimulationUpdate;
 
 // MARK: Resources
 
-#[derive(Resource, Default)]
+#[derive(Resource, Default, Deref, DerefMut)]
 struct SimulationGraph(Graph<(Machine, TilePos), Side>);
 
-impl Deref for SimulationGraph {
-    type Target = Graph<(Machine, TilePos), Side>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for SimulationGraph {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
-#[derive(Resource)]
+#[derive(Resource, Deref, DerefMut)]
 struct SimulationTimer(Timer);
-
-impl Deref for SimulationTimer {
-    type Target = Timer;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for SimulationTimer {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
 
 // MARK: Systems
 
