@@ -1,3 +1,4 @@
+pub mod auto_save;
 pub mod building;
 pub mod completion;
 pub mod crafting;

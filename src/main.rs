@@ -17,7 +17,9 @@ use sandy_factry_helpers::tilemap::{TilemapSettingsBorrowed, get_mouse_tilepos};
 use serde::{Deserialize, Serialize};
 use winit::window::Icon;
 
-use crate::plugins::{completion::CompletionPlugin, interaction::MachineInteractionPlugin};
+use crate::plugins::{
+    auto_save::AutoSavePlugin, completion::CompletionPlugin, interaction::MachineInteractionPlugin,
+};
 
 mod content;
 mod game_save_types;
@@ -101,6 +103,7 @@ fn main() -> AppExit {
             MenuPlugin,
             MachineInteractionPlugin,
             CompletionPlugin,
+            AutoSavePlugin,
         ))
         .insert_resource(PkvStore::new("com.louisweigel", "sandy-factry"))
         .init_resource::<MouseCoordinates>()
