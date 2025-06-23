@@ -5,7 +5,9 @@ use serde::{Deserialize, Serialize};
 use crate::{
     content::{
         items::ItemType,
-        machine_types::{InputItems, MachineType, OutputItems, Side},
+        machine_types::{
+            InputItems, MachineType, OutputItems, Side, UnwrapOutputItems, UnwrapOutputItemsMut,
+        },
     },
     plugins::{crafting::recipe_types::FurnaceRecipe, world::MiddlegroundObject},
 };
@@ -49,7 +51,7 @@ impl MachineType for Furnace {
     fn perform_action(
         &mut self,
         input_items: &mut InputItems,
-        output_items: &mut OutputItems,
+        mut output_items: Option<&mut OutputItems>,
         _middleground_object: Option<MiddlegroundObject>,
     ) {
         // Convert the coal to burn time
@@ -84,7 +86,7 @@ impl MachineType for Furnace {
                 // Append the smelted item to `output_items`
                 for _ in 0..*output_count {
                     output_items
-                        .exactly_one_mut()
+                        .unwrap_single_side_mut()
                         .push_back((*output_item).into());
                 }
 
@@ -97,7 +99,9 @@ impl MachineType for Furnace {
 
             None => {
                 // Only try to craft something, if there are no items already crafted and enough burn time is left
-                if self.burn_time >= Self::SMELTING_BURN_TIME && output_items.is_empty() {
+                if self.burn_time >= Self::SMELTING_BURN_TIME
+                    && output_items.unwrap_single_side().is_empty()
+                {
                     let mut items = HashMap::new();
                     let items_input = input_items
                         .get_side_mut(&self.input_side)
@@ -139,7 +143,7 @@ impl MachineType for Furnace {
         &self,
         item: &ItemType,
         input_items: &InputItems,
-        _output_items: &OutputItems,
+        _output_items: Option<&OutputItems>,
         input_side: &Side,
     ) -> bool {
         if *input_side == self.input_side {

@@ -122,7 +122,7 @@ pub fn place_buildings(
                         None => return,
                     },
                     foreground_object.get_input_sides().into(),
-                    foreground_object.get_output_sides().into(),
+                    foreground_object.get_output_sides().try_into().ok(),
                 ),
                 BuildingInput(foreground_object.get_input_sides()),
                 BuildingOutput(foreground_object.get_output_sides()),

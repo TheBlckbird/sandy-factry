@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     content::{
         items::ItemType,
-        machine_types::{InputItems, MachineType, OutputItems, Side},
+        machine_types::{InputItems, MachineType, OutputItems, Side, UnwrapOutputItemsMut},
     },
     plugins::world::MiddlegroundObject,
 };
@@ -28,7 +28,7 @@ impl MachineType for Splitter {
     fn perform_action(
         &mut self,
         input_items: &mut InputItems,
-        output_items: &mut OutputItems,
+        mut output_items: Option<&mut OutputItems>,
         _middleground_object: Option<MiddlegroundObject>,
     ) {
         // Get current input side
@@ -41,17 +41,23 @@ impl MachineType for Splitter {
         let current_output_side = self.output_sides[current_output_side_index];
 
         //  Check if there are any items in the output and if something can be pulled from the input
-        if output_items.is_empty()
+        if output_items
+            .as_ref()
+            .expect("Splitter should have output sides")
+            .is_empty()
             && let Some(input_item) = input_items.exactly_one_mut().pop_front()
         {
-            output_items
-                .get_side_mut(&current_output_side)
-                .as_mut()
-                .unwrap_or_else(|| {
-                    panic!("Splitter should have the output side `{current_output_side:?}`")
-                })
-                .push_back(input_item);
+            // Get output_items (it should always be multiples sides)
+            let output_items = output_items.unwrap_multiple_sides_mut();
+            // Push item
+            output_items.items.push_back(input_item);
 
+            // Set the preferred sides
+            output_items.preferred_sides.clear();
+            output_items.push_side(current_output_side);
+            output_items.push_side(self.output_sides[self.last_output_side_index]);
+
+            // Switch last output side
             self.last_output_side_index = current_output_side_index;
         }
     }
@@ -60,10 +66,14 @@ impl MachineType for Splitter {
         &self,
         _item: &ItemType,
         input_items: &InputItems,
-        output_items: &OutputItems,
+        output_items: Option<&OutputItems>,
         _input_side: &Side,
     ) -> bool {
-        input_items.count() + output_items.count() < 1
+        input_items.count()
+            + output_items
+                .expect("Splitter should have output items")
+                .len()
+            < 1
     }
 
     fn tick_after_first(&self) -> bool {

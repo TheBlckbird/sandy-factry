@@ -16,7 +16,7 @@ impl MachineType for Void {
     fn perform_action(
         &mut self,
         input_items: &mut InputItems,
-        _output_items: &mut OutputItems,
+        _output_items: Option<&mut OutputItems>,
         _middleground_object: Option<MiddlegroundObject>,
     ) {
         input_items.all().clear();
@@ -26,7 +26,7 @@ impl MachineType for Void {
         &self,
         _item: &ItemType,
         _input_items: &InputItems,
-        _output_items: &OutputItems,
+        _output_items: Option<&OutputItems>,
         _input_side: &Side,
     ) -> bool {
         true

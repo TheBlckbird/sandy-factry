@@ -5,7 +5,9 @@ use serde::{Deserialize, Serialize};
 use crate::{
     content::{
         items::ItemType,
-        machine_types::{InputItems, MachineType, OutputItems, Side},
+        machine_types::{
+            InputItems, MachineType, OutputItems, Side, UnwrapOutputItems, UnwrapOutputItemsMut,
+        },
     },
     plugins::{crafting::recipe_types::CrafterRecipe, world::MiddlegroundObject},
 };
@@ -33,7 +35,7 @@ impl MachineType for Crafter {
     fn perform_action(
         &mut self,
         input_items: &mut InputItems,
-        output_items: &mut OutputItems,
+        mut output_items: Option<&mut OutputItems>,
         _middleground_object: Option<MiddlegroundObject>,
     ) {
         // Crafting
@@ -53,7 +55,7 @@ impl MachineType for Crafter {
 
                 for _ in 0..*output_count {
                     output_items
-                        .exactly_one_mut()
+                        .unwrap_single_side_mut()
                         .push_back((*output_item).into());
                 }
 
@@ -66,7 +68,7 @@ impl MachineType for Crafter {
 
             None => {
                 // Only try to craft something, if there are no items already crafted
-                if !output_items.is_empty() {
+                if !output_items.unwrap_single_side().is_empty() {
                     return;
                 }
 
@@ -109,7 +111,7 @@ impl MachineType for Crafter {
         &self,
         item: &ItemType,
         input_items: &InputItems,
-        _output_items: &OutputItems,
+        _output_items: Option<&OutputItems>,
         _input_side: &Side,
     ) -> bool {
         input_items.count_item(item) < 50
