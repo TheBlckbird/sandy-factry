@@ -31,4 +31,4 @@ But be aware that the description of the algorithm is already outdated.
 
 ## License
 
-This project is dual licensed under [MIT](/LICENSE-MIT) and [Apache-2.0](/LICENSE-APACHE).
+This project is licensed under [MPL-2.0](/LICENSE-MIT).
