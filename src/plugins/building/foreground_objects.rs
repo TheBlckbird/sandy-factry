@@ -130,7 +130,24 @@ pub enum ForegroundObject {
     TunnelOutRight,
 }
 
+pub type MachineIndex = usize;
+pub type VariantIndex = usize;
+
 impl ForegroundObject {
+    /// Gets the machine and variant indices for selecting the current building.
+    pub fn get_machine_indices(&self) -> (MachineIndex, VariantIndex) {
+        Self::get_groups()
+            .iter()
+            .enumerate()
+            .find_map(|(index, (_, variants, _))| {
+                variants
+                    .iter()
+                    .position(|variant| variant == self)
+                    .map(|variant_index| (index, variant_index))
+            })
+            .expect("All foreground objects should be in a group")
+    }
+
     /// Groups the variants of the machines together, always defining
     /// one variant that can be used as a thumbnail for a group
     fn get_groups() -> Vec<(Self, Vec<Self>, bool)> {
@@ -277,6 +294,11 @@ impl CurrentMachine {
         self.machine_index = None;
     }
 
+    /// Whether there is currently a selected machine.
+    pub fn is_something_selected(&self) -> bool {
+        self.machine_index.is_some()
+    }
+
     /// Select the next machine.
     pub fn select_next_machine(&mut self) {
         match &self.machine_index {
@@ -294,6 +316,8 @@ impl CurrentMachine {
     }
 
     /// Select the nth machine, resetting the variant to the first one.
+    ///
+    /// `n` starts at 1 instead of 0.
     pub fn select_nth_machine(&mut self, mut n: usize) {
         n -= 1;
 
@@ -303,6 +327,38 @@ impl CurrentMachine {
                 _ => {
                     self.machine_index = Some(n);
                 }
+            }
+        }
+    }
+
+    /// Select the nth variant of the current machine.
+    ///
+    /// `n` starts at 1 instead of 0.
+    ///
+    /// Panics if the variant index is too high and does nothing if no machine is selected.
+    pub fn select_nth_variant(&mut self, mut n: usize) {
+        if let Some(machine_index) = self.machine_index {
+            n -= 1;
+
+            let current_machine_variants = &ForegroundObject::get_groups()[machine_index].1;
+
+            let mut is_variant_existent = false;
+
+            if self.is_standard_rotatable(machine_index) {
+                if n < 4 {
+                    self.standard_rotatable_variant_index = n;
+                    is_variant_existent = true;
+                }
+            } else if n < current_machine_variants.len() {
+                self.variant_indices[machine_index] = n;
+                is_variant_existent = true;
+            }
+
+            if !is_variant_existent {
+                panic!(
+                    "Variant {n} doesn't exist for machine {:?}",
+                    ForegroundObject::get_groups()[machine_index].0
+                );
             }
         }
     }
@@ -359,6 +415,9 @@ impl CurrentMachine {
         }
     }
 
+    /// Whether this machien has four rotation variants.
+    ///
+    /// This is used for unifying rotation between different machines.
     fn is_standard_rotatable(&self, machine_index: usize) -> bool {
         ForegroundObject::get_groups()[machine_index].2
     }

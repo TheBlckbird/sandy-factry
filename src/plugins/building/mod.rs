@@ -9,6 +9,7 @@ use crate::{
     Direction,
     plugins::{
         RenderLayer,
+        building::pick_tile::pick_tile,
         interaction::can_interact_with_world,
         menu::{GameState, game_menus::GameMenuState},
         world::{MAP_SIZE, MAP_TYPE, TILE_SIZE},
@@ -17,6 +18,7 @@ use crate::{
 
 pub mod foreground_objects;
 mod load_game_save;
+mod pick_tile;
 mod place_buildings;
 
 // MARK: Plugin
@@ -26,10 +28,11 @@ pub struct BuildingPlugin;
 impl Plugin for BuildingPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<BuildEvent>()
+            .add_event::<PickTileEvent>()
             .add_systems(OnEnter(GameState::Game), (setup, load_game_save).chain())
             .add_systems(
                 Update,
-                (select_building, place_buildings).run_if(can_interact_with_world),
+                (select_building, pick_tile, place_buildings).run_if(can_interact_with_world),
             )
             .add_systems(OnExit(GameMenuState::Hidden), deselect_current_building)
             .add_systems(OnExit(GameState::Game), cleanup);
@@ -44,6 +47,9 @@ pub enum BuildEvent {
     Placed(TilePos, foreground_objects::ForegroundObject),
     Deleted(TilePos, foreground_objects::ForegroundObject),
 }
+
+#[derive(Event)]
+struct PickTileEvent;
 
 // MARK: Components
 
@@ -89,7 +95,11 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 /// Check for keyboard inputs to select or rotate buildings
-fn select_building(mut current_building: ResMut<CurrentMachine>, keys: Res<ButtonInput<KeyCode>>) {
+fn select_building(
+    mut current_building: ResMut<CurrentMachine>,
+    keys: Res<ButtonInput<KeyCode>>,
+    mut pick_tile_event_writer: EventWriter<PickTileEvent>,
+) {
     if keys.just_pressed(KeyCode::KeyX) {
         current_building.select_next_machine();
     } else if keys.just_pressed(KeyCode::KeyZ) {
@@ -99,7 +109,11 @@ fn select_building(mut current_building: ResMut<CurrentMachine>, keys: Res<Butto
     } else if keys.just_pressed(KeyCode::KeyF) {
         current_building.select_prev_variant();
     } else if keys.just_pressed(KeyCode::KeyQ) {
-        current_building.deselect();
+        if current_building.is_something_selected() {
+            current_building.deselect();
+        } else {
+            pick_tile_event_writer.write(PickTileEvent);
+        }
     }
 
     let mut n = None;
