@@ -8,4 +8,4 @@
 8 - Tunnel Input
 9 - Tunnel Output
 0 - Buffer Chest
-Q - Deselect Building
+Q - (De)select Building

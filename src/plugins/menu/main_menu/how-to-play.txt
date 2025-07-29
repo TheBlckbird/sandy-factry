@@ -4,7 +4,7 @@ You move around with WASD and zoom in and out with the scroll wheel.
 Press Space to reset the zoom level.
 
 Use the number keys to select the buildings.
-They are relatively self-explanatory, but here is another list:
+They are relatively self-explanatory, but here is a list:
 
 - Belts
 - Splitters, split a belt into two
