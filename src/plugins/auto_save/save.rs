@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, window::WindowCloseRequested};
 use bevy_ecs_tilemap::tiles::{TilePos, TileTextureIndex};
 use bevy_pkv::PkvStore;
 
@@ -15,6 +15,9 @@ use crate::{
 pub fn check_auto_save(
     mut auto_save_timer: ResMut<AutoSaveTimer>,
     time: Res<Time>,
+    app_exit_events: EventReader<AppExit>,
+    window_close_events: EventReader<WindowCloseRequested>,
+
     mut pkv: ResMut<PkvStore>,
     seed: Res<Seed>,
     tile_query: Query<(&TilePos, &TileTextureIndex, &Machine)>,
@@ -23,7 +26,10 @@ pub fn check_auto_save(
     mut save_indicator_visibility: Single<&mut Visibility, With<SaveIndicator>>,
     mut save_indicator_timer: ResMut<SaveIndicatorTimer>,
 ) {
-    if auto_save_timer.tick(time.delta()).just_finished() {
+    if auto_save_timer.tick(time.delta()).just_finished()
+        || !app_exit_events.is_empty()
+        || !window_close_events.is_empty()
+    {
         info!("saving game");
 
         save_game(
