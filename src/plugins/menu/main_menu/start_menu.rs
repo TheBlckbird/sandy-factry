@@ -153,7 +153,7 @@ pub fn update_main_menu(
                     match saved_version {
                         Ok(saved_version) => {
                             if saved_version != env!("CARGO_PKG_VERSION") {
-                                let message = "Mismatched version in save file. If the game crashes, the save file is corrupted and needs to be deleted.";
+                                let message = "Mismatched version of save file. If the game crashes, the save file is too old (or new) and needs to be deleted.\nThere is currently no way to update it to newer versions, I'm sorry.";
 
                                 warn!("{message}");
                                 show_popup_writer
