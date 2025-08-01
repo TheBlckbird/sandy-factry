@@ -37,4 +37,7 @@ pub fn save_game(
 
     pkv.set(SaveKey::GameSave, &game_save)
         .expect("An error occured while trying to save the game");
+
+    pkv.set(SaveKey::Version, &env!("CARGO_PKG_VERSION").to_owned())
+        .expect("An error occured while trying to save the game version");
 }
