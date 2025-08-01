@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_pkv::{GetError, PkvStore};
 
+const VERSION_MISMATCH_POPUP_ID: &str = "version_mismatch";
+
 use crate::{
     game_save_types::{GameSave, LoadedGameSave},
     plugins::menu::{
@@ -109,8 +111,6 @@ pub fn setup_main_menu(
     ));
 }
 
-const POPUP_ID: &str = "version_mismatch";
-
 pub fn update_main_menu(
     interaction_query: Query<
         (&Interaction, &MainMenuButtonAction),
@@ -127,7 +127,7 @@ pub fn update_main_menu(
 ) {
     if popup_close_event_reader
         .read()
-        .any(|event| event.identifier == POPUP_ID)
+        .any(|event| event.identifier == VERSION_MISMATCH_POPUP_ID)
     {
         start_game(
             &pkv,
@@ -156,8 +156,10 @@ pub fn update_main_menu(
                                 let message = "Mismatched version of save file. If the game crashes, the save file is too old (or new) and needs to be deleted.\nThere is currently no way to update it to newer versions, I'm sorry.";
 
                                 warn!("{message}");
-                                show_popup_writer
-                                    .write(ShowPopupEvent::with_confirm(message, POPUP_ID));
+                                show_popup_writer.write(ShowPopupEvent::with_confirm(
+                                    message,
+                                    VERSION_MISMATCH_POPUP_ID,
+                                ));
 
                                 return;
                             }
