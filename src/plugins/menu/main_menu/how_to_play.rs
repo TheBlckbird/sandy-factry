@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 
 use crate::plugins::menu::{
-    MAIN_TEXT_COLOR, MENU_BACKGROUND, NORMAL_BUTTON, TEXT_COLOR,
+    MAIN_TEXT_COLOR, MENU_BACKGROUND, NORMAL_BUTTON, TEXT_COLOR, get_button_node,
+    get_button_text_font,
     main_menu::{HowToPlayMenu, MainMenuState},
 };
 
@@ -11,19 +12,6 @@ pub enum HowToPlayMenuAction {
 }
 
 pub fn setup_how_to_play_menu(mut commands: Commands) {
-    let button_node = Node {
-        width: Val::Px(300.0),
-        height: Val::Px(65.0),
-        margin: UiRect::all(Val::Px(20.0)),
-        justify_content: JustifyContent::Center,
-        align_items: AlignItems::Center,
-        ..default()
-    };
-    let button_text_font = TextFont {
-        font_size: 33.0,
-        ..default()
-    };
-
     commands.spawn((
         Node {
             width: Val::Percent(100.0),
@@ -67,12 +55,12 @@ pub fn setup_how_to_play_menu(mut commands: Commands) {
                 ),
                 (
                     Button,
-                    button_node.clone(),
+                    get_button_node(),
                     BackgroundColor(NORMAL_BUTTON),
                     HowToPlayMenuAction::Back,
                     children![(
                         Text::new("Back"),
-                        button_text_font.clone(),
+                        get_button_text_font(),
                         TextColor(TEXT_COLOR),
                     ),]
                 ),

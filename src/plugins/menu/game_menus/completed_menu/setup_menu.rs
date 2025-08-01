@@ -3,23 +3,10 @@ use bevy::prelude::*;
 use crate::plugins::menu::{
     MENU_BACKGROUND, NORMAL_BUTTON, TEXT_COLOR,
     game_menus::completed_menu::{CompletedMenuButtonAction, CompletedMenuScreen},
+    get_button_node, get_button_text_font,
 };
 
 pub fn setup_completed_menu(mut commands: Commands) {
-    // Common style for all buttons on the screen
-    let button_node = Node {
-        width: Val::Px(350.0),
-        height: Val::Px(65.0),
-        margin: UiRect::all(Val::Px(20.0)),
-        justify_content: JustifyContent::Center,
-        align_items: AlignItems::Center,
-        ..default()
-    };
-    let button_text_font = TextFont {
-        font_size: 33.0,
-        ..default()
-    };
-
     commands.spawn((
         Node {
             width: Val::Percent(100.0),
@@ -55,32 +42,36 @@ pub fn setup_completed_menu(mut commands: Commands) {
                 // - quit
                 (
                     Button,
-                    button_node.clone(),
+                    get_button_node(),
                     BackgroundColor(NORMAL_BUTTON),
                     CompletedMenuButtonAction::ContinuePlaying,
                     children![(
                         Text::new("Continue Playing"),
-                        button_text_font.clone(),
+                        get_button_text_font(),
                         TextColor(TEXT_COLOR),
                     ),]
                 ),
                 (
                     Button,
-                    button_node.clone(),
+                    get_button_node(),
                     BackgroundColor(NORMAL_BUTTON),
                     CompletedMenuButtonAction::BackToMainMenu,
                     children![(
                         Text::new("Main Menu"),
-                        button_text_font.clone(),
+                        get_button_text_font(),
                         TextColor(TEXT_COLOR),
                     ),]
                 ),
                 (
                     Button,
-                    button_node,
+                    get_button_node(),
                     BackgroundColor(NORMAL_BUTTON),
                     CompletedMenuButtonAction::Quit,
-                    children![(Text::new("Quit"), button_text_font, TextColor(TEXT_COLOR),),]
+                    children![(
+                        Text::new("Quit"),
+                        get_button_text_font(),
+                        TextColor(TEXT_COLOR),
+                    ),]
                 ),
             ]
         )],

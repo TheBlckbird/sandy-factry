@@ -3,12 +3,14 @@ use bevy::prelude::*;
 use crate::{
     game_save_types::LoadedGameSave,
     plugins::menu::{
-        game_menus::GameMenusPlugin, main_menu::MainMenuPlugin, splash_screen::SplashScreenPlugin,
+        game_menus::GameMenusPlugin, main_menu::MainMenuPlugin, popup::PopupPlugin,
+        splash_screen::SplashScreenPlugin,
     },
 };
 
 pub mod game_menus;
 mod main_menu;
+pub mod popup;
 mod splash_screen;
 
 // MARK: Constants
@@ -22,14 +24,38 @@ const MAIN_TEXT_COLOR: Color = Color::srgb(0.1, 0.1, 0.1);
 const TEXT_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 const MENU_BACKGROUND: Color = Color::hsl(15.0, 0.31, 0.5);
 
+fn get_button_node() -> Node {
+    Node {
+        width: Val::Px(300.0),
+        height: Val::Px(65.0),
+        margin: UiRect::all(Val::Px(20.0)),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        ..default()
+    }
+}
+
+fn get_button_text_font() -> TextFont {
+    TextFont {
+        font_size: 33.0,
+        ..default()
+    }
+}
+
 // MARK: Plugin
 pub struct MenuPlugin;
 
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((SplashScreenPlugin, MainMenuPlugin, GameMenusPlugin))
-            .init_state::<GameState>()
-            .init_resource::<LoadedGameSave>();
+        app.add_plugins((
+            SplashScreenPlugin,
+            MainMenuPlugin,
+            GameMenusPlugin,
+            PopupPlugin,
+        ))
+        .init_state::<GameState>()
+        .init_resource::<LoadedGameSave>()
+        .add_systems(Update, button_system);
     }
 }
 

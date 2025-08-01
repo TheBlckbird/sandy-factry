@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::plugins::menu::{
-    button_system, despawn_screen,
+    despawn_screen,
     game_menus::{
         GameMenuState,
         completed_menu::{setup_menu::setup_completed_menu, update_menu::update_completed_menu},
@@ -19,7 +19,7 @@ impl Plugin for CompletedMenuPlugin {
         app.add_systems(OnEnter(GameMenuState::Completed), setup_completed_menu)
             .add_systems(
                 Update,
-                (update_completed_menu, button_system).run_if(in_state(GameMenuState::Completed)),
+                update_completed_menu.run_if(in_state(GameMenuState::Completed)),
             )
             .add_systems(
                 OnExit(GameMenuState::Completed),

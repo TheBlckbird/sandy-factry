@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::plugins::menu::{
-    button_system, despawn_screen,
+    despawn_screen,
     game_menus::{
         GameMenuState,
         pause_menu::{setup_menu::setup_pause_menu, update_menu::update_game_menu},
@@ -19,7 +19,7 @@ impl Plugin for PauseMenuPlugin {
         app.add_systems(OnEnter(GameMenuState::Pause), setup_pause_menu)
             .add_systems(
                 Update,
-                (update_game_menu, button_system).run_if(in_state(GameMenuState::Pause)),
+                update_game_menu.run_if(in_state(GameMenuState::Pause)),
             )
             .add_systems(
                 OnExit(GameMenuState::Pause),
