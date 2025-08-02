@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::plugins::menu::{
     MAIN_TEXT_COLOR, MENU_BACKGROUND, NORMAL_BUTTON, TEXT_COLOR, get_button_node,
-    get_button_text_font,
+    get_button_text_font, get_continuous_text_font,
     main_menu::{HowToPlayMenu, MainMenuState},
 };
 
@@ -11,7 +11,7 @@ pub enum HowToPlayMenuAction {
     Back,
 }
 
-pub fn setup_how_to_play_menu(mut commands: Commands) {
+pub fn setup_how_to_play_menu(mut commands: Commands, asset_sever: Res<AssetServer>) {
     commands.spawn((
         Node {
             width: Val::Percent(100.0),
@@ -43,10 +43,7 @@ pub fn setup_how_to_play_menu(mut commands: Commands) {
                 ),
                 (
                     Text::new(include_str!("./how-to-play.txt")),
-                    TextFont {
-                        font_size: 15.0,
-                        ..default()
-                    },
+                    get_continuous_text_font(&asset_sever, Some(20.0)),
                     TextColor(MAIN_TEXT_COLOR),
                     Node {
                         max_width: Val::Px(600.0),

@@ -26,7 +26,7 @@ const MENU_BACKGROUND: Color = Color::hsl(15.0, 0.31, 0.5);
 
 fn get_button_node() -> Node {
     Node {
-        width: Val::Px(300.0),
+        width: Val::Px(400.0),
         height: Val::Px(65.0),
         margin: UiRect::all(Val::Px(20.0)),
         justify_content: JustifyContent::Center,
@@ -38,6 +38,14 @@ fn get_button_node() -> Node {
 fn get_button_text_font() -> TextFont {
     TextFont {
         font_size: 33.0,
+        ..default()
+    }
+}
+
+fn get_continuous_text_font(asset_server: &AssetServer, font_size: Option<f32>) -> TextFont {
+    TextFont {
+        font: asset_server.load("fonts/Rubik-Regular.ttf"),
+        font_size: font_size.unwrap_or(25.0),
         ..default()
     }
 }
