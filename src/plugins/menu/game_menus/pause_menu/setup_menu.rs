@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::plugins::menu::{
-    MENU_BACKGROUND, NORMAL_BUTTON, TEXT_COLOR,
+    MENU_BACKGROUND, NORMAL_BUTTON, TEXT_COLOR, UiButton,
     game_menus::pause_menu::{GameMenuScreen, PauseMenuButtonAction, SaveButtonText},
     get_button_node, get_button_text_font,
 };
@@ -29,7 +29,7 @@ pub fn setup_pause_menu(mut commands: Commands) {
                 // - main menu
                 // - quit
                 (
-                    Button,
+                    UiButton,
                     get_button_node(),
                     BackgroundColor(NORMAL_BUTTON),
                     PauseMenuButtonAction::BackToGame,
@@ -40,7 +40,7 @@ pub fn setup_pause_menu(mut commands: Commands) {
                     ),]
                 ),
                 (
-                    Button,
+                    UiButton,
                     get_button_node(),
                     BackgroundColor(NORMAL_BUTTON),
                     PauseMenuButtonAction::BackToMainMenu,
@@ -51,7 +51,7 @@ pub fn setup_pause_menu(mut commands: Commands) {
                     ),]
                 ),
                 (
-                    Button,
+                    UiButton,
                     get_button_node(),
                     BackgroundColor(NORMAL_BUTTON),
                     PauseMenuButtonAction::Save,
@@ -63,7 +63,7 @@ pub fn setup_pause_menu(mut commands: Commands) {
                     ),]
                 ),
                 (
-                    Button,
+                    UiButton,
                     get_button_node(),
                     BackgroundColor(NORMAL_BUTTON),
                     PauseMenuButtonAction::Quit,

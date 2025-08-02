@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::plugins::menu::{
-    MAIN_TEXT_COLOR, MENU_BACKGROUND, NORMAL_BUTTON, TEXT_COLOR, get_button_node,
+    MAIN_TEXT_COLOR, MENU_BACKGROUND, NORMAL_BUTTON, TEXT_COLOR, UiButton, get_button_node,
     get_button_text_font, get_continuous_text_font,
     main_menu::{HowToPlayMenu, MainMenuState},
 };
@@ -51,7 +51,7 @@ pub fn setup_how_to_play_menu(mut commands: Commands, asset_sever: Res<AssetServ
                     }
                 ),
                 (
-                    Button,
+                    UiButton,
                     get_button_node(),
                     BackgroundColor(NORMAL_BUTTON),
                     HowToPlayMenuAction::Back,

@@ -82,6 +82,13 @@ pub enum GameState {
 #[derive(Component)]
 struct SelectedOption;
 
+/// A button for the main UI.
+///
+/// It automatically gets the normal, hover and clicked colors assigned.
+#[derive(Component)]
+#[require(Button)]
+struct UiButton;
+
 // MARK: Systems
 
 /// Generic system that takes a component as a parameter, and will despawn all entities with that component
@@ -95,7 +102,7 @@ fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands
 fn button_system(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, Option<&SelectedOption>),
-        (Changed<Interaction>, With<Button>),
+        (Changed<Interaction>, With<UiButton>),
     >,
 ) {
     for (interaction, mut background_color, selected) in &mut interaction_query {

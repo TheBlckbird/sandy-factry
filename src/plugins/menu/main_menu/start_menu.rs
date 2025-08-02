@@ -6,8 +6,8 @@ const VERSION_MISMATCH_POPUP_ID: &str = "version_mismatch";
 use crate::{
     game_save_types::{GameSave, LoadedGameSave},
     plugins::menu::{
-        GameState, MAIN_TEXT_COLOR, MENU_BACKGROUND, NORMAL_BUTTON, TEXT_COLOR, get_button_node,
-        get_button_text_font,
+        GameState, MAIN_TEXT_COLOR, MENU_BACKGROUND, NORMAL_BUTTON, TEXT_COLOR, UiButton,
+        get_button_node, get_button_text_font,
         main_menu::{MainMenuScreen, MainMenuState},
         popup::{PopupCloseEvent, ShowPopupEvent},
     },
@@ -64,7 +64,7 @@ pub fn setup_main_menu(
                     // - quit
                     // - how to play
                     (
-                        Button,
+                        UiButton,
                         get_button_node(),
                         BackgroundColor(NORMAL_BUTTON),
                         MainMenuButtonAction::Play,
@@ -75,7 +75,7 @@ pub fn setup_main_menu(
                         ),]
                     ),
                     (
-                        Button,
+                        UiButton,
                         get_button_node(),
                         BackgroundColor(NORMAL_BUTTON),
                         MainMenuButtonAction::HowToPlay,
@@ -86,7 +86,7 @@ pub fn setup_main_menu(
                         )]
                     ),
                     (
-                        Button,
+                        UiButton,
                         get_button_node(),
                         BackgroundColor(NORMAL_BUTTON),
                         MainMenuButtonAction::Quit,

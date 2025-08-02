@@ -60,7 +60,7 @@ impl ShowPopupEvent {
 
     /// Construct a new [ShowPopupEvent] to show a popup with an ok and cancel button and a given message.
     pub fn with_ok_cancel(message: impl Into<String>, identifier: impl Into<String>) -> Self {
-        Self::new(Popup::Confirm, message, identifier)
+        Self::new(Popup::OkCancel, message, identifier)
     }
 }
 
