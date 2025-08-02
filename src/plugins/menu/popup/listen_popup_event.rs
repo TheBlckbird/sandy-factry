@@ -1,7 +1,7 @@
 use bevy::{ecs::spawn::SpawnWith, prelude::*};
 
 use crate::plugins::menu::{
-    MAIN_TEXT_COLOR, MENU_BACKGROUND, NORMAL_BUTTON, TEXT_COLOR, get_button_node,
+    MAIN_TEXT_COLOR, MENU_BACKGROUND, NORMAL_BUTTON, TEXT_COLOR, UiButton, get_button_node,
     get_button_text_font,
     popup::{Popup, PopupAction, PopupCloseEvent, PopupIdentifier, ShowPopupEvent},
 };
@@ -60,7 +60,7 @@ pub fn listen_show_popup_event(
                         match popup_type {
                             Popup::Confirm => {
                                 parent.spawn((
-                                    Button,
+                                    UiButton,
                                     get_button_node(),
                                     BackgroundColor(NORMAL_BUTTON),
                                     PopupAction::Confirm,
@@ -74,7 +74,7 @@ pub fn listen_show_popup_event(
                             }
                             Popup::OkCancel => {
                                 parent.spawn((
-                                    Button,
+                                    UiButton,
                                     get_button_node(),
                                     BackgroundColor(NORMAL_BUTTON),
                                     PopupAction::Ok,
@@ -86,7 +86,7 @@ pub fn listen_show_popup_event(
                                     )],
                                 ));
                                 parent.spawn((
-                                    Button,
+                                    UiButton,
                                     get_button_node(),
                                     BackgroundColor(NORMAL_BUTTON),
                                     PopupAction::Cancel,
