@@ -1,7 +1,9 @@
 #![feature(if_let_guard)] // [TODO] This can probably be removed in a few days
 #![windows_subsystem = "windows"]
 
-use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
+use bevy::{
+    asset::load_internal_binary_asset, prelude::*, window::PrimaryWindow, winit::WinitWindows,
+};
 use bevy_ecs_tilemap::prelude::*;
 use bevy_pkv::PkvStore;
 use plugins::{
@@ -80,48 +82,59 @@ impl Direction {
 }
 
 fn main() -> AppExit {
-    App::new()
-        .add_plugins((
-            DefaultPlugins
-                .set(WindowPlugin {
-                    primary_window: Some(Window {
-                        title: String::from("Sandy Fact'ry"),
-                        ..default()
-                    }),
+    let mut app = App::new();
+
+    app.add_plugins((
+        DefaultPlugins
+            .set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: String::from("Sandy Fact'ry"),
                     ..default()
-                })
-                .set(ImagePlugin::default_nearest()),
-            TilemapPlugin,
-        ))
-        .add_plugins((
-            BuildingPlugin,
-            SimulationPlugin,
-            WorldPlugin,
-            HudPlugin,
-            RenderingPlugin,
-            DebugCameraPlugin,
-            CraftingPlugin,
-            MenuPlugin,
-            MachineInteractionPlugin,
-            CompletionPlugin,
-            AutoSavePlugin,
-        ))
-        .insert_resource(PkvStore::new("com.louisweigel", "sandy-factry"))
-        .init_resource::<MouseCoordinates>()
-        .insert_resource(ClearColor(Color::hsl(194.0, 0.71, 0.37)))
-        .add_systems(
-            PreStartup,
-            (
-                startup,
-                #[cfg(any(target_os = "windows", target_os = "linux"))]
-                set_window_icon,
-            ),
-        )
-        .add_systems(
-            PreUpdate,
-            update_mouse_coords.run_if(in_state(GameState::Game)),
-        )
-        .run()
+                }),
+                ..default()
+            })
+            .set(ImagePlugin::default_nearest()),
+        TilemapPlugin,
+    ))
+    .add_plugins((
+        BuildingPlugin,
+        SimulationPlugin,
+        WorldPlugin,
+        HudPlugin,
+        RenderingPlugin,
+        DebugCameraPlugin,
+        CraftingPlugin,
+        MenuPlugin,
+        MachineInteractionPlugin,
+        CompletionPlugin,
+        AutoSavePlugin,
+    ))
+    .insert_resource(PkvStore::new("com.louisweigel", "sandy-factry"))
+    .init_resource::<MouseCoordinates>()
+    .insert_resource(ClearColor(Color::hsl(194.0, 0.71, 0.37)))
+    .add_systems(
+        PreStartup,
+        (
+            startup,
+            #[cfg(any(target_os = "windows", target_os = "linux"))]
+            set_window_icon,
+        ),
+    )
+    .add_systems(
+        PreUpdate,
+        update_mouse_coords.run_if(in_state(GameState::Game)),
+    );
+
+    load_internal_binary_asset!(
+        app,
+        TextFont::default().font,
+        "../assets/fonts/TheNeue-Black.ttf",
+        |bytes: &[u8], _path: String| {
+            Font::try_from_bytes(bytes.to_vec()).expect("Font file shouldn't be corrupted.")
+        }
+    );
+
+    app.run()
 }
 
 /// Set the window icon on windows and X11
