@@ -1,4 +1,4 @@
-#![feature(if_let_guard)] // [TODO] This can probably be removed in a few days
+#![feature(if_let_guard)]
 #![windows_subsystem = "windows"]
 
 use bevy::{
