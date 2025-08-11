@@ -27,8 +27,7 @@ use crate::plugins::{
 mod content;
 mod game_save_types;
 mod plugins;
-mod save_game;
-mod save_keys;
+mod saving;
 
 #[derive(Resource, Default)]
 pub struct MouseCoordinates {
@@ -139,7 +138,7 @@ fn main() -> AppExit {
 
 /// Set the window icon on windows and X11
 ///
-/// MacOS and Wayland get the icons from the desktop entry
+/// MacOS and Wayland get the icons from their desktop entry
 #[allow(unused)]
 fn set_window_icon(windows: NonSend<WinitWindows>) {
     let (icon_rgba, icon_width, icon_height) = {

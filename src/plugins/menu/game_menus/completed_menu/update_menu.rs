@@ -12,7 +12,7 @@ use crate::{
         },
         world::Seed,
     },
-    save_game::save_game,
+    saving::save_game::save_game,
 };
 
 pub fn update_completed_menu(
