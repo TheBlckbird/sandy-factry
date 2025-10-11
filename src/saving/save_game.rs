@@ -8,7 +8,7 @@ use crate::{
     content::machine_types::Machine,
     game_save_types::{GameSave, MachineTiles},
     plugins::{building::foreground_objects::ForegroundObject, world::Seed},
-    save_keys::SaveKey,
+    saving::SaveKey,
 };
 
 /// Save the game and write it to disk

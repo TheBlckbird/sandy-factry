@@ -9,7 +9,7 @@ use crate::{
         completion::HasCompletedGame,
         world::Seed,
     },
-    save_game::save_game,
+    saving::save_game::save_game,
 };
 
 pub fn check_auto_save(
