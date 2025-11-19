@@ -44,3 +44,8 @@ This will be outlined in the following section.
 Every save should be put into its own file in the save directory. The file format is described below.
 
 ### File Format
+
+The first two bytes represent the version number. Everything after these first two bytes is part of the save data.
+This is done in order to not having to rely on a single file format.
+
+For now, JSON will be used as it is by far the easiest format to work with and debug.
