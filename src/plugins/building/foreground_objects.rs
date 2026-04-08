@@ -133,14 +133,35 @@ pub enum ForegroundObject {
 pub type MachineIndex = usize;
 pub type VariantIndex = usize;
 
+pub struct MachineGroup {
+    thumbnail: ForegroundObject,
+    variants: Vec<ForegroundObject>,
+    is_standard_rotatable: bool,
+}
+
+impl MachineGroup {
+    fn new(
+        thumbnail: ForegroundObject,
+        variants: Vec<ForegroundObject>,
+        is_rotatable: bool,
+    ) -> Self {
+        Self {
+            thumbnail,
+            variants,
+            is_standard_rotatable: is_rotatable,
+        }
+    }
+}
+
 impl ForegroundObject {
     /// Gets the machine and variant indices for selecting the current building.
     pub fn get_machine_indices(&self) -> (MachineIndex, VariantIndex) {
         Self::get_groups()
             .iter()
             .enumerate()
-            .find_map(|(index, (_, variants, _))| {
-                variants
+            .find_map(|(index, machine_group)| {
+                machine_group
+                    .variants
                     .iter()
                     .position(|variant| variant == self)
                     .map(|variant_index| (index, variant_index))
@@ -150,9 +171,9 @@ impl ForegroundObject {
 
     /// Groups the variants of the machines together, always defining
     /// one variant that can be used as a thumbnail for a group
-    fn get_groups() -> Vec<(Self, Vec<Self>, bool)> {
+    fn get_groups() -> Vec<MachineGroup> {
         vec![
-            (
+            MachineGroup::new(
                 Self::BeltUp,
                 vec![
                     Self::BeltDown,
@@ -162,7 +183,7 @@ impl ForegroundObject {
                 ],
                 true,
             ),
-            (
+            MachineGroup::new(
                 Self::BeltDownRight,
                 vec![
                     Self::BeltDownRight,
@@ -176,7 +197,7 @@ impl ForegroundObject {
                 ],
                 false,
             ),
-            (
+            MachineGroup::new(
                 Self::CombinerDownLeft,
                 vec![
                     Self::CombinerUpLeft,
@@ -190,7 +211,7 @@ impl ForegroundObject {
                 ],
                 false,
             ),
-            (
+            MachineGroup::new(
                 Self::SplitterDownLeft,
                 vec![
                     Self::SplitterDownRight,
@@ -204,7 +225,7 @@ impl ForegroundObject {
                 ],
                 false,
             ),
-            (
+            MachineGroup::new(
                 Self::MinerDown,
                 vec![
                     Self::MinerDown,
@@ -214,7 +235,7 @@ impl ForegroundObject {
                 ],
                 true,
             ),
-            (
+            MachineGroup::new(
                 Self::FurnaceUpLeft,
                 vec![
                     Self::FurnaceUpLeft,
@@ -228,7 +249,7 @@ impl ForegroundObject {
                 ],
                 false,
             ),
-            (
+            MachineGroup::new(
                 Self::CrafterDown,
                 vec![
                     Self::CrafterDown,
@@ -238,7 +259,7 @@ impl ForegroundObject {
                 ],
                 true,
             ),
-            (
+            MachineGroup::new(
                 Self::TunnelInUp,
                 vec![
                     Self::TunnelInDown,
@@ -248,7 +269,7 @@ impl ForegroundObject {
                 ],
                 true,
             ),
-            (
+            MachineGroup::new(
                 Self::TunnelOutUp,
                 vec![
                     Self::TunnelOutDown,
@@ -258,7 +279,7 @@ impl ForegroundObject {
                 ],
                 true,
             ),
-            (Self::Chest, vec![Self::Chest], false),
+            MachineGroup::new(Self::Chest, vec![Self::Chest], false),
         ]
     }
 }
@@ -286,7 +307,7 @@ impl CurrentMachine {
             self.variant_indices[self.machine_index?]
         };
 
-        Some(ForegroundObject::get_groups()[self.machine_index?].1[variant_index])
+        Some(ForegroundObject::get_groups()[self.machine_index?].variants[variant_index])
     }
 
     /// Deselect the current machine.
@@ -340,7 +361,7 @@ impl CurrentMachine {
         if let Some(machine_index) = self.machine_index {
             n -= 1;
 
-            let current_machine_variants = &ForegroundObject::get_groups()[machine_index].1;
+            let current_machine_variants = &ForegroundObject::get_groups()[machine_index].variants;
 
             let mut is_variant_existent = false;
 
@@ -357,7 +378,7 @@ impl CurrentMachine {
             if !is_variant_existent {
                 panic!(
                     "Variant {n} doesn't exist for machine {:?}",
-                    ForegroundObject::get_groups()[machine_index].0
+                    ForegroundObject::get_groups()[machine_index].thumbnail
                 );
             }
         }
@@ -387,7 +408,7 @@ impl CurrentMachine {
                     self.standard_rotatable_variant_index += 1;
                 }
             } else if self.variant_indices[machine_index]
-                == ForegroundObject::get_groups()[machine_index].1.len() - 1
+                == ForegroundObject::get_groups()[machine_index].variants.len() - 1
             {
                 self.variant_indices[machine_index] = 0;
             } else {
@@ -408,7 +429,7 @@ impl CurrentMachine {
             }
             if self.variant_indices[machine_index] == 0 {
                 self.variant_indices[machine_index] =
-                    ForegroundObject::get_groups()[machine_index].1.len() - 1;
+                    ForegroundObject::get_groups()[machine_index].variants.len() - 1;
             } else {
                 self.variant_indices[machine_index] -= 1;
             }
@@ -419,7 +440,7 @@ impl CurrentMachine {
     ///
     /// This is used for unifying rotation between different machines.
     fn is_standard_rotatable(&self, machine_index: usize) -> bool {
-        ForegroundObject::get_groups()[machine_index].2
+        ForegroundObject::get_groups()[machine_index].is_standard_rotatable
     }
 }
 
@@ -428,7 +449,7 @@ impl Default for CurrentMachine {
         Self {
             all_machines: ForegroundObject::get_groups()
                 .iter()
-                .map(|(machine_icon, _, _)| *machine_icon)
+                .map(|machine_group| machine_group.thumbnail)
                 .collect(),
             machine_index: None,
             variant_indices: vec![0; ForegroundObject::get_groups().len()],
