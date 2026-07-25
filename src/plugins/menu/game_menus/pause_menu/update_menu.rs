@@ -23,7 +23,7 @@ pub fn update_game_menu(
         (&Interaction, &PauseMenuButtonAction),
         (Changed<Interaction>, With<Button>),
     >,
-    mut app_exit_events: EventWriter<AppExit>,
+    mut app_exit_events: MessageWriter<AppExit>,
     mut game_state: ResMut<NextState<GameState>>,
     mut pause_menu_state: ResMut<NextState<GameMenuState>>,
     mut pkv: ResMut<PkvStore>,

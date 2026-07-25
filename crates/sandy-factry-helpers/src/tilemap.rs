@@ -60,7 +60,7 @@ pub fn get_mouse_tilepos(
         .and_then(|cursor| camera.viewport_to_world_2d(camera_transform, cursor).ok())?;
 
     let cursor_position = Vec4::from((cursor_position, 0.0, 1.0));
-    let cursor_in_map_position = map_transform.compute_matrix().inverse() * cursor_position;
+    let cursor_in_map_position = map_transform.to_matrix().inverse() * cursor_position;
 
     TilePos::from_world_pos(
         &cursor_in_map_position.xy(),

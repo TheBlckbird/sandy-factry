@@ -7,7 +7,7 @@ use crate::plugins::menu::{
 };
 
 pub fn listen_show_popup_event(
-    mut event_reader: EventReader<ShowPopupEvent>,
+    mut event_reader: MessageReader<ShowPopupEvent>,
     mut commands: Commands,
 ) {
     let Some(show_popup_event) = event_reader.read().next() else {
@@ -19,8 +19,8 @@ pub fn listen_show_popup_event(
 
     commands.spawn((
         Node {
-            width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
+            width: percent(100),
+            height: percent(100),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
             ..default()
@@ -43,10 +43,10 @@ pub fn listen_show_popup_event(
                     },
                     TextColor(MAIN_TEXT_COLOR),
                     Node {
-                        margin: UiRect::axes(Val::Px(20.0), Val::Px(30.0)),
-                        max_width: Val::Px(match show_popup_event.popup_type {
-                            Popup::Confirm => 400.0,
-                            Popup::OkCancel => 700.0,
+                        margin: UiRect::axes(px(20), px(30)),
+                        max_width: px(match show_popup_event.popup_type {
+                            Popup::Confirm => 400,
+                            Popup::OkCancel => 700,
                         }),
                         ..default()
                     }
@@ -107,7 +107,7 @@ pub fn listen_show_popup_event(
 }
 
 pub fn listen_close_popup_event(
-    mut close_popup: EventReader<PopupCloseEvent>,
+    mut close_popup: MessageReader<PopupCloseEvent>,
     popup: Option<Single<Entity, With<Popup>>>,
     mut commands: Commands,
 ) {

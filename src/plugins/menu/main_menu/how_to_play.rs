@@ -14,8 +14,8 @@ pub enum HowToPlayMenuAction {
 pub fn setup_how_to_play_menu(mut commands: Commands, asset_sever: Res<AssetServer>) {
     commands.spawn((
         Node {
-            width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
+            width: percent(100),
+            height: percent(100),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
             ..default()
@@ -37,7 +37,7 @@ pub fn setup_how_to_play_menu(mut commands: Commands, asset_sever: Res<AssetServ
                     },
                     TextColor(MAIN_TEXT_COLOR),
                     Node {
-                        margin: UiRect::all(Val::Px(50.0)),
+                        margin: px(50).all(),
                         ..default()
                     },
                 ),
@@ -46,7 +46,7 @@ pub fn setup_how_to_play_menu(mut commands: Commands, asset_sever: Res<AssetServ
                     get_continuous_text_font(&asset_sever, Some(20.0)),
                     TextColor(MAIN_TEXT_COLOR),
                     Node {
-                        max_width: Val::Px(600.0),
+                        max_width: px(600),
                         ..default()
                     }
                 ),

@@ -13,7 +13,7 @@ pub fn load_game_save(
     mut commands: Commands,
     game_save: Res<LoadedGameSave>,
     foreground_tilemap: Single<(Entity, &mut TileStorage), With<Foreground>>,
-    mut event_writer: EventWriter<BuildEvent>,
+    mut event_writer: MessageWriter<BuildEvent>,
 ) {
     let (tilemap_entity, mut tile_storage) = foreground_tilemap.into_inner();
 

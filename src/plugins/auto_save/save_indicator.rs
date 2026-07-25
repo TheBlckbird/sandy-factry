@@ -6,11 +6,11 @@ pub fn setup_save_indicator(mut commands: Commands) {
     commands.spawn((
         Node {
             position_type: PositionType::Absolute,
-            top: Val::Px(80.0),
-            width: Val::Vw(100.0),
+            top: px(80),
+            width: vw(100),
             ..default()
         },
-        TextLayout::new_with_justify(JustifyText::Center),
+        TextLayout::new_with_justify(Justify::Center),
         Visibility::Hidden,
         Text::new("Saving..."),
         SaveIndicator,

@@ -12,11 +12,11 @@ pub fn setup(mut commands: Commands) {
     // Spawn the text providing additional information
     commands.spawn((
         Text::new(include_str!("information.txt")),
-        TextLayout::new_with_justify(JustifyText::Left),
+        TextLayout::new_with_justify(Justify::Left),
         Node {
             position_type: PositionType::Absolute,
-            bottom: Val::Px(5.0),
-            left: Val::Px(5.0),
+            bottom: px(5),
+            left: px(5),
             ..default()
         },
         InformationText,

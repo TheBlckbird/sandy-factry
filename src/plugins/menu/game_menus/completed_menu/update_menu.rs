@@ -20,7 +20,7 @@ pub fn update_completed_menu(
         (&Interaction, &CompletedMenuButtonAction),
         (Changed<Interaction>, With<Button>),
     >,
-    mut app_exit_events: EventWriter<AppExit>,
+    mut app_exit_events: MessageWriter<AppExit>,
     mut game_state: ResMut<NextState<GameState>>,
     mut pause_menu_state: ResMut<NextState<GameMenuState>>,
     mut pkv: ResMut<PkvStore>,

@@ -30,8 +30,8 @@ pub fn setup_main_menu(
 
     commands.spawn((
         Node {
-            width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
+            width: percent(100),
+            height: percent(100),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
             ..default()
@@ -55,7 +55,7 @@ pub fn setup_main_menu(
                         },
                         TextColor(MAIN_TEXT_COLOR),
                         Node {
-                            margin: UiRect::all(Val::Px(50.0)),
+                            margin: px(50).all(),
                             ..default()
                         },
                     ),
@@ -101,8 +101,8 @@ pub fn setup_main_menu(
             (
                 Node {
                     position_type: PositionType::Absolute,
-                    right: Val::Px(5.0),
-                    bottom: Val::Px(5.0),
+                    right: px(5),
+                    bottom: px(5),
                     ..default()
                 },
                 Text::new(format!("v{}", env!("CARGO_PKG_VERSION")))
@@ -116,14 +116,14 @@ pub fn update_main_menu(
         (&Interaction, &MainMenuButtonAction),
         (Changed<Interaction>, With<Button>),
     >,
-    mut app_exit_events: EventWriter<AppExit>,
+    mut app_exit_events: MessageWriter<AppExit>,
     mut game_state: ResMut<NextState<GameState>>,
     mut main_menu_state: ResMut<NextState<MainMenuState>>,
     mut current_game_save: ResMut<LoadedGameSave>,
     pkv: Res<PkvStore>,
 
-    mut show_popup_writer: EventWriter<ShowPopupEvent>,
-    mut popup_close_event_reader: EventReader<PopupCloseEvent>,
+    mut show_popup_writer: MessageWriter<ShowPopupEvent>,
+    mut popup_close_event_reader: MessageReader<PopupCloseEvent>,
 ) {
     if popup_close_event_reader
         .read()

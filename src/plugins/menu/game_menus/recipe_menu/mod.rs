@@ -62,7 +62,7 @@ pub struct RecipeButton(Recipe);
 
 /// Updates the scroll position of scrollable nodes in response to mouse input
 pub fn update_scroll_position(
-    mut mouse_wheel_events: EventReader<MouseWheel>,
+    mut mouse_wheel_events: MessageReader<MouseWheel>,
     hover_map: Res<HoverMap>,
     mut scrolled_node_query: Query<&mut ScrollPosition>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
@@ -85,8 +85,8 @@ pub fn update_scroll_position(
         for (_pointer, pointer_map) in hover_map.iter() {
             for (entity, _hit) in pointer_map.iter() {
                 if let Ok(mut scroll_position) = scrolled_node_query.get_mut(*entity) {
-                    scroll_position.offset_x -= dx;
-                    scroll_position.offset_y -= dy;
+                    scroll_position.x -= dx;
+                    scroll_position.y -= dy;
                 }
             }
         }

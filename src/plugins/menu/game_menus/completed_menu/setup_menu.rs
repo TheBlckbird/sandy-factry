@@ -9,8 +9,8 @@ use crate::plugins::menu::{
 pub fn setup_completed_menu(mut commands: Commands) {
     commands.spawn((
         Node {
-            width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
+            width: percent(100),
+            height: percent(100),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
             ..default()
@@ -32,7 +32,7 @@ pub fn setup_completed_menu(mut commands: Commands) {
                     },
                     TextColor(TEXT_COLOR),
                     Node {
-                        margin: UiRect::all(Val::Px(30.0)),
+                        margin: px(30).all(),
                         ..default()
                     },
                 ),

@@ -26,9 +26,9 @@ const MENU_BACKGROUND: Color = Color::hsl(15.0, 0.31, 0.5);
 
 fn get_button_node() -> Node {
     Node {
-        width: Val::Px(400.0),
-        height: Val::Px(65.0),
-        margin: UiRect::all(Val::Px(20.0)),
+        width: px(400),
+        height: px(65),
+        margin: px(20).all(),
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
         ..default()

@@ -34,7 +34,7 @@ pub fn place_buildings(
         With<Foreground>,
     >,
     current_machine: Res<CurrentMachine>,
-    mut event_writer: EventWriter<BuildEvent>,
+    mut event_writer: MessageWriter<BuildEvent>,
 ) {
     // Extract all queried components
 

@@ -12,7 +12,7 @@ use crate::{
 /// Listens to the [PickTileEvent] and sets the currently
 /// selected building to the tile under the curser
 pub fn pick_tile(
-    mut event_reader: EventReader<PickTileEvent>,
+    mut event_reader: MessageReader<PickTileEvent>,
     mouse_coordinates: Res<MouseCoordinates>,
     foreground_tiles: Query<(&TilePos, &TileTextureIndex), With<Foreground>>,
     mut current_building: ResMut<CurrentMachine>,

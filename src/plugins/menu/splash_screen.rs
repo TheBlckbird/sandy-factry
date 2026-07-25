@@ -27,15 +27,15 @@ pub fn setup_splash_screen(mut commands: Commands, asset_server: Res<AssetServer
         Node {
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
-            width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
+            width: percent(100),
+            height: percent(100),
             ..default()
         },
         SplashScreen,
         children![(
             ImageNode::new(icon),
             Node {
-                width: Val::Px(200.0),
+                width: px(200),
                 ..default()
             }
         )],
@@ -50,7 +50,7 @@ pub fn countdown(
     time: Res<Time>,
     mut timer: ResMut<SplashTimer>,
 ) {
-    if timer.tick(time.delta()).finished() {
+    if timer.tick(time.delta()).is_finished() {
         game_state.set(GameState::MainMenu);
         main_menu_state.set(MainMenuState::Menu);
     }

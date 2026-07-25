@@ -13,8 +13,8 @@ pub struct PopupPlugin;
 
 impl Plugin for PopupPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<ShowPopupEvent>()
-            .add_event::<PopupCloseEvent>()
+        app.add_message::<ShowPopupEvent>()
+            .add_message::<PopupCloseEvent>()
             .add_systems(
                 Update,
                 (
@@ -31,7 +31,7 @@ impl Plugin for PopupPlugin {
 /// Event that should be fired to open a popup.
 ///
 /// The [Popup] type defines the type of popup, if it has one or two buttons and the String the message.
-#[derive(Event)]
+#[derive(Message)]
 pub struct ShowPopupEvent {
     popup_type: Popup,
     message: String,
@@ -65,9 +65,9 @@ impl ShowPopupEvent {
 }
 
 /// Event that is fired once a popup closes.
-#[allow(unused)]
-#[derive(Event)]
+#[derive(Message)]
 pub struct PopupCloseEvent {
+    #[allow(unused)]
     pub action: PopupAction,
     pub identifier: String,
 }

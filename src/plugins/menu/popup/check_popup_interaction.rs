@@ -7,7 +7,7 @@ pub fn check_popup_interaction(
         (&Interaction, &PopupAction, &PopupIdentifier),
         (Changed<Interaction>, With<Button>),
     >,
-    mut popup_close_event: EventWriter<PopupCloseEvent>,
+    mut popup_close_event: MessageWriter<PopupCloseEvent>,
 ) {
     for (interaction, popup_action, identifier) in &interaction_query {
         if *interaction != Interaction::Pressed {

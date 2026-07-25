@@ -15,8 +15,8 @@ use crate::{
 pub fn check_auto_save(
     mut auto_save_timer: ResMut<AutoSaveTimer>,
     time: Res<Time>,
-    app_exit_events: EventReader<AppExit>,
-    window_close_events: EventReader<WindowCloseRequested>,
+    app_exit_events: MessageReader<AppExit>,
+    window_close_events: MessageReader<WindowCloseRequested>,
 
     mut pkv: ResMut<PkvStore>,
     seed: Res<Seed>,

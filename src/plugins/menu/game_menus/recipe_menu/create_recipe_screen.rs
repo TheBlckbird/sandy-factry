@@ -63,27 +63,27 @@ pub fn create_recipe_screen(
 
     commands.spawn((
         Node {
-            width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
+            width: percent(100),
+            height: percent(100),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             ..default()
         },
         children![(
             Node {
-                width: Val::Px(600.0),
-                height: Val::Px(300.0),
+                width: px(600),
+                height: px(300),
                 justify_content: JustifyContent::SpaceBetween,
-                column_gap: Val::Px(10.0),
+                column_gap: px(10),
                 ..default()
             },
             BackgroundColor(GRAY_500.into()),
             children![
                 (
                     Node {
-                        padding: UiRect::all(Val::Px(5.0)),
+                        padding: px(5).all(),
                         flex_direction: FlexDirection::Column,
-                        width: Val::Percent(50.0),
+                        width: percent(50),
                         overflow: Overflow {
                             x: OverflowAxis::Hidden,
                             y: OverflowAxis::Scroll
@@ -95,8 +95,8 @@ pub fn create_recipe_screen(
                         for (recipe_text, is_current_recipe, recipe_button) in recipe_rows {
                             parent.spawn((
                                 Node {
-                                    height: Val::Px(LINE_HEIGHT),
-                                    padding: UiRect::vertical(Val::Px(5.0)),
+                                    height: px(LINE_HEIGHT),
+                                    padding: px(5).vertical(),
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
@@ -118,9 +118,9 @@ pub fn create_recipe_screen(
                 ),
                 (
                     Node {
-                        width: Val::Percent(50.0),
-                        padding: UiRect::all(Val::Px(5.0)),
-                        height: Val::Auto,
+                        width: percent(50),
+                        padding: px(5).all(),
+                        height: auto(),
                         ..default()
                     },
                     BackgroundColor(GRAY_400.into()),

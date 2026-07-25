@@ -9,11 +9,11 @@ pub fn setup(mut commands: Commands) {
     // Spawn text for coordinates
     commands.spawn((
         Text::new("X: ---, Y: ---"),
-        TextLayout::new_with_justify(JustifyText::Center),
+        TextLayout::new_with_justify(Justify::Center),
         Node {
             position_type: PositionType::Absolute,
-            top: Val::Px(5.0),
-            left: Val::Px(5.0),
+            top: px(5),
+            left: px(5),
             ..default()
         },
         CoordinatesText,

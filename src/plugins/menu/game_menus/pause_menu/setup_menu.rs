@@ -9,8 +9,8 @@ use crate::plugins::menu::{
 pub fn setup_pause_menu(mut commands: Commands) {
     commands.spawn((
         Node {
-            width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
+            width: percent(100),
+            height: percent(100),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
             ..default()

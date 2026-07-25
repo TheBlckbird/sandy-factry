@@ -67,7 +67,7 @@ fn movement(
 
 fn zoom(
     camera_projection: Single<&mut Projection>,
-    mut evr_scroll: EventReader<MouseWheel>,
+    mut evr_scroll: MessageReader<MouseWheel>,
     keys: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
 ) {
