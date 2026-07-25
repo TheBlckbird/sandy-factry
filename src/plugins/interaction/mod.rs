@@ -2,8 +2,7 @@ use bevy::prelude::*;
 
 use crate::plugins::{
     interaction::selection_marker::{
-        despawn_selection_marker, hide_selection_marker, spawn_selection_marker,
-        update_selection_marker,
+        despawn_selection_marker, hide_selection_marker, selection_marker, update_selection_marker,
     },
     menu::{GameState, game_menus::GameMenuState},
 };
@@ -16,7 +15,7 @@ pub struct MachineInteractionPlugin;
 impl Plugin for MachineInteractionPlugin {
     fn build(&self, app: &mut App) {
         app //.init_state::<RecipeMenuState>()
-            .add_systems(OnEnter(GameState::Game), spawn_selection_marker)
+            .add_systems(OnEnter(GameState::Game), selection_marker.spawn())
             .add_systems(
                 Update,
                 (update_selection_marker).run_if(can_interact_with_world),
@@ -28,7 +27,7 @@ impl Plugin for MachineInteractionPlugin {
 
 // MARK: Components
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, Default)]
 struct SelectionMarker;
 
 /// Added to the currently selected machine.

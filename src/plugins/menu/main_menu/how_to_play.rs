@@ -1,85 +1,48 @@
 use bevy::prelude::*;
 
 use crate::plugins::menu::{
-    MAIN_TEXT_COLOR, MENU_BACKGROUND, NORMAL_BUTTON, TEXT_COLOR, UiButton, get_button_node,
-    get_button_text_font, get_continuous_text_font,
+    MAIN_TEXT_COLOR, MENU_BACKGROUND, button, get_continuous_text_font,
     main_menu::{HowToPlayMenu, MainMenuState},
 };
 
-#[derive(Component)]
-pub enum HowToPlayMenuAction {
-    Back,
-}
-
-pub fn setup_how_to_play_menu(mut commands: Commands, asset_sever: Res<AssetServer>) {
-    commands.spawn((
+pub fn how_to_play_menu() -> impl Scene {
+    bsn! {
         Node {
             width: percent(100),
             height: percent(100),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
-            ..default()
-        },
-        HowToPlayMenu,
-        children![(
+        }
+        HowToPlayMenu
+        Children [
             Node {
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Center,
-                ..default()
-            },
-            BackgroundColor(MENU_BACKGROUND),
-            children![
-                (
-                    Text::new("Sandy Fact'ry"),
-                    TextFont {
-                        font_size: FontSize::Px(67.0),
-                        ..default()
-                    },
-                    TextColor(MAIN_TEXT_COLOR),
-                    Node {
-                        margin: px(50).all(),
-                        ..default()
-                    },
-                ),
-                (
-                    Text::new(include_str!("./how-to-play.txt")),
-                    get_continuous_text_font(&asset_sever, Some(20.0)),
-                    TextColor(MAIN_TEXT_COLOR),
-                    Node {
-                        max_width: px(600),
-                        ..default()
-                    }
-                ),
-                (
-                    UiButton,
-                    get_button_node(),
-                    BackgroundColor(NORMAL_BUTTON),
-                    HowToPlayMenuAction::Back,
-                    children![(
-                        Text::new("Back"),
-                        get_button_text_font(),
-                        TextColor(TEXT_COLOR),
-                    ),]
-                ),
-            ]
-        )],
-    ));
-}
-
-pub fn update_how_to_play_menu(
-    interaction_query: Query<
-        (&Interaction, &HowToPlayMenuAction),
-        (Changed<Interaction>, With<Button>),
-    >,
-    mut main_menu_state: ResMut<NextState<MainMenuState>>,
-) {
-    for (interaction, how_to_play_button_action) in &interaction_query {
-        if *interaction == Interaction::Pressed {
-            match how_to_play_button_action {
-                HowToPlayMenuAction::Back => {
-                    main_menu_state.set(MainMenuState::Menu);
-                }
             }
-        }
+            BackgroundColor(MENU_BACKGROUND)
+
+            Children [
+                Text::new("Sandy Fact'ry")
+                TextFont {
+                    font_size: px(67),
+                }
+                TextColor(MAIN_TEXT_COLOR)
+                Node {
+                    margin: px(50),
+                },
+
+                Text::new(include_str!("./how-to-play.txt"))
+                get_continuous_text_font(Some(20))
+                TextColor(MAIN_TEXT_COLOR)
+                Node {
+                    max_width: px(600),
+                },
+
+                button("Back")
+                on(|_event: On<Pointer<Press>>, mut main_menu_state: ResMut<NextState<MainMenuState>>| {
+                    main_menu_state.set(MainMenuState::Menu);
+                })
+            ]
+        ]
     }
 }

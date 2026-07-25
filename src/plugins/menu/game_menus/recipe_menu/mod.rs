@@ -14,7 +14,7 @@ use crate::plugins::{
         game_menus::{
             GameMenuState,
             recipe_menu::{
-                create_recipe_screen::create_recipe_screen, deselect_machine::deselect_machine,
+                create_recipe_screen::spawn_recipe_screen, deselect_machine::deselect_machine,
                 update_recipe_screen::update_recipe_screen,
             },
         },
@@ -34,7 +34,7 @@ pub struct RecipeMenuPlugin;
 
 impl Plugin for RecipeMenuPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameMenuState::Recipe), create_recipe_screen)
+        app.add_systems(OnEnter(GameMenuState::Recipe), spawn_recipe_screen)
             .add_systems(
                 Update,
                 (update_recipe_screen, update_scroll_position)
@@ -49,13 +49,13 @@ impl Plugin for RecipeMenuPlugin {
 
 // MARK: Components
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, Default)]
 pub struct RecipeScreen;
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, Default)]
 pub struct RecipeDetailText;
 
-#[derive(Component, Deref)]
+#[derive(Component, Clone, Default, Deref)]
 pub struct RecipeButton(Recipe);
 
 // MARK: States

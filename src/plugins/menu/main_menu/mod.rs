@@ -3,13 +3,13 @@ use bevy::prelude::*;
 use crate::plugins::menu::{
     GameState, despawn_screen,
     main_menu::{
-        how_to_play::{setup_how_to_play_menu, update_how_to_play_menu},
-        start_menu::{setup_main_menu, update_main_menu},
+        how_to_play::how_to_play_menu,
+        start_menu::{main_menu, update_main_menu},
     },
 };
 
-pub mod how_to_play;
-pub mod start_menu;
+mod how_to_play;
+mod start_menu;
 
 // MARK: Plugin
 pub struct MainMenuPlugin;
@@ -23,7 +23,7 @@ impl Plugin for MainMenuPlugin {
                     main_menu_state.set(MainMenuState::Menu);
                 },
             )
-            .add_systems(OnEnter(MainMenuState::Menu), setup_main_menu)
+            .add_systems(OnEnter(MainMenuState::Menu), main_menu.spawn())
             .add_systems(
                 Update,
                 update_main_menu.run_if(in_state(MainMenuState::Menu)),
@@ -32,11 +32,7 @@ impl Plugin for MainMenuPlugin {
                 OnExit(MainMenuState::Menu),
                 despawn_screen::<MainMenuScreen>,
             )
-            .add_systems(OnEnter(MainMenuState::HowToPlay), setup_how_to_play_menu)
-            .add_systems(
-                Update,
-                update_how_to_play_menu.run_if(in_state(MainMenuState::HowToPlay)),
-            )
+            .add_systems(OnEnter(MainMenuState::HowToPlay), how_to_play_menu.spawn())
             .add_systems(
                 OnExit(MainMenuState::HowToPlay),
                 despawn_screen::<HowToPlayMenu>,
@@ -56,8 +52,8 @@ pub enum MainMenuState {
 
 // MARK: Components
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, Default)]
 struct MainMenuScreen;
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, Default)]
 struct HowToPlayMenu;

@@ -2,25 +2,23 @@ use bevy::prelude::*;
 
 // MARK: Components
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, Default)]
 pub struct InformationText;
 
 // MARK: Systems
 
 /// Spawn the text
-pub fn setup(mut commands: Commands) {
-    // Spawn the text providing additional information
-    commands.spawn((
-        Text::new(include_str!("information.txt")),
-        TextLayout::justify(Justify::Left),
+pub fn information_hud() -> impl Scene {
+    bsn! {
+        Text::new(include_str!("information.txt"))
+        TextLayout::justify(Justify::Left)
         Node {
             position_type: PositionType::Absolute,
             bottom: px(5),
             left: px(5),
-            ..default()
-        },
-        InformationText,
-    ));
+        }
+        InformationText
+    }
 }
 
 /// Remove the text

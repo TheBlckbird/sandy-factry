@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, text::FontSourceTemplate};
 
 use crate::{
     game_save_types::LoadedGameSave,
@@ -24,31 +24,33 @@ const MAIN_TEXT_COLOR: Color = Color::srgb(0.1, 0.1, 0.1);
 const TEXT_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 const MENU_BACKGROUND: Color = Color::hsl(15.0, 0.31, 0.5);
 
-fn get_button_node() -> Node {
-    Node {
-        width: px(400),
-        height: px(65),
-        margin: px(20).all(),
-        justify_content: JustifyContent::Center,
-        align_items: AlignItems::Center,
-        ..default()
+fn button(title: &'static str) -> impl Scene {
+    bsn! {
+        UiButton
+        Node {
+            width: px(400),
+            height: px(65),
+            margin: px(20),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+        }
+        BackgroundColor(NORMAL_BUTTON)
+        Children [
+            Text::new(title)
+            TextFont {
+                font_size: px(33),
+            }
+            TextColor(TEXT_COLOR)
+        ]
     }
 }
 
-fn get_button_text_font() -> TextFont {
-    TextFont {
-        font_size: FontSize::Px(33.0),
-        ..default()
-    }
-}
-
-fn get_continuous_text_font(asset_server: &AssetServer, font_size: Option<f32>) -> TextFont {
-    let font_handle = FontSource::Handle(asset_server.load("fonts/Rubik-Regular.ttf"));
-
-    TextFont {
-        font: font_handle,
-        font_size: FontSize::Px(font_size.unwrap_or(25.0)),
-        ..default()
+fn get_continuous_text_font(font_size: Option<i32>) -> impl Scene {
+    bsn! {
+        TextFont {
+            font: FontSourceTemplate::Handle("fonts/Rubik-Regular.ttf"),
+            font_size: px(font_size.unwrap_or(25)),
+        }
     }
 }
 
@@ -87,7 +89,7 @@ struct SelectedOption;
 /// A button for the main UI.
 ///
 /// It automatically gets the normal, hover and clicked colors assigned.
-#[derive(Component)]
+#[derive(Component, Clone, Copy, Default)]
 #[require(Button)]
 struct UiButton;
 

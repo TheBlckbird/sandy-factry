@@ -71,13 +71,13 @@ pub fn hide_selection_marker(mut selection_marker: Single<&mut Visibility, With<
     **selection_marker = Visibility::Hidden;
 }
 
-pub fn spawn_selection_marker(asset_server: Res<AssetServer>, mut commands: Commands) {
-    commands.spawn((
-        Sprite::from_image(asset_server.load("selection.png")),
-        Transform::from_xyz(0., 0., RenderLayer::SelectionMarker.into()),
-        Visibility::Hidden,
-        SelectionMarker,
-    ));
+pub fn selection_marker() -> impl Scene {
+    bsn! {
+        Sprite { image: "selection.png" }
+        Transform::from_xyz(0., 0., RenderLayer::SelectionMarker.into())
+        Visibility::Hidden
+        SelectionMarker
+    }
 }
 
 pub fn despawn_selection_marker(

@@ -4,12 +4,19 @@ use serde::{Deserialize, Serialize};
 
 use crate::content::items::ItemType;
 
+#[derive(Clone)]
 pub enum Recipe {
     Crafter(CrafterRecipe),
     Furnace(FurnaceRecipe),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+impl Default for Recipe {
+    fn default() -> Self {
+        Self::Crafter(Default::default())
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct CrafterRecipe {
     pub ingredients: HashMap<ItemType, u16>,
     pub output_item: ItemType,

@@ -8,43 +8,46 @@ pub struct SplashScreenPlugin;
 
 impl Plugin for SplashScreenPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Splash), setup_splash_screen)
-            .add_systems(Update, countdown.run_if(in_state(GameState::Splash)))
-            .add_systems(OnExit(GameState::Splash), despawn_screen::<SplashScreen>);
+        app.add_systems(
+            OnEnter(GameState::Splash),
+            (setup_splash_timer, splash_screen.spawn()),
+        )
+        .add_systems(Update, countdown.run_if(in_state(GameState::Splash)))
+        .add_systems(OnExit(GameState::Splash), despawn_screen::<SplashScreen>);
     }
 }
 
 #[derive(Resource, Deref, DerefMut)]
 pub struct SplashTimer(Timer);
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, Default)]
 struct SplashScreen;
 
-pub fn setup_splash_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let icon = asset_server.load("app-icon.png");
+fn setup_splash_timer(mut commands: Commands) {
+    commands.insert_resource(SplashTimer(Timer::from_seconds(0.5, TimerMode::Once)));
+}
 
-    commands.spawn((
+fn splash_screen() -> impl Scene {
+    bsn! {
         Node {
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
             width: percent(100),
             height: percent(100),
-            ..default()
-        },
-        SplashScreen,
-        children![(
-            ImageNode::new(icon),
+        }
+        SplashScreen
+        Children [
+            ImageNode {
+                image: "app-icon.png"
+            }
             Node {
                 width: px(200),
-                ..default()
             }
-        )],
-    ));
-
-    commands.insert_resource(SplashTimer(Timer::from_seconds(0.5, TimerMode::Once)));
+        ]
+    }
 }
 
-pub fn countdown(
+fn countdown(
     mut game_state: ResMut<NextState<GameState>>,
     mut main_menu_state: ResMut<NextState<MainMenuState>>,
     time: Res<Time>,

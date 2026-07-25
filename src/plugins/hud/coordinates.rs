@@ -2,22 +2,20 @@ use bevy::prelude::*;
 
 use crate::MouseCoordinates;
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, Default)]
 pub struct CoordinatesText;
 
-pub fn setup(mut commands: Commands) {
-    // Spawn text for coordinates
-    commands.spawn((
-        Text::new("X: ---, Y: ---"),
-        TextLayout::justify(Justify::Center),
+pub fn coordinates_hud() -> impl Scene {
+    bsn! {
+        Text::new("X: ---, Y: ---")
+        TextLayout::justify(Justify::Center)
         Node {
             position_type: PositionType::Absolute,
             top: px(5),
             left: px(5),
-            ..default()
-        },
-        CoordinatesText,
-    ));
+        }
+        CoordinatesText
+    }
 }
 
 /// Update the coordinates text
