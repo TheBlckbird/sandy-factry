@@ -17,7 +17,7 @@ bevy_ecs_tilemap.workspace = true
 petgraph.workspace = true
 image = "0.25"
 noise = "0.9"
-rand = "0.9"
+rand = "0.10"
 winit = "0.30"
 sandy-factry-helpers = { path = "./crates/sandy-factry-helpers" }
 sandy-factry-macros = { path = "./crates/sandy-factry-macros" }
