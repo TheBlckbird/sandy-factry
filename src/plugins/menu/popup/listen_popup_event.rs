@@ -1,13 +1,12 @@
-use bevy::{ecs::spawn::SpawnWith, prelude::*};
+use bevy::prelude::*;
 
 use crate::plugins::menu::{
-    MAIN_TEXT_COLOR, MENU_BACKGROUND, NORMAL_BUTTON, TEXT_COLOR, UiButton, get_button_node,
-    get_button_text_font,
-    popup::{Popup, PopupAction, PopupCloseEvent, PopupIdentifier, ShowPopupEvent},
+    MAIN_TEXT_COLOR, MENU_BACKGROUND, button,
+    popup::{Popup, PopupCloseEvent, ShowPopupEvent},
 };
 
 pub fn listen_show_popup_event(
-    mut event_reader: EventReader<ShowPopupEvent>,
+    mut event_reader: MessageReader<ShowPopupEvent>,
     mut commands: Commands,
 ) {
     let Some(show_popup_event) = event_reader.read().next() else {
@@ -16,98 +15,77 @@ pub fn listen_show_popup_event(
 
     let popup_type = show_popup_event.popup_type;
     let identifier = show_popup_event.identifier.clone();
+    let popup_message = show_popup_event.message.clone();
 
-    commands.spawn((
+    commands.spawn_scene(bsn! {
         Node {
-            width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
+            width: percent(100),
+            height: percent(100),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
-            ..default()
-        },
-        BackgroundColor(Color::linear_rgba(0.0, 0.0, 0.0, 0.8)),
-        show_popup_event.popup_type,
-        children![(
+        }
+        BackgroundColor(Color::linear_rgba(0.0, 0.0, 0.0, 0.8))
+        template_value(popup_type)
+
+        Children [
             Node {
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Center,
-                ..default()
-            },
-            BackgroundColor(MENU_BACKGROUND),
-            children![
-                (
-                    Text::new(show_popup_event.message.clone()),
-                    TextFont {
-                        font_size: 25.0,
-                        ..default()
-                    },
-                    TextColor(MAIN_TEXT_COLOR),
-                    Node {
-                        margin: UiRect::axes(Val::Px(20.0), Val::Px(30.0)),
-                        max_width: Val::Px(match show_popup_event.popup_type {
-                            Popup::Confirm => 400.0,
-                            Popup::OkCancel => 700.0,
-                        }),
-                        ..default()
-                    }
-                ),
-                (
-                    Node {
-                        flex_direction: FlexDirection::Row,
-                        ..default()
-                    },
-                    Children::spawn(SpawnWith(move |parent: &mut ChildSpawner| {
-                        match popup_type {
-                            Popup::Confirm => {
-                                parent.spawn((
-                                    UiButton,
-                                    get_button_node(),
-                                    BackgroundColor(NORMAL_BUTTON),
-                                    PopupAction::Confirm,
-                                    PopupIdentifier(identifier),
-                                    children![(
-                                        Text::new("Okay"),
-                                        get_button_text_font(),
-                                        TextColor(TEXT_COLOR),
-                                    )],
-                                ));
-                            }
-                            Popup::OkCancel => {
-                                parent.spawn((
-                                    UiButton,
-                                    get_button_node(),
-                                    BackgroundColor(NORMAL_BUTTON),
-                                    PopupAction::Ok,
-                                    PopupIdentifier(identifier.clone()),
-                                    children![(
-                                        Text::new("Okay"),
-                                        get_button_text_font(),
-                                        TextColor(TEXT_COLOR),
-                                    )],
-                                ));
-                                parent.spawn((
-                                    UiButton,
-                                    get_button_node(),
-                                    BackgroundColor(NORMAL_BUTTON),
-                                    PopupAction::Cancel,
-                                    PopupIdentifier(identifier),
-                                    children![(
-                                        Text::new("Cancel"),
-                                        get_button_text_font(),
-                                        TextColor(TEXT_COLOR),
-                                    )],
-                                ));
-                            }
-                        }
-                    }))
-                ),
-            ],
-        )],
-    ));
+            }
+            BackgroundColor(MENU_BACKGROUND)
+
+            Children [
+                Text::new(popup_message)
+                TextFont {
+                    font_size: px(25),
+                }
+                TextColor(MAIN_TEXT_COLOR)
+                Node {
+                    margin: UiRect::axes(px(20), px(30)),
+                    max_width: px(match show_popup_event.popup_type {
+                        Popup::Confirm => 400,
+                        Popup::OkCancel => 700,
+                    }),
+                },
+
+                Node {
+                    flex_direction: FlexDirection::Row,
+                }
+                Children [{popup_buttons(popup_type, identifier)}]
+            ]
+        ]
+    });
+}
+
+fn popup_buttons(popup_type: Popup, identifier: String) -> Box<dyn SceneList> {
+    match popup_type {
+        Popup::Confirm => Box::new(bsn_list![
+            button("Okay")
+            on(close_observer(identifier))
+        ]),
+
+        Popup::OkCancel => Box::new(bsn_list![
+            button("Okay")
+            on(close_observer(identifier.clone())),
+
+            button("Cancel")
+            on(close_observer(identifier)),
+        ]),
+    }
+}
+
+fn close_observer(
+    identifier: String,
+) -> impl FnMut(On<Pointer<Press>>, MessageWriter<PopupCloseEvent>) + Clone {
+    move |_event, mut popup_close_writer| {
+        popup_close_writer.write(PopupCloseEvent {
+            identifier: identifier.clone(),
+        });
+    }
 }
 
 pub fn listen_close_popup_event(
-    mut close_popup: EventReader<PopupCloseEvent>,
+    mut close_popup: MessageReader<PopupCloseEvent>,
     popup: Option<Single<Entity, With<Popup>>>,
     mut commands: Commands,
 ) {

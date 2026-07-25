@@ -27,8 +27,8 @@ pub struct BuildingPlugin;
 
 impl Plugin for BuildingPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<BuildEvent>()
-            .add_event::<PickTileEvent>()
+        app.add_message::<BuildEvent>()
+            .add_message::<PickTileEvent>()
             .add_systems(OnEnter(GameState::Game), (setup, load_game_save).chain())
             .add_systems(
                 Update,
@@ -42,13 +42,13 @@ impl Plugin for BuildingPlugin {
 // MARK: Events
 
 #[allow(unused)]
-#[derive(Event)]
+#[derive(Message)]
 pub enum BuildEvent {
     Placed(TilePos, foreground_objects::ForegroundObject),
     Deleted(TilePos, foreground_objects::ForegroundObject),
 }
 
-#[derive(Event)]
+#[derive(Message)]
 struct PickTileEvent;
 
 // MARK: Components
@@ -98,7 +98,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 fn select_building(
     mut current_building: ResMut<CurrentMachine>,
     keys: Res<ButtonInput<KeyCode>>,
-    mut pick_tile_event_writer: EventWriter<PickTileEvent>,
+    mut pick_tile_event_writer: MessageWriter<PickTileEvent>,
 ) {
     if keys.just_pressed(KeyCode::KeyX) {
         current_building.select_next_machine();

@@ -14,7 +14,7 @@ use crate::plugins::{
         game_menus::{
             GameMenuState,
             recipe_menu::{
-                create_recipe_screen::create_recipe_screen, deselect_machine::deselect_machine,
+                create_recipe_screen::spawn_recipe_screen, deselect_machine::deselect_machine,
                 update_recipe_screen::update_recipe_screen,
             },
         },
@@ -34,7 +34,7 @@ pub struct RecipeMenuPlugin;
 
 impl Plugin for RecipeMenuPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameMenuState::Recipe), create_recipe_screen)
+        app.add_systems(OnEnter(GameMenuState::Recipe), spawn_recipe_screen)
             .add_systems(
                 Update,
                 (update_recipe_screen, update_scroll_position)
@@ -49,20 +49,20 @@ impl Plugin for RecipeMenuPlugin {
 
 // MARK: Components
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, Default)]
 pub struct RecipeScreen;
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, Default)]
 pub struct RecipeDetailText;
 
-#[derive(Component, Deref)]
+#[derive(Component, Clone, Default, Deref)]
 pub struct RecipeButton(Recipe);
 
 // MARK: States
 
 /// Updates the scroll position of scrollable nodes in response to mouse input
 pub fn update_scroll_position(
-    mut mouse_wheel_events: EventReader<MouseWheel>,
+    mut mouse_wheel_events: MessageReader<MouseWheel>,
     hover_map: Res<HoverMap>,
     mut scrolled_node_query: Query<&mut ScrollPosition>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
@@ -85,8 +85,8 @@ pub fn update_scroll_position(
         for (_pointer, pointer_map) in hover_map.iter() {
             for (entity, _hit) in pointer_map.iter() {
                 if let Ok(mut scroll_position) = scrolled_node_query.get_mut(*entity) {
-                    scroll_position.offset_x -= dx;
-                    scroll_position.offset_y -= dy;
+                    scroll_position.x -= dx;
+                    scroll_position.y -= dy;
                 }
             }
         }

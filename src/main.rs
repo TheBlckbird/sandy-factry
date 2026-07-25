@@ -20,13 +20,12 @@ use serde::{Deserialize, Serialize};
 use winit::window::Icon;
 
 use crate::plugins::{
-    auto_save::AutoSavePlugin, completion::CompletionPlugin, interaction::MachineInteractionPlugin,
+    completion::CompletionPlugin, interaction::MachineInteractionPlugin, save::SavePlugin,
 };
 
 mod content;
 mod game_save_types;
 mod plugins;
-mod save_game;
 mod save_keys;
 
 #[derive(Resource, Default)]
@@ -106,7 +105,7 @@ fn main() -> AppExit {
         MenuPlugin,
         MachineInteractionPlugin,
         CompletionPlugin,
-        AutoSavePlugin,
+        SavePlugin,
     ))
     .insert_resource(PkvStore::new("com.louisweigel", "sandy-factry"))
     .init_resource::<MouseCoordinates>()
@@ -114,7 +113,7 @@ fn main() -> AppExit {
     .add_systems(
         PreStartup,
         (
-            startup,
+            camera.spawn(),
             #[cfg(any(target_os = "windows", target_os = "linux"))]
             set_window_icon,
         ),
@@ -126,11 +125,9 @@ fn main() -> AppExit {
 
     load_internal_binary_asset!(
         app,
-        TextFont::default().font,
+        Handle::<Font>::default(),
         "../assets/fonts/TheNeue-Black.ttf",
-        |bytes: &[u8], _path: String| {
-            Font::try_from_bytes(bytes.to_vec()).expect("Font file shouldn't be corrupted.")
-        }
+        |bytes: &[u8], _path: String| { Font::from_bytes(bytes.to_vec()) }
     );
 
     app.run()
@@ -160,12 +157,12 @@ fn set_window_icon(windows: NonSend<WinitWindows>) {
     }
 }
 
-fn startup(mut commands: Commands) {
-    commands.spawn((
-        Camera2d,
-        Transform::from_scale(Vec3::new(0.2, 0.2, 1.0)),
-        Msaa::Off,
-    ));
+fn camera() -> impl Scene {
+    bsn! {
+        Camera2d
+        Transform::from_scale(Vec3::new(0.2, 0.2, 1.0))
+        Msaa::Off
+    }
 }
 
 /// Update the resource holding the mouse coordinates

@@ -24,7 +24,7 @@ const MAXIMUM_TUNNEL_DISTANCE: u8 = 5;
 
 /// Build a graph from the world representation
 pub fn build_graph(
-    mut _build_events: EventReader<BuildEvent>,
+    mut _build_events: MessageReader<BuildEvent>,
     tile_query: Query<(
         Entity,
         &TilePos,

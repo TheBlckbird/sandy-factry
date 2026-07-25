@@ -6,125 +6,118 @@ const VERSION_MISMATCH_POPUP_ID: &str = "version_mismatch";
 use crate::{
     game_save_types::{GameSave, LoadedGameSave},
     plugins::menu::{
-        GameState, MAIN_TEXT_COLOR, MENU_BACKGROUND, NORMAL_BUTTON, TEXT_COLOR, UiButton,
-        get_button_node, get_button_text_font,
+        GameState, MAIN_TEXT_COLOR, MENU_BACKGROUND, button,
         main_menu::{MainMenuScreen, MainMenuState},
         popup::{PopupCloseEvent, ShowPopupEvent},
     },
     save_keys::SaveKey,
 };
 
-#[derive(Component)]
-pub enum MainMenuButtonAction {
-    Play,
-    Quit,
-    HowToPlay,
-}
-
-pub fn setup_main_menu(
-    mut commands: Commands,
-    mut main_menu_state: ResMut<NextState<MainMenuState>>,
-) {
-    // Reset `MainMenuState`
-    main_menu_state.set(MainMenuState::Menu);
-
-    commands.spawn((
+pub fn main_menu() -> impl Scene {
+    bsn! {
         Node {
-            width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
+            width: percent(100),
+            height: percent(100),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
-            ..default()
+        }
+        MainMenuScreen
+
+        Children [
+            Node {
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Center,
+            }
+            BackgroundColor(MENU_BACKGROUND)
+            Children [
+                // Display the game name
+                Text::new("Sandy Fact'ry")
+                TextFont {
+                    font_size: px(67),
+                }
+                TextColor(MAIN_TEXT_COLOR)
+                Node {
+                    margin: px(50),
+                },
+
+                button("Play")
+                on(play_click),
+
+                button("How to Play")
+                on(|_event: On<Pointer<Press>>, mut main_menu_state: ResMut<NextState<MainMenuState>>| {
+                    main_menu_state.set(MainMenuState::HowToPlay);
+                }),
+
+                button("Quit")
+                on(|_event: On<Pointer<Press>>, mut app_exit_events: MessageWriter<AppExit>| {
+                    app_exit_events.write_default();
+                }),
+            ],
+
+            Node {
+                position_type: PositionType::Absolute,
+                right: px(5),
+                bottom: px(5),
+            }
+            Text::new(format!("v{}", env!("CARGO_PKG_VERSION")))
+        ]
+    }
+}
+
+fn play_click(
+    _event: On<Pointer<Press>>,
+    pkv: Res<PkvStore>,
+    mut show_popup_writer: MessageWriter<ShowPopupEvent>,
+    mut game_state: ResMut<NextState<GameState>>,
+    mut current_game_save: ResMut<LoadedGameSave>,
+    mut main_menu_state: ResMut<NextState<MainMenuState>>,
+) {
+    // retrieve the version of the saved game to potentially warn the player that his save might be corrupted
+    let saved_version: Result<String, GetError> = pkv.get(SaveKey::Version);
+
+    match saved_version {
+        Ok(saved_version) => {
+            if saved_version == env!("CARGO_PKG_VERSION") {
+                let message = "Mismatched version of save file. If the game crashes, the save file is too old (or new) and needs to be deleted.\nThere is currently no way to update it to newer versions, I'm sorry.";
+
+                warn!("{message}");
+                show_popup_writer.write(ShowPopupEvent::with_confirm(
+                    message,
+                    VERSION_MISMATCH_POPUP_ID,
+                ));
+
+                return;
+            }
+        }
+        Err(get_error) => match get_error {
+            GetError::NotFound => {}
+
+            GetError::ReDbStorageError(_)
+            | GetError::ReDbTransactionError(_)
+            | GetError::ReDbTableError(_) => panic!("A database error occurred"),
+
+            GetError::MessagePack(_) => {
+                panic!("The version type shouldn't ever change.")
+            }
         },
-        MainMenuScreen,
-        children![
-            (
-                Node {
-                    flex_direction: FlexDirection::Column,
-                    align_items: AlignItems::Center,
-                    ..default()
-                },
-                BackgroundColor(MENU_BACKGROUND),
-                children![
-                    // Display the game name
-                    (
-                        Text::new("Sandy Fact'ry"),
-                        TextFont {
-                            font_size: 67.0,
-                            ..default()
-                        },
-                        TextColor(MAIN_TEXT_COLOR),
-                        Node {
-                            margin: UiRect::all(Val::Px(50.0)),
-                            ..default()
-                        },
-                    ),
-                    // Display three buttons for each action available from the main menu:
-                    // - play
-                    // - quit
-                    // - how to play
-                    (
-                        UiButton,
-                        get_button_node(),
-                        BackgroundColor(NORMAL_BUTTON),
-                        MainMenuButtonAction::Play,
-                        children![(
-                            Text::new("Play"),
-                            get_button_text_font(),
-                            TextColor(TEXT_COLOR),
-                        ),]
-                    ),
-                    (
-                        UiButton,
-                        get_button_node(),
-                        BackgroundColor(NORMAL_BUTTON),
-                        MainMenuButtonAction::HowToPlay,
-                        children![(
-                            Text::new("How to Play"),
-                            get_button_text_font(),
-                            TextColor(TEXT_COLOR)
-                        )]
-                    ),
-                    (
-                        UiButton,
-                        get_button_node(),
-                        BackgroundColor(NORMAL_BUTTON),
-                        MainMenuButtonAction::Quit,
-                        children![(
-                            Text::new("Quit"),
-                            get_button_text_font(),
-                            TextColor(TEXT_COLOR),
-                        ),]
-                    ),
-                ]
-            ),
-            (
-                Node {
-                    position_type: PositionType::Absolute,
-                    right: Val::Px(5.0),
-                    bottom: Val::Px(5.0),
-                    ..default()
-                },
-                Text::new(format!("v{}", env!("CARGO_PKG_VERSION")))
-            )
-        ],
-    ));
+    }
+
+    start_game(
+        &pkv,
+        &mut current_game_save,
+        &mut game_state,
+        &mut main_menu_state,
+    );
 }
 
 pub fn update_main_menu(
-    interaction_query: Query<
-        (&Interaction, &MainMenuButtonAction),
-        (Changed<Interaction>, With<Button>),
-    >,
-    mut app_exit_events: EventWriter<AppExit>,
+    mut popup_close_event_reader: MessageReader<PopupCloseEvent>,
     mut game_state: ResMut<NextState<GameState>>,
     mut main_menu_state: ResMut<NextState<MainMenuState>>,
     mut current_game_save: ResMut<LoadedGameSave>,
     pkv: Res<PkvStore>,
-
-    mut show_popup_writer: EventWriter<ShowPopupEvent>,
-    mut popup_close_event_reader: EventReader<PopupCloseEvent>,
 ) {
+    // [TODO] check what this is doing
     if popup_close_event_reader
         .read()
         .any(|event| event.identifier == VERSION_MISMATCH_POPUP_ID)
@@ -135,60 +128,6 @@ pub fn update_main_menu(
             &mut game_state,
             &mut main_menu_state,
         );
-
-        // Terminate if the game was loaded because no other options will be readable at that point
-        return;
-    }
-
-    for (interaction, menu_button_action) in &interaction_query {
-        if *interaction == Interaction::Pressed {
-            match menu_button_action {
-                MainMenuButtonAction::Quit => {
-                    app_exit_events.write(AppExit::Success);
-                }
-                MainMenuButtonAction::Play => {
-                    // retrieve the version of the saved game to potentially warn the player that his save might be corrupted
-                    let saved_version: Result<String, GetError> = pkv.get(SaveKey::Version);
-
-                    match saved_version {
-                        Ok(saved_version) => {
-                            if saved_version != env!("CARGO_PKG_VERSION") {
-                                let message = "Mismatched version of save file. If the game crashes, the save file is too old (or new) and needs to be deleted.\nThere is currently no way to update it to newer versions, I'm sorry.";
-
-                                warn!("{message}");
-                                show_popup_writer.write(ShowPopupEvent::with_confirm(
-                                    message,
-                                    VERSION_MISMATCH_POPUP_ID,
-                                ));
-
-                                return;
-                            }
-                        }
-                        Err(get_error) => match get_error {
-                            GetError::NotFound => {}
-
-                            GetError::ReDbStorageError(_)
-                            | GetError::ReDbTransactionError(_)
-                            | GetError::ReDbTableError(_) => panic!("A database error occurred"),
-
-                            GetError::MessagePack(_) => {
-                                panic!("The version type shouldn't ever change.")
-                            }
-                        },
-                    }
-
-                    start_game(
-                        &pkv,
-                        &mut current_game_save,
-                        &mut game_state,
-                        &mut main_menu_state,
-                    );
-                }
-                MainMenuButtonAction::HowToPlay => {
-                    main_menu_state.set(MainMenuState::HowToPlay);
-                }
-            }
-        }
     }
 }
 
@@ -206,7 +145,7 @@ fn start_game(
         Ok(game_save) => Some(game_save),
         Err(GetError::NotFound) => None,
         _ => panic!(
-            "An Error occured while trying to load the save state\nTry to delete the save file (/Users/username/Library/Application Support/louisweigel.sandy-factry/bevy_pkv.redb) on MacOS.\nThis WILL delete all your save data!"
+            "An Error occured while trying to load the save state\nTry deleting the save file (/Users/username/Library/Application Support/louisweigel.sandy-factry/bevy_pkv.redb on MacOS).\nThis will delete ALL your save data!"
         ),
     };
 

@@ -1,6 +1,5 @@
 use bevy::{
     color::palettes::tailwind::{GRAY_400, GRAY_500},
-    ecs::spawn::SpawnWith,
     prelude::*,
 };
 
@@ -18,7 +17,7 @@ use crate::{
     },
 };
 
-pub fn create_recipe_screen(
+pub fn spawn_recipe_screen(
     mut commands: Commands,
     crafter_recipes: Res<CrafterRecipes>,
     furnace_recipes: Res<FurnaceRecipes>,
@@ -61,73 +60,78 @@ pub fn create_recipe_screen(
         }
     }
 
-    commands.spawn((
+    let recipe_row_scenes = recipe_rows
+        .into_iter()
+        .map(|(recipe_text, is_current_recipe, recipe_button)| {
+            bsn! {
+                Node {
+                    height: px(LINE_HEIGHT),
+                    padding: {px(5).vertical()},
+                    align_items: AlignItems::Center,
+                }
+                Text::new(recipe_text.clone())
+                BackgroundColor({
+                    if is_current_recipe {
+                        GRAY_500
+                    } else {
+                        GRAY_400
+                    }
+                })
+                template_value(recipe_button)
+                Button
+                Pickable {
+                    should_block_lower: false,
+                }
+            }
+        })
+        .collect::<Vec<_>>();
+
+    let scene = bsn! {
         Node {
-            width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
+            width: percent(100),
+            height: percent(100),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
-            ..default()
-        },
-        children![(
+        }
+        Children [
             Node {
-                width: Val::Px(600.0),
-                height: Val::Px(300.0),
+                width: px(600),
+                height: px(300),
                 justify_content: JustifyContent::SpaceBetween,
-                column_gap: Val::Px(10.0),
-                ..default()
-            },
-            BackgroundColor(GRAY_500.into()),
-            children![
+                column_gap: px(10),
+            }
+            BackgroundColor(GRAY_500)
+            Children [
                 (
                     Node {
-                        padding: UiRect::all(Val::Px(5.0)),
+                        padding: px(5),
                         flex_direction: FlexDirection::Column,
-                        width: Val::Percent(50.0),
+                        width: percent(50),
                         overflow: Overflow {
                             x: OverflowAxis::Hidden,
                             y: OverflowAxis::Scroll
                         },
-                        ..default()
-                    },
-                    BackgroundColor(GRAY_400.into()),
-                    Children::spawn(SpawnWith(move |parent: &mut ChildSpawner| {
-                        for (recipe_text, is_current_recipe, recipe_button) in recipe_rows {
-                            parent.spawn((
-                                Node {
-                                    height: Val::Px(LINE_HEIGHT),
-                                    padding: UiRect::vertical(Val::Px(5.0)),
-                                    align_items: AlignItems::Center,
-                                    ..default()
-                                },
-                                Text::new(recipe_text.to_string()),
-                                Pickable {
-                                    should_block_lower: false,
-                                    ..default()
-                                },
-                                if is_current_recipe {
-                                    BackgroundColor(GRAY_500.into())
-                                } else {
-                                    BackgroundColor(GRAY_400.into())
-                                },
-                                recipe_button,
-                                Button,
-                            ));
-                        }
-                    }))
+                    }
+                    BackgroundColor(GRAY_400)
+                    Children [{recipe_row_scenes}]
                 ),
                 (
                     Node {
-                        width: Val::Percent(50.0),
-                        padding: UiRect::all(Val::Px(5.0)),
-                        height: Val::Auto,
-                        ..default()
-                    },
-                    BackgroundColor(GRAY_400.into()),
-                    children![(Text::new(""), RecipeDetailText)]
+                        width: percent(50),
+                        padding: px(5),
+                        height: auto(),
+                    }
+                    BackgroundColor(GRAY_400)
+                    Children [
+                        Text::new("")
+                        RecipeDetailText
+                    ]
                 )
             ],
-        )],
-        RecipeScreen,
-    ));
+        ]
+
+        RecipeScreen
+    };
+
+    commands.spawn_scene(scene);
 }

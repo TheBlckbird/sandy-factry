@@ -5,24 +5,22 @@ use crate::{MouseCoordinates, content::items::Item};
 
 // MARK: Components
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy, Default)]
 pub struct HoveredItemText;
 
 // MARK: Systems
 
-pub fn setup(mut commands: Commands) {
-    // Spawn text for the hovered items
-    commands.spawn((
-        Text::new(""),
-        TextLayout::new_with_justify(JustifyText::Center),
+pub fn hovered_item_hud() -> impl Scene {
+    bsn! {
+        Text::new("")
+        TextLayout::justify(Justify::Center)
         Node {
             position_type: PositionType::Absolute,
-            top: Val::Px(5.0),
-            right: Val::Px(5.0),
-            ..default()
-        },
-        HoveredItemText,
-    ));
+            top: px(5),
+            right: px(5),
+        }
+        HoveredItemText
+    }
 }
 
 /// Update the hovered items text

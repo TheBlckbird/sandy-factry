@@ -7,8 +7,9 @@ use strum_macros::Display;
 // - add flag to item if it has already moved
 // - check before moving
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize, Deserialize, Display)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize, Deserialize, Display, Default)]
 pub enum ItemType {
+    #[default]
     #[strum(to_string = "Coal")]
     Coal,
     #[strum(to_string = "Raw Copper")]

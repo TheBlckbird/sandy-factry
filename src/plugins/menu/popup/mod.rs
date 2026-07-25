@@ -1,11 +1,9 @@
 use bevy::prelude::*;
 
-use check_popup_interaction::check_popup_interaction;
 use listen_popup_event::listen_show_popup_event;
 
 use crate::plugins::menu::popup::listen_popup_event::listen_close_popup_event;
 
-mod check_popup_interaction;
 mod listen_popup_event;
 
 // MARK: Plugin
@@ -13,16 +11,9 @@ pub struct PopupPlugin;
 
 impl Plugin for PopupPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<ShowPopupEvent>()
-            .add_event::<PopupCloseEvent>()
-            .add_systems(
-                Update,
-                (
-                    listen_show_popup_event,
-                    check_popup_interaction,
-                    listen_close_popup_event,
-                ),
-            );
+        app.add_message::<ShowPopupEvent>()
+            .add_message::<PopupCloseEvent>()
+            .add_systems(Update, (listen_show_popup_event, listen_close_popup_event));
     }
 }
 
@@ -31,7 +22,7 @@ impl Plugin for PopupPlugin {
 /// Event that should be fired to open a popup.
 ///
 /// The [Popup] type defines the type of popup, if it has one or two buttons and the String the message.
-#[derive(Event)]
+#[derive(Message)]
 pub struct ShowPopupEvent {
     popup_type: Popup,
     message: String,
@@ -65,51 +56,17 @@ impl ShowPopupEvent {
 }
 
 /// Event that is fired once a popup closes.
-#[allow(unused)]
-#[derive(Event)]
+#[derive(Message)]
 pub struct PopupCloseEvent {
-    pub action: PopupAction,
     pub identifier: String,
-}
-
-impl PopupCloseEvent {
-    pub fn with_confirm(identifier: String) -> Self {
-        Self {
-            action: PopupAction::Confirm,
-            identifier,
-        }
-    }
-
-    pub fn with_ok(identifier: String) -> Self {
-        Self {
-            action: PopupAction::Ok,
-            identifier,
-        }
-    }
-
-    pub fn with_cancel(identifier: String) -> Self {
-        Self {
-            action: PopupAction::Cancel,
-            identifier,
-        }
-    }
 }
 
 // MARK: Components
 
 #[allow(unused)]
-#[derive(Component, Clone, Copy)]
+#[derive(Component, Clone, Copy, Default)]
 pub enum Popup {
+    #[default]
     Confirm,
     OkCancel,
 }
-
-#[derive(Component)]
-pub enum PopupAction {
-    Confirm,
-    Ok,
-    Cancel,
-}
-
-#[derive(Component, Deref, DerefMut)]
-pub struct PopupIdentifier(String);

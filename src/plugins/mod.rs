@@ -1,8 +1,8 @@
-pub mod auto_save;
 pub mod building;
 pub mod completion;
 pub mod crafting;
 pub mod debug_camera;
+pub mod save;
 pub mod hud;
 pub mod interaction;
 pub mod menu;

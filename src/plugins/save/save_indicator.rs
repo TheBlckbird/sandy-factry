@@ -1,20 +1,19 @@
 use bevy::prelude::*;
 
-use crate::plugins::auto_save::{SaveIndicator, SaveIndicatorTimer};
+use crate::plugins::save::{SaveIndicator, SaveIndicatorTimer};
 
-pub fn setup_save_indicator(mut commands: Commands) {
-    commands.spawn((
+pub fn save_indicator() -> impl Scene {
+    bsn! {
         Node {
             position_type: PositionType::Absolute,
-            top: Val::Px(80.0),
-            width: Val::Vw(100.0),
-            ..default()
-        },
-        TextLayout::new_with_justify(JustifyText::Center),
-        Visibility::Hidden,
-        Text::new("Saving..."),
-        SaveIndicator,
-    ));
+            top: px(80),
+            width: vw(100),
+        }
+        TextLayout::justify(Justify::Center)
+        Visibility::Hidden
+        Text::new("Saving...")
+        SaveIndicator
+    }
 }
 
 pub fn update_save_indicator(
