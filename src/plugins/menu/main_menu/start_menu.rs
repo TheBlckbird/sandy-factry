@@ -21,13 +21,7 @@ pub enum MainMenuButtonAction {
     HowToPlay,
 }
 
-pub fn setup_main_menu(
-    mut commands: Commands,
-    mut main_menu_state: ResMut<NextState<MainMenuState>>,
-) {
-    // Reset `MainMenuState`
-    main_menu_state.set(MainMenuState::Menu);
-
+pub fn setup_main_menu(mut commands: Commands) {
     commands.spawn((
         Node {
             width: percent(100),

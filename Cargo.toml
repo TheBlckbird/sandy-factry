@@ -22,7 +22,7 @@ winit = "0.30"
 sandy-factry-helpers = { path = "./crates/sandy-factry-helpers" }
 sandy-factry-macros = { path = "./crates/sandy-factry-macros" }
 itertools.workspace = true
-bevy_pkv = "0.14"
+bevy_pkv = "0.15"
 serde.workspace = true
 strum.workspace = true
 strum_macros.workspace = true
@@ -48,8 +48,11 @@ workspace = true
 members = [".", "crates/*"]
 
 [workspace.dependencies]
-bevy = { version = "0.17", features = ["file_watcher"] }
-bevy_ecs_tilemap = { version = "0.17", features = ["serde"] }
+bevy = { version = "0.18", default-features = false, features = [
+    "2d",
+    "file_watcher",
+] }
+bevy_ecs_tilemap = { version = "0.18", features = ["serde"] }
 petgraph = "0.8"
 itertools = "0.15"
 serde = { version = "1.0", features = ["derive"] }
