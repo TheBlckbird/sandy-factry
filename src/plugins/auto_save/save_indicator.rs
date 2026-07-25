@@ -10,7 +10,7 @@ pub fn setup_save_indicator(mut commands: Commands) {
             width: vw(100),
             ..default()
         },
-        TextLayout::new_with_justify(Justify::Center),
+        TextLayout::justify(Justify::Center),
         Visibility::Hidden,
         Text::new("Saving..."),
         SaveIndicator,

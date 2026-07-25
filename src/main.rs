@@ -126,11 +126,9 @@ fn main() -> AppExit {
 
     load_internal_binary_asset!(
         app,
-        TextFont::default().font,
+        Handle::<Font>::default(),
         "../assets/fonts/TheNeue-Black.ttf",
-        |bytes: &[u8], _path: String| {
-            Font::try_from_bytes(bytes.to_vec()).expect("Font file shouldn't be corrupted.")
-        }
+        |bytes: &[u8], _path: String| { Font::from_bytes(bytes.to_vec()) }
     );
 
     app.run()

@@ -38,7 +38,7 @@ pub fn listen_show_popup_event(
                 (
                     Text::new(show_popup_event.message.clone()),
                     TextFont {
-                        font_size: 25.0,
+                        font_size: FontSize::Px(25.0),
                         ..default()
                     },
                     TextColor(MAIN_TEXT_COLOR),

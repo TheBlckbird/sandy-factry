@@ -12,7 +12,7 @@ pub fn setup(mut commands: Commands) {
     // Spawn the text providing additional information
     commands.spawn((
         Text::new(include_str!("information.txt")),
-        TextLayout::new_with_justify(Justify::Left),
+        TextLayout::justify(Justify::Left),
         Node {
             position_type: PositionType::Absolute,
             bottom: px(5),

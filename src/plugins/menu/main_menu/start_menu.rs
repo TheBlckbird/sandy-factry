@@ -44,7 +44,7 @@ pub fn setup_main_menu(mut commands: Commands) {
                     (
                         Text::new("Sandy Fact'ry"),
                         TextFont {
-                            font_size: 67.0,
+                            font_size: FontSize::Px(67.0),
                             ..default()
                         },
                         TextColor(MAIN_TEXT_COLOR),

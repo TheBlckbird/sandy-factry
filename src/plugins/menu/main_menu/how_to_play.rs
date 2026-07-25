@@ -32,7 +32,7 @@ pub fn setup_how_to_play_menu(mut commands: Commands, asset_sever: Res<AssetServ
                 (
                     Text::new("Sandy Fact'ry"),
                     TextFont {
-                        font_size: 67.0,
+                        font_size: FontSize::Px(67.0),
                         ..default()
                     },
                     TextColor(MAIN_TEXT_COLOR),

@@ -37,15 +37,17 @@ fn get_button_node() -> Node {
 
 fn get_button_text_font() -> TextFont {
     TextFont {
-        font_size: 33.0,
+        font_size: FontSize::Px(33.0),
         ..default()
     }
 }
 
 fn get_continuous_text_font(asset_server: &AssetServer, font_size: Option<f32>) -> TextFont {
+    let font_handle = FontSource::Handle(asset_server.load("fonts/Rubik-Regular.ttf"));
+
     TextFont {
-        font: asset_server.load("fonts/Rubik-Regular.ttf"),
-        font_size: font_size.unwrap_or(25.0),
+        font: font_handle,
+        font_size: FontSize::Px(font_size.unwrap_or(25.0)),
         ..default()
     }
 }
