@@ -1,4 +1,3 @@
-#![feature(if_let_guard)]
 #![windows_subsystem = "windows"]
 
 use bevy::{
